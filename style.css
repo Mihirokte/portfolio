@@ -1,21 +1,23 @@
-/* Mihir Okte · pond */
+/* Mihir Okte · pond — taopunk */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --ink: #1c2a26;
-  --paper: #f5f2ea;
-  --accent: #9a5b2d;
+  --ink: #14140f;
+  --bone: #ece3c8;
+  --jade: #46e0b1;
+  --crimson: #a92e22;
+  --gold: #b98f4a;
 }
 
 html, body {
   height: 100%;
   overflow: hidden;
-  background: #0d2622;
+  background: #0b1613;
   font-family: "Inter", system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
-#scene-container, #scene-container canvas {
+#pond {
   position: fixed;
   inset: 0;
   width: 100%;
@@ -28,58 +30,85 @@ html, body {
 #loader {
   position: fixed;
   inset: 0;
-  background: #0d2622;
+  background: #0b1613;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 20;
-  transition: opacity 1.2s ease;
+  transition: opacity 1s ease;
 }
 #loader.done { opacity: 0; pointer-events: none; }
 .loader-text {
   font-family: "Fraunces", serif;
-  font-size: 1rem;
-  color: #d8d2c2;
-  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+  color: #b8ac8a;
+  letter-spacing: 0.06em;
   animation: breathe 2.4s ease-in-out infinite;
 }
-@keyframes breathe { 0%,100% { opacity: 0.45; } 50% { opacity: 1; } }
+@keyframes breathe { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-/* quiet corner controls */
-.resume-link, .sound-toggle {
+/* crimson seal — the one loud accent, like the game uses red */
+.resume-link {
   position: fixed;
+  right: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 5;
+  font-family: "Fraunces", serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--bone);
+  background: var(--crimson);
+  border: 1px solid #7c1f16;
+  text-decoration: none;
+  padding: 10px 12px;
+  transform: rotate(-2deg);
+  transition: transform 0.2s ease;
+}
+.resume-link:hover { transform: rotate(0deg) scale(1.04); }
+
+.sound-toggle {
+  position: fixed;
+  left: 20px;
   bottom: max(20px, env(safe-area-inset-bottom));
   z-index: 5;
   font-family: "Inter", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
-  color: rgba(245, 242, 234, 0.55);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(236, 227, 200, 0.5);
   background: none;
   border: none;
-  text-decoration: none;
   cursor: pointer;
   padding: 8px 4px;
   transition: color 0.25s ease;
 }
-.resume-link:hover, .sound-toggle:hover { color: rgba(245, 242, 234, 0.95); }
-.resume-link { right: 24px; }
-.sound-toggle { left: 24px; }
-.sound-toggle[aria-pressed="true"] { color: rgba(245, 242, 234, 0.9); }
+.sound-toggle:hover, .sound-toggle[aria-pressed="true"] { color: var(--jade); }
 
-/* story panel — flat paper card */
+/* dialogue bubble — cream, ink text, meander border strip */
 .story-panel {
   position: fixed;
   left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 115%);
-  width: min(560px, calc(100% - 28px));
+  bottom: 14px;
+  transform: translate(-50%, calc(100% + 40px));
+  width: min(560px, calc(100% - 24px));
   z-index: 10;
-  background: var(--paper);
+  background: var(--bone);
   color: var(--ink);
-  border-radius: 10px 10px 0 0;
-  padding: 20px 24px calc(18px + env(safe-area-inset-bottom));
-  transition: transform 0.45s cubic-bezier(0.3, 1, 0.35, 1);
+  border-radius: 18px;
+  padding: 16px 20px calc(14px + env(safe-area-inset-bottom) / 2);
+  border: 2px solid #171712;
+  box-shadow: 0 4px 0 #171712;
+  transition: transform 0.4s cubic-bezier(0.3, 1.1, 0.35, 1);
+}
+.story-panel::before { /* meander strip */
+  content: "";
+  position: absolute;
+  top: 7px; left: 20px; right: 20px;
+  height: 3px;
+  background: repeating-linear-gradient(90deg,
+    var(--gold) 0 8px, transparent 8px 12px, var(--gold) 12px 14px, transparent 14px 22px);
+  opacity: 0.55;
 }
 .story-panel.open { transform: translate(-50%, 0); }
 
@@ -87,45 +116,47 @@ html, body {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin: 8px 0 8px;
 }
 .panel-title {
   font-family: "Fraunces", serif;
-  font-size: 1.05rem;
-  color: var(--accent);
+  font-size: 1rem;
+  color: var(--crimson);
+  letter-spacing: 0.2em;
 }
 .panel-close {
   background: none;
   border: none;
-  color: rgba(28, 42, 38, 0.45);
-  font-size: 0.95rem;
+  color: rgba(20, 20, 15, 0.4);
+  font-size: 0.9rem;
   cursor: pointer;
   padding: 6px 8px;
 }
 .panel-close:hover { color: var(--ink); }
 
 .panel-text {
-  font-family: "Inter", sans-serif;
-  font-size: clamp(0.88rem, 2.9vw, 0.95rem);
+  font-size: clamp(0.86rem, 2.9vw, 0.93rem);
   line-height: 1.7;
   min-height: 4em;
 }
 
-.panel-links { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 14px; }
+.panel-links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 14px; }
 .panel-links a {
-  color: var(--accent);
-  font-size: 0.8rem;
+  color: var(--crimson);
+  font-size: 0.78rem;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.panel-progress { margin-top: 14px; display: flex; gap: 7px; }
+.panel-progress { margin-top: 12px; display: flex; gap: 7px; }
 .panel-progress .dot {
-  width: 6px; height: 6px;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  background: rgba(28, 42, 38, 0.15);
+  border: 1.5px solid rgba(20, 20, 15, 0.35);
+  background: transparent;
 }
-.panel-progress .dot.eaten { background: var(--accent); }
+.panel-progress .dot.eaten { background: var(--jade); border-color: #2a8f70; }
 
 @media (prefers-reduced-motion: reduce) {
   .loader-text { animation: none; }

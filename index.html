@@ -4,23 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mihir Okte</title>
-<meta name="description" content="A small pond. Feed the koi.">
+<meta name="description" content="A small pond. Feed the fish.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Fraunces:opsz,wght@9..144,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js" } }
-</script>
 </head>
 <body>
-<div id="scene-container"></div>
+<canvas id="pond"></canvas>
 
 <div id="loader">
   <p class="loader-text">the pond is filling</p>
 </div>
 
-<a class="resume-link" href="resume.html">resume</a>
+<a class="resume-link" href="resume.html">résumé</a>
 <button id="sound-toggle" class="sound-toggle" aria-pressed="false">sound</button>
 
 <div id="story-panel" class="story-panel" role="dialog" aria-live="polite">
@@ -33,6 +30,6 @@
   <div id="panel-progress" class="panel-progress"></div>
 </div>
 
-<script type="module" src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
