@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mihir Okte — Software Engineer</title>
+<meta name="description" content="Mihir Okte — Software Engineer at Amazon. IIT Delhi. Explore the pond to learn more.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="pond" aria-label="Interactive pond with a koi fish. Tap food items to read stories about Mihir."></canvas>
+
+<header class="hud hud-top">
+  <div class="name-block">
+    <h1>Mihir Okte</h1>
+    <p class="tagline">software engineer · amazon · iit delhi</p>
+  </div>
+  <a class="resume-link" href="resume.html">resume →</a>
+</header>
+
+<div id="hint" class="hint">tap the food — the koi will tell you its stories</div>
+
+<div id="story-panel" class="story-panel" role="dialog" aria-modal="false" aria-live="polite">
+  <div class="panel-inner">
+    <div class="panel-head">
+      <span class="fish-avatar" aria-hidden="true">
+        <svg viewBox="0 0 40 24" width="40" height="24"><path d="M4 12 Q 12 2 24 6 Q 34 9 36 12 Q 34 15 24 18 Q 12 22 4 12 Z" fill="#ff8c42"/><path d="M4 12 L 0 5 L 2 12 L 0 19 Z" fill="#ff8c42"/><circle cx="30" cy="10.5" r="1.6" fill="#1d2b33"/></svg>
+      </span>
+      <span id="panel-title" class="panel-title">the koi says…</span>
+      <button id="panel-close" class="panel-close" aria-label="Close">✕</button>
+    </div>
+    <p id="panel-text" class="panel-text"></p>
+    <div id="panel-links" class="panel-links"></div>
+    <div class="panel-progress" id="panel-progress"></div>
+  </div>
+</div>
+
+<script src="pond.js"></script>
+</body>
+</html>
