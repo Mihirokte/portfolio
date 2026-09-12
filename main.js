@@ -30,18 +30,18 @@ const STORIES = [
   },
   {
     title: "二",
-    text: "He led eight engineers and moved nineteen of Amazon's ordering services onto new infrastructure. Zero downtime. Before that, founding engineer at a startup. He builds calm out of chaos.",
+    text: "At Amazon he led eight engineers and moved nineteen ordering services onto new ground. Zero downtime. Nobody noticed, which is the point. The best infrastructure work is invisible.",
     links: [],
   },
   {
     title: "三",
-    text: "Python, TypeScript, React, AWS. Lately it is agents: LangChain, MCP. He once tuned a Llama to place YouTube ads and cut placement variance by forty percent.",
+    text: "Before that, first engineer at an ad startup. He built the platform that took client onboarding from days to minutes, and the alarms that catch wasted ad spend in ten minutes instead of two hours.",
     links: [],
   },
   {
     title: "四",
-    text: "He is building Helio, a split-brain assistant: Telegram on one side, a LangGraph brain on the other, 168 tests deep. His thesis solved the Rubik's Cube with group theory. Under two seconds.",
-    links: [{ label: "github", href: "https://github.com/Mihirokte" }],
+    text: "Python and TypeScript are his native waters. React when it needs a face, AWS when it needs to stand, and lately agent systems that work while he sleeps. I also work while he sleeps.",
+    links: [],
   },
   {
     title: "五",
@@ -437,7 +437,12 @@ function drawFood(t) {
   }
 }
 
-/* ————— jade moths (the game's moth motif) ————— */
+/* ————— jade moths (the game's moth motif) —————
+   PLACEHOLDER for the future projects list: each moth will become a
+   clickable project entry (outcome-focused copy, GitHub link for the
+   technical detail). Until then they are deliberately NON-INTERACTIVE —
+   the pointerdown handler raycasts food orbs and water only, and no hit
+   region is registered for moths. Purely ambient. ————— */
 const moths = [
   { x: 0, y: 0, tx: 0, ty: 0, t: 1, dur: 1, hover: 0, phase: 0 },
   { x: 0, y: 0, tx: 0, ty: 0, t: 1, dur: 1, hover: 2, phase: 3 },
