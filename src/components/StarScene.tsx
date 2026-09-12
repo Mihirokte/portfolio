@@ -226,10 +226,18 @@ export default function StarScene() {
       W = wrap.clientWidth
       H = wrap.clientHeight
       renderer.setSize(W, H, false)
-      camera.aspect = W / H
+      const aspect = W / H
+      camera.aspect = aspect
       camera.updateProjectionMatrix()
-      const fit = Math.min(1, (W / H) / 1.25)
-      rig.scale.setScalar(0.92 * fit + 0.08)
+      // portrait: lift the sun so the hero copy owns the lower half
+      const portrait = aspect < 0.8
+      camera.position.set(0, portrait ? -1.1 : -0.35, 6.8)
+      camera.lookAt(0, portrait ? -0.5 : 0.2, 0)
+      // scale the system so the outer belt stays inside the visible width
+      const halfH = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z
+      const halfW = halfH * aspect
+      const fit = Math.min(1, (halfW * 0.94) / (BELT_R[1] + 0.2))
+      rig.scale.setScalar(Math.max(0.34, fit))
     }
     resize()
     const ro = new ResizeObserver(resize)
@@ -256,9 +264,12 @@ export default function StarScene() {
         drag.lastX = ev.clientX
         drag.lastY = ev.clientY
       }
-      ndc.set(pointer.x * 2 - 1, -(pointer.y * 2 - 1))
-      raycaster.setFromCamera(ndc, camera)
-      const hit = raycaster.intersectObject(star, false).length > 0
+      let hit = false
+      if (!isMobile) {
+        ndc.set(pointer.x * 2 - 1, -(pointer.y * 2 - 1))
+        raycaster.setFromCamera(ndc, camera)
+        hit = raycaster.intersectObject(star, false).length > 0
+      }
       hover = hit ? 1 : 0
       canvas.style.cursor = drag.on ? 'grabbing' : hit ? 'grab' : 'default'
     }

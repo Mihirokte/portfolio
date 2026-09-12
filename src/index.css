@@ -239,7 +239,7 @@ nav.top .brand { font-family: var(--display); font-weight: 900; font-size: 15px;
 nav.top ul { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
 nav.top a.link { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: lowercase; color: var(--faint); text-decoration: none; transition: color 0.2s; }
 nav.top a.link:hover { color: var(--ink); }
-@media (max-width: 640px) { nav.top { padding: 14px 20px; } nav.top ul { display: none; } }
+
 
 /* ——— reveal ——— */
 .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -281,6 +281,47 @@ nav.top a.link:hover { color: var(--ink); }
 }
 
 footer.foot { position: relative; z-index: 2; padding: 40px; text-align: center; }
+
+/* ——— phones ——— */
+#hero { min-height: 100svh; }
+@media (max-width: 640px) {
+  #hero { padding-bottom: calc(8vh + env(safe-area-inset-bottom)); padding-top: 80px; }
+  #hero h1 { font-size: clamp(44px, 15vw, 72px); }
+  #hero .tag { padding: 14px 16px; margin-top: 18px; }
+  #hero .tag p { font-size: 15px; }
+
+  h2 { font-size: 22px; }
+  h2.glass { padding: 18px 20px; }
+  p { font-size: 16px; }
+  .eyebrow { margin-bottom: 14px; }
+
+  .glass, .glass-card, .chip, .cta, nav.top { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .glass-card:hover { transform: none; }
+  .grid-cards { grid-template-columns: 1fr; gap: 12px; }
+  .focus-list { padding: 0 14px; }
+  .focus-list li { font-size: 15px; gap: 14px; padding: 13px 2px; }
+
+  .cta { padding: 14px 20px; font-size: 11px; letter-spacing: 0.18em; }
+
+  /* nav: brand + horizontally scrollable links, safe-area aware */
+  nav.top {
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    gap: 12px;
+  }
+  nav.top ul {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  nav.top ul::-webkit-scrollbar { display: none; }
+  nav.top .brand { font-size: 13px; flex: none; }
+
+  .orbit-label { font-size: 10px; letter-spacing: 0.2em; padding: 8px 10px; }
+  footer.foot { padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { transition: none; opacity: 1; transform: none; }
