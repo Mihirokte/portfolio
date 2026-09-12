@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #000;
+  overflow-x: hidden;
+}
+
+.font-bamboly {
+  font-family: "Bamboly Demo", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee-scroll 18s linear infinite;
+}

@@ -1,0 +1,27 @@
+const MARQUEE_TEXT =
+  'SPARK \u00B7 RENDER \u00B7 IGNITE \u00B7 UNFOLD \u00B7 GENESIS \u00B7 EVOLVE \u00B7 PURPOSE \u00B7 BEYOND \u00B7 '
+
+export default function Marquee() {
+  return (
+    <div className="w-full bg-white overflow-hidden py-6 md:py-8">
+      <div className="marquee-track">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <span
+            key={i}
+            aria-hidden={i > 0}
+            className="shrink-0 uppercase select-none"
+            style={{
+              fontFamily: '"Bamboly Demo", sans-serif',
+              color: '#EC612C',
+              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
+              lineHeight: 1,
+              paddingRight: '0.25em',
+            }}
+          >
+            {MARQUEE_TEXT}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
