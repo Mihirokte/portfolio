@@ -1,0 +1,292 @@
+/* Mihir Okte · game menu — Swiss minimal, console-dark */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d0e11;
+  --fg: #f2f3f5;
+  --fg-dim: rgba(242, 243, 245, 0.55);
+  --fg-faint: rgba(242, 243, 245, 0.28);
+  --accent: #7aa7ff;
+  --line: rgba(242, 243, 245, 0.12);
+  --card: rgba(242, 243, 245, 0.035);
+  --ease: cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 300;
+  overflow: hidden;
+}
+
+/* ambient background: slow radial sheen, console-quiet */
+#bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1100px 700px at 72% 30%, rgba(122, 167, 255, 0.07), transparent 60%),
+    radial-gradient(900px 800px at 18% 78%, rgba(122, 167, 255, 0.045), transparent 65%),
+    var(--bg);
+  animation: sheen 26s ease-in-out infinite alternate;
+}
+@keyframes sheen {
+  from { background-position: 0 0, 0 0; filter: brightness(1); }
+  to   { background-position: 60px -40px, -50px 30px; filter: brightness(1.12); }
+}
+
+#avatar-stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ——— views ——— */
+.view {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(24px, 7vw, 96px);
+  opacity: 0;
+  transform: translateX(14px);
+  transition: opacity 0.32s var(--ease), transform 0.32s var(--ease);
+  pointer-events: none;
+}
+.view.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.view[hidden] { display: flex; visibility: hidden; }
+.view.active[hidden] { visibility: visible; }
+
+/* ——— landing ——— */
+.eyebrow {
+  font-size: clamp(0.7rem, 1.6vw, 0.8rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 18px;
+}
+.title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 300;
+  font-size: clamp(3rem, 11vw, 7.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin-bottom: clamp(28px, 6vh, 56px);
+}
+.start-btn {
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-family: "Archivo", sans-serif;
+  font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  padding: 14px 6px;
+}
+.start-ring {
+  width: 12px; height: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  animation: pulse 2.2s var(--ease) infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(122, 167, 255, 0.35); }
+  50% { box-shadow: 0 0 0 9px rgba(122, 167, 255, 0); }
+}
+.start-btn:hover, .start-btn:focus-visible { color: var(--accent); }
+.hint-line {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--fg-faint);
+}
+
+/* ——— menu ——— */
+.menu-list { list-style: none; }
+.menu-list a {
+  display: inline-block;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 5.2vw, 3.1rem);
+  line-height: 1.5;
+  color: var(--fg-dim);
+  text-decoration: none;
+  padding: 2px 0 2px 26px;
+  border-left: 2px solid transparent;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.24s var(--ease), letter-spacing 0.24s var(--ease);
+}
+.menu-list a:hover,
+.menu-list a.selected {
+  color: var(--fg);
+  border-left-color: var(--accent);
+  transform: translateX(10px);
+  letter-spacing: 0.015em;
+}
+.menu-list a:focus-visible {
+  outline: none;
+  color: var(--fg);
+  border-left-color: var(--accent);
+}
+.menu-foot {
+  margin-top: clamp(24px, 5vh, 48px);
+  padding-left: 28px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: var(--fg-faint);
+}
+.menu-foot a { color: var(--fg-faint); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.menu-foot a:hover, .menu-foot a:focus-visible { color: var(--accent); border-color: var(--accent); }
+
+/* ——— content pages ——— */
+.view-page { justify-content: flex-start; padding-top: clamp(64px, 12vh, 120px); }
+.page-head { margin-bottom: clamp(20px, 4vh, 40px); }
+.page-head h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 300;
+  font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+  letter-spacing: -0.01em;
+}
+.page-sub {
+  margin-top: 6px;
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+}
+.page-body {
+  max-width: 640px;
+  overflow-y: auto;
+  max-height: 62vh;
+  scrollbar-width: thin;
+  padding-right: 8px;
+}
+.page-body p { font-size: clamp(0.92rem, 2.4vw, 1.02rem); line-height: 1.8; color: var(--fg-dim); margin-bottom: 16px; }
+.page-body .lede { color: var(--fg); font-size: clamp(1.05rem, 2.8vw, 1.25rem); font-weight: 400; }
+.placeholder-note { letter-spacing: 0.2em; color: var(--fg-faint); font-size: 0.75rem; }
+
+.cards { display: flex; flex-direction: column; gap: 14px; max-width: 720px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px 22px;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.card:hover { border-color: rgba(122, 167, 255, 0.4); background: rgba(122, 167, 255, 0.04); }
+.card h3 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+.card h3 span { font-weight: 300; font-size: 0.76rem; color: var(--fg-faint); letter-spacing: 0.1em; }
+.card ul { list-style: none; }
+.card li {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--fg-dim);
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 4px;
+}
+.card li::before { content: ""; position: absolute; left: 0; top: 0.72em; width: 5px; height: 1.5px; background: var(--accent); }
+.card p { font-size: 0.88rem; margin-bottom: 8px; }
+.card-link a { color: var(--accent); text-decoration: none; font-size: 0.82rem; letter-spacing: 0.06em; }
+.card-link a:hover, .card-link a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.card.placeholder { border-style: dashed; opacity: 0.65; }
+
+/* ——— skill map ——— */
+.skillmap-wrap { position: relative; width: 100%; max-width: 980px; }
+#skillmap { width: 100%; height: auto; display: block; }
+#skillmap .edge { stroke: var(--line); stroke-width: 1; }
+#skillmap .edge.lit { stroke: rgba(122, 167, 255, 0.5); }
+#skillmap .node circle {
+  fill: #14161b;
+  stroke: rgba(242, 243, 245, 0.3);
+  stroke-width: 1.2;
+  transition: stroke 0.2s var(--ease), r 0.2s var(--ease);
+  cursor: pointer;
+}
+#skillmap .node text {
+  fill: var(--fg-dim);
+  font-family: "Archivo", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+#skillmap .node.hub circle { stroke: var(--accent); }
+#skillmap .node.hub text { fill: var(--fg); font-family: "Space Grotesk", sans-serif; font-size: 15px; }
+#skillmap .node:hover circle,
+#skillmap .node.focused circle { stroke: var(--accent); filter: drop-shadow(0 0 6px rgba(122, 167, 255, 0.55)); }
+#skillmap .node:hover text,
+#skillmap .node.focused text { fill: var(--fg); }
+#skillmap .node:focus { outline: none; }
+.skill-tip {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* ——— chrome ——— */
+.chrome {
+  position: fixed;
+  left: clamp(24px, 7vw, 96px);
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 6;
+}
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--fg-faint);
+  font-family: "Archivo", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  padding: 8px 4px;
+  transition: color 0.2s var(--ease);
+}
+.back-btn:hover, .back-btn:focus-visible { color: var(--fg); }
+.back-btn kbd {
+  font-family: inherit;
+  font-size: 0.68rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  color: var(--fg-faint);
+}
+
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; }
+
+@media (max-width: 700px) {
+  .page-body { max-height: 58vh; }
+  #avatar-stage { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bg, .start-ring { animation: none; }
+  .view { transition: opacity 0.2s ease; transform: none; }
+}

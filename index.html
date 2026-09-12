@@ -2,36 +2,150 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mihir Okte</title>
-<meta name="description" content="A small pond. Feed the fish.">
+<meta name="description" content="Mihir Okte — software engineer. Press start.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="menu.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+} }
+</script>
 </head>
 <body>
-<canvas id="pond"></canvas>
+<div id="bg" aria-hidden="true"></div>
+<canvas id="avatar-stage" aria-hidden="true"></canvas>
 
-<div id="loader">
-  <p class="loader-text">the pond is filling</p>
-</div>
+<!-- ——— landing ——— -->
+<section class="view view-landing" id="view-home" data-view="home">
+  <p class="eyebrow">software engineer · bengaluru</p>
+  <h1 class="title">Mihir<br>Okte</h1>
+  <button class="start-btn" id="start-btn">
+    <span class="start-ring" aria-hidden="true"></span>
+    let's get started
+  </button>
+  <p class="hint-line" aria-hidden="true">enter ↵</p>
+</section>
 
-<footer class="controls">
-  <button id="sound-toggle" class="sound-toggle" aria-pressed="false">sound</button>
-  <a class="resume-link" href="resume.html">resume</a>
+<!-- ——— main menu ——— -->
+<section class="view view-menu" id="view-menu" data-view="menu" hidden>
+  <nav aria-label="Main menu">
+    <ul class="menu-list" id="menu-list">
+      <li><a href="#/about"       data-idx="0">About me</a></li>
+      <li><a href="#/experience"  data-idx="1">Experience</a></li>
+      <li><a href="#/skills"      data-idx="2">Skills</a></li>
+      <li><a href="#/exploration" data-idx="3">Exploration projects</a></li>
+      <li><a href="#/fun"         data-idx="4">Fun projects</a></li>
+      <li><a href="#/hobbies"     data-idx="5">Hobbies</a></li>
+    </ul>
+  </nav>
+  <p class="menu-foot"><a href="resume.html">resume</a><span aria-hidden="true"> · </span><a href="pond.html">the pond</a></p>
+</section>
+
+<!-- ——— content pages ——— -->
+<section class="view view-page" id="view-about" data-view="about" hidden>
+  <header class="page-head"><h2>About me</h2></header>
+  <div class="page-body">
+    <p class="lede">Engineer at Amazon, mathematician by training, builder by habit.</p>
+    <p>I studied Mathematics and Computing at IIT Delhi and now write software in Bengaluru.
+       I like systems that stay calm under load and tools that work while I sleep.
+       When the city gets loud, I think next to water.</p>
+    <p class="placeholder-note">— more soon —</p>
+  </div>
+</section>
+
+<section class="view view-page" id="view-experience" data-view="experience" hidden>
+  <header class="page-head"><h2>Experience</h2></header>
+  <div class="page-body cards" id="xp-cards">
+    <article class="card">
+      <h3>Amazon <span>Software Engineer · 2024 – now</span></h3>
+      <ul>
+        <li>Moved 19 core ordering and refund services onto new AWS infrastructure with zero downtime.</li>
+        <li>Led a team of 8 over 10 months from setup through migration and validation.</li>
+        <li>Cut risk-mitigation time by 97% by wiring legacy logs into diagnosis agents.</li>
+        <li>Delivered the org's first fully AI-led end-to-end rollout.</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>YOptima <span>Founding Engineer, CEO Office · 2023 – 24</span></h3>
+      <ul>
+        <li>Cut client onboarding from days to minutes with a self-serve campaign platform.</li>
+        <li>Reduced overspend-alert latency from 2 hours to 10 minutes.</li>
+        <li>Cut live ad-placement variance by 40% with a fine-tuned language model.</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>E-Ring <span>SWE Intern (PPO) · 2022</span></h3>
+      <ul>
+        <li>Cut query time by 30% by restructuring the database behind a US land-tax appraisal system.</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>Early startups <span>Materate · Pricing · StoryProcess · 2020 – 23</span></h3>
+      <ul>
+        <li>First dashboards, end-to-end web apps, and a speech-to-animation pitch engine.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="view view-page" id="view-skills" data-view="skills" hidden>
+  <header class="page-head"><h2>Skills</h2><p class="page-sub">arrows to move · hover to read</p></header>
+  <div class="skillmap-wrap">
+    <svg id="skillmap" viewBox="0 0 1000 620" role="group" aria-label="Skill map"></svg>
+    <div class="skill-tip" id="skill-tip" hidden></div>
+  </div>
+</section>
+
+<section class="view view-page" id="view-exploration" data-view="exploration" hidden>
+  <header class="page-head"><h2>Exploration projects</h2></header>
+  <div class="page-body cards">
+    <article class="card">
+      <h3>Helio <span>2025 – now</span></h3>
+      <p>A personal assistant with a split brain: it answers on Telegram and keeps working
+         when connectivity drops. Hardened for daily use with 168 automated tests.</p>
+      <p class="card-link"><a href="https://github.com/Mihirokte" target="_blank" rel="noopener">github ↗</a></p>
+    </article>
+    <article class="card">
+      <h3>Group theory vs the Rubik's Cube <span>B.Tech thesis</span></h3>
+      <p>Modeled cube states as permutation groups and searched them as a graph.
+         Solutions under twenty moves, in under two seconds.</p>
+    </article>
+  </div>
+</section>
+
+<section class="view view-page" id="view-fun" data-view="fun" hidden>
+  <header class="page-head"><h2>Fun projects</h2></header>
+  <div class="page-body cards">
+    <article class="card">
+      <h3>The koi pond <span>this site's first face</span></h3>
+      <p>A hand-drawn pond where a fish tells my story if you feed it.
+         Still alive, one click away.</p>
+      <p class="card-link"><a href="pond.html">visit the pond →</a></p>
+    </article>
+    <article class="card">
+      <h3>Speech-to-animation engine <span>StoryProcess</span></h3>
+      <p>Talked into a mic, got an animated pitch out. Made elevator pitches in bulk.</p>
+    </article>
+  </div>
+</section>
+
+<section class="view view-page" id="view-hobbies" data-view="hobbies" hidden>
+  <header class="page-head"><h2>Hobbies</h2></header>
+  <div class="page-body cards">
+    <article class="card placeholder"><h3>· · ·</h3><p>Mihir is deciding what to admit to here.</p></article>
+    <article class="card placeholder"><h3>· · ·</h3><p>Reserved.</p></article>
+  </div>
+</section>
+
+<footer class="chrome" id="chrome" hidden>
+  <button class="back-btn" id="back-btn">← menu <kbd>esc</kbd></button>
 </footer>
 
-<div id="story-panel" class="story-panel" role="dialog" aria-live="polite">
-  <div class="panel-head">
-    <span id="panel-title" class="panel-title"></span>
-    <button id="panel-close" class="panel-close" aria-label="Close">✕</button>
-  </div>
-  <p id="panel-text" class="panel-text"></p>
-  <div id="panel-links" class="panel-links"></div>
-  <div id="panel-progress" class="panel-progress"></div>
-</div>
-
-<script src="main.js"></script>
+<script type="module" src="menu.js"></script>
 </body>
 </html>
