@@ -132,51 +132,48 @@ def fish_body():
     # ink outline — bold, uniform
     d.line(sil + [sil[0]], fill=INK, width=int(8 * SS), joint="curve")
 
-    # almond ink eyes on the cream face — symmetric, angled forward
-    for side in (-1, 1):
-        cx, cy = 470, 180 + side * 33
-        eye = path(
-            [(cx - 26, cy), (cx - 12, cy - 14), (cx + 14, cy - 11), (cx + 24, cy)],
-            [(cx + 24, cy), (cx + 12, cy + 11), (cx - 12, cy + 12), (cx - 26, cy)],
-            n=24)
-        d.polygon(eye, fill=INK)
-        gx, gy = S_(cx + 6), S_(cy - 4)
-        r = S_(3.8)
-        d.ellipse([gx - r, gy - r, gx + r, gy + r], fill=BONE)
-
     save(img, "fish-body.png", W, H)
 
 
 def fish_tail():
-    # 400x360, pivot at (56,180); blades flow to +x (page rotates it behind body)
+    # 400x360, pivot at (56,180); one flowing fan, three soft lobes
     W, H = 400, 360
     img, d = canvas(W, H)
 
-    for side in (-1, 1):
-        yb = 180
-        blade = path(
-            [(56, yb), (120, yb + side * 10), (230, yb + side * 40), (330, yb + side * 128)],
-            [(330, yb + side * 128), (350, yb + side * 60), (300, yb + side * 26), (250, yb + side * 18)],
-            [(250, yb + side * 18), (180, yb + side * 8), (100, yb + side * 2), (56, yb)],
-            n=36)
-        d.polygon(blade, fill=FISH)
-        # hard shade streak inside the blade, following its curve
-        streak = path(
-            [(90, yb + side * 6), (180, yb + side * 20), (260, yb + side * 48), (316, yb + side * 106)],
-            [(316, yb + side * 106), (300, yb + side * 60), (250, yb + side * 34), (180, yb + side * 22)],
-            [(180, yb + side * 22), (140, yb + side * 14), (105, yb + side * 8), (90, yb + side * 6)],
-            n=28)
-        d.polygon(streak, fill=FISH_SHADE)
-        d.line(blade + [blade[0]], fill=INK, width=int(7 * SS), joint="curve")
+    fan = path(
+        # upper edge sweeping out
+        [(56, 176), (140, 118), (240, 84), (322, 80)],
+        # top lobe trailing edge curling into the first notch
+        [(322, 80), (332, 122), (312, 142), (286, 152)],
+        # notch out to the middle lobe tip
+        [(286, 152), (330, 158), (354, 170), (356, 180)],
+        # mirror: middle lobe back to second notch
+        [(356, 180), (354, 190), (330, 202), (286, 208)],
+        # second notch out to bottom lobe tip
+        [(286, 208), (312, 218), (332, 238), (322, 280)],
+        # lower edge flowing back to the pivot
+        [(322, 280), (240, 276), (140, 242), (56, 184)],
+        n=32)
+    d.polygon(fan, fill=FISH)
 
-    # peduncle wedge at the pivot (tucks under the body)
-    hub = path(
-        [(30, 160), (60, 150), (86, 162), (92, 180)],
-        [(92, 180), (86, 198), (60, 210), (30, 200)],
-        [(30, 200), (44, 180), (44, 180), (30, 160)],
-        n=20)
-    d.polygon(hub, fill=FISH)
-    d.line(hub + [hub[0]], fill=INK, width=int(6 * SS), joint="curve")
+    # shade ribbons following the flow into the upper and lower lobes
+    for sgn in (-1, 1):
+        rib = path(
+            [(70, 180 + sgn * 4), (150, 180 + sgn * 34), (230, 180 + sgn * 56), (300, 180 + sgn * 84)],
+            [(300, 180 + sgn * 84), (280, 180 + sgn * 52), (210, 180 + sgn * 34), (140, 180 + sgn * 20)],
+            [(140, 180 + sgn * 20), (110, 180 + sgn * 12), (85, 180 + sgn * 6), (70, 180 + sgn * 4)],
+            n=26)
+        d.polygon(rib, fill=FISH_SHADE)
+
+    # light ribbon into the middle lobe
+    mid = path(
+        [(90, 180), (180, 178), (260, 176), (330, 178)],
+        [(330, 178), (260, 186), (180, 186), (90, 182)],
+        n=24)
+    d.polygon(mid, fill=BELLY)
+
+    # ink outline
+    d.line(fan + [fan[0]], fill=INK, width=int(7 * SS), joint="curve")
 
     save(img, "fish-tail.png", W, H)
 
