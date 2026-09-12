@@ -11,10 +11,10 @@ const SECTIONS = [
   { id: 'contact', label: 'Say hi' },
 ]
 
-const STAR_R = 1.1
-const ORBIT_R = 1.85
+const STAR_R = 0.5
+const ORBIT_R = 1.45
 const ORBIT_TILT = 0.32 // rad — the "clock face" leans back slightly
-const BELT_R = [2.5, 3.05]
+const BELT_R = [2.15, 2.65]
 
 /* ——— GLSL ——— */
 const NOISE = /* glsl */ `
@@ -37,31 +37,28 @@ const STAR_VERT = /* glsl */ `
   }
 `
 const STAR_FRAG = /* glsl */ `
-  uniform float uTime; uniform float uFlare; uniform vec3 uCore; uniform vec3 uMid; uniform vec3 uEdge;
+  uniform float uTime; uniform float uFlare; uniform float uPulse; uniform vec3 uCore; uniform vec3 uMid; uniform vec3 uEdge;
   varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
   ${NOISE}
   void main() {
     vec3 p = normalize(vPos);
-    float t = uTime * 0.05;
-    float cells = fbm(p * 3.5 + vec3(t, -t * 0.6, t * 0.3));
-    float grain = fbm(p * 11.0 - vec3(t * 2.1, t * 1.4, -t));
-    float g = cells * 0.7 + grain * 0.45;
-    vec3 col = mix(uEdge * 0.55, uMid, smoothstep(0.22, 0.58, g));
-    col = mix(col, uCore, smoothstep(0.58, 0.92, g));
+    float t = uTime * 0.35;
+    // fast, fine plasma churn on a tiny, furious surface
+    float g = fbm(p * 9.0 + vec3(t, -t * 0.8, t * 0.5)) * 0.8 + fbm(p * 22.0 - vec3(t * 2.0)) * 0.4;
+    vec3 col = mix(uMid, uCore, smoothstep(0.3, 0.8, g));
     float ndv = max(dot(normalize(vNormal), normalize(vView)), 0.0);
-    float limb = pow(ndv, 0.6);
-    col *= 0.5 + 0.65 * limb;
-    col += uEdge * pow(1.0 - ndv, 3.0) * 1.1;
-    col *= 1.0 + uFlare * 0.45;
+    col = mix(col, uCore, 0.35);                  // nearly white overall
+    col += uCore * pow(1.0 - ndv, 2.0) * 1.6;     // blazing limb
+    col *= 1.2 + uPulse * 1.1 + uFlare * 0.4;
     gl_FragColor = vec4(col, 1.0);
   }
 `
 const RIM_FRAG = /* glsl */ `
-  uniform vec3 uColor; uniform float uFlare;
+  uniform vec3 uColor; uniform float uFlare; uniform float uPulse;
   varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
   void main() {
-    float f = pow(1.0 - max(dot(normalize(vNormal), normalize(vView)), 0.0), 2.6);
-    f *= 1.0 + uFlare * 0.8;
+    float f = pow(1.0 - max(dot(normalize(vNormal), normalize(vView)), 0.0), 2.2);
+    f *= 1.0 + uFlare * 0.8 + uPulse * 1.2;
     gl_FragColor = vec4(uColor * f * 1.5, f);
   }
 `
@@ -70,7 +67,7 @@ const CORONA_VERT = /* glsl */ `
   void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
 `
 const CORONA_FRAG = /* glsl */ `
-  uniform float uTime; uniform float uFlare; uniform vec3 uColor; uniform float uInner;
+  uniform float uTime; uniform float uFlare; uniform float uPulse; uniform vec3 uColor; uniform float uInner;
   varying vec2 vUv;
   ${NOISE}
   void main() {
@@ -80,9 +77,31 @@ const CORONA_FRAG = /* glsl */ `
     float streaks = fbm(vec3(cos(ang) * 2.2, sin(ang) * 2.2, r * 3.0 - uTime * 0.12));
     float halo = exp(-r * 3.4) * (0.7 + 0.6 * streaks);
     float rays = pow(max(0.0, streaks - 0.38), 1.6) * exp(-r * 2.0) * 1.4;
-    float a = (halo * 1.4 + rays) * (1.0 + uFlare * 0.7);
+    float a = (halo * 1.4 + rays) * (1.0 + uFlare * 0.7 + uPulse * 0.9);
     a *= smoothstep(1.0, 0.72, r);
     a *= smoothstep(uInner - 0.04, uInner + 0.08, r);
+    gl_FragColor = vec4(uColor * a, a);
+  }
+`
+/* pulsar radiation beams: bright core line, soft edges, fading with distance */
+const BEAM_VERT = /* glsl */ `
+  varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+  void main() {
+    vUv = uv;
+    vN = normalize(normalMatrix * normal);
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vV = -mv.xyz;
+    gl_Position = projectionMatrix * mv;
+  }
+`
+const BEAM_FRAG = /* glsl */ `
+  uniform vec3 uColor; uniform float uPulse;
+  varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+  void main() {
+    float along = vUv.y;                                   // 0 at the star, 1 at the tip
+    float fade = pow(1.0 - along, 1.7);
+    float edge = pow(max(dot(normalize(vN), normalize(vV)), 0.0), 1.4);
+    float a = fade * edge * (0.25 + 0.75 * uPulse) * 0.9;
     gl_FragColor = vec4(uColor * a, a);
   }
 `
@@ -167,6 +186,7 @@ export default function StarScene() {
     const uniforms = {
       uTime: { value: 0 },
       uFlare: { value: 0 },
+      uPulse: { value: 0 },
       uCore: { value: hex(PALETTE.cream) },
       uMid: { value: hex(PALETTE.gold) },
       uEdge: { value: hex(PALETTE.orange) },
@@ -180,7 +200,7 @@ export default function StarScene() {
     const rim = new THREE.Mesh(
       new THREE.SphereGeometry(STAR_R * 1.04, 64, 48),
       new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: hex(PALETTE.gold) }, uFlare: uniforms.uFlare },
+        uniforms: { uColor: { value: hex(PALETTE.cream) }, uFlare: uniforms.uFlare, uPulse: uniforms.uPulse },
         vertexShader: STAR_VERT,
         fragmentShader: RIM_FRAG,
         transparent: true,
@@ -190,14 +210,15 @@ export default function StarScene() {
     )
     rig.add(rim)
 
-    const CORONA_SIZE = 7.2
+    const CORONA_SIZE = 4.4
     const corona = new THREE.Mesh(
       new THREE.PlaneGeometry(CORONA_SIZE, CORONA_SIZE),
       new THREE.ShaderMaterial({
         uniforms: {
           uTime: uniforms.uTime,
           uFlare: uniforms.uFlare,
-          uColor: { value: hex(PALETTE.orange).lerp(hex(PALETTE.gold), 0.5) },
+          uPulse: uniforms.uPulse,
+          uColor: { value: hex(PALETTE.gold).lerp(hex(PALETTE.cream), 0.35) },
           uInner: { value: (STAR_R * 2) / CORONA_SIZE },
         },
         vertexShader: CORONA_VERT,
@@ -209,6 +230,33 @@ export default function StarScene() {
     )
     corona.renderOrder = 2
     scene.add(corona)
+
+    /* ——— radiation beams: the spin axis is tilted, the magnetic axis is
+       offset from it, so the beams sweep like a lighthouse ——— */
+    const spin = new THREE.Group()
+    spin.rotation.z = 0.55
+    rig.add(spin)
+    const BEAM_LEN = 7
+    const beamGeo = new THREE.CylinderGeometry(0.75, 0.08, BEAM_LEN, 40, 1, true)
+    beamGeo.translate(0, BEAM_LEN / 2, 0)
+    const beamMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: hex(PALETTE.mint).lerp(hex(PALETTE.cream), 0.45) }, uPulse: uniforms.uPulse },
+      vertexShader: BEAM_VERT,
+      fragmentShader: BEAM_FRAG,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.FrontSide,
+    })
+    const magnetic = new THREE.Group()
+    magnetic.rotation.x = 0.5 // offset from the spin axis
+    spin.add(magnetic)
+    for (const dir of [1, -1]) {
+      const beam = new THREE.Mesh(beamGeo, beamMat)
+      beam.rotation.x = dir === 1 ? 0 : Math.PI
+      beam.renderOrder = 3
+      magnetic.add(beam)
+    }
 
     /* ——— orbiting titles (clock face) ——— */
     const orbit = new THREE.Group()
@@ -338,10 +386,14 @@ export default function StarScene() {
       starfield.rotation.x = rig.rotation.x * 0.15
 
       if (!reduced) {
-        star.rotation.y = t * 0.03
+        star.rotation.y = t * 0.6
+        spin.rotation.y = t * 2.4                     // fast neutron-star spin sweeps the beams
         orbit.rotation.y = -t * 0.11
         belt.rotation.y = t * 0.05
       }
+      // sharp lighthouse pulse, in step with the sweep
+      const ph = 0.5 + 0.5 * Math.sin(t * 2.4 * 2.0)
+      uniforms.uPulse.value = reduced ? 0.5 : Math.pow(ph, 4.0)
 
       const n = SECTIONS.length
       for (let i = 0; i < n; i++) {
@@ -383,6 +435,8 @@ export default function StarScene() {
       canvas.removeEventListener('pointerleave', onLeave)
       renderer.dispose()
       starsGeo.dispose()
+      beamGeo.dispose()
+      beamMat.dispose()
     }
   }, [])
 

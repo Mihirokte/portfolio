@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --fs-body: clamp(15px, 1.25vw, 17px);
+  --fs-h2: clamp(20px, 1.9vw, 26px);
   --ink: #FFF8F0;
   --dim: rgba(255, 248, 240, 0.78);
   --faint: rgba(255, 248, 240, 0.48);
@@ -93,6 +95,7 @@ section {
 /* ——— type ——— */
 .eyebrow {
   font-family: var(--mono);
+  font-weight: 500;
   font-size: 11px;
   letter-spacing: 0.4em;
   color: var(--accent);
@@ -108,18 +111,18 @@ section {
 h2 {
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(21px, 2.6vw, 34px);
+  font-size: var(--fs-h2);
   letter-spacing: -0.01em;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--ink);
   text-shadow: var(--glow-mid);
   text-transform: lowercase;
 }
-h2.glass { padding: 32px 36px; display: inline-block; }
+h2.glass { padding: 22px 26px; display: inline-block; }
 
 p {
-  font-size: clamp(16px, 2vw, 22px);
-  line-height: 1.5;
+  font-size: var(--fs-body);
+  line-height: 1.6;
   font-weight: 500;
   color: var(--dim);
   max-width: 880px;
@@ -144,8 +147,8 @@ p {
   padding: 0;
   max-width: none;
   /* room beside the sun, used to size the halves so they always fit */
-  --sun-side: calc(var(--sun-cx) - var(--sun-r) - 4vw);
-  --name-size: clamp(34px, calc(var(--sun-side) / 4.3), 128px);
+  --sun-side: calc(var(--sun-cx) - var(--sun-r) - 3vw);
+  --name-size: clamp(44px, calc(var(--sun-side) / 3.5), 176px);
   --sun-bottom: calc(var(--sun-cy) + var(--sun-r));
 }
 .name-stack { display: contents; }
@@ -161,18 +164,19 @@ p {
   text-transform: lowercase;
   text-shadow: var(--glow-strong);
   white-space: nowrap;
-  /* baseline a few px above the eyebrow */
-  top: calc(var(--sun-bottom) + 2px);
-  transform: translateY(-100%);
+  opacity: 0.8;
+  /* vertically centred on the star's upper third */
+  top: calc(var(--sun-cy) - var(--sun-r) * 0.55);
+  transform: translateY(-50%);
 }
-#hero h1.half.left { right: calc(100% - var(--sun-cx) + var(--sun-r) + 3vw); }
-#hero h1.half.right { left: calc(var(--sun-cx) + var(--sun-r) + 3vw); }
+#hero h1.half.left { right: calc(100% - var(--sun-cx) + var(--sun-r) + 2.5vw); }
+#hero h1.half.right { left: calc(var(--sun-cx) + var(--sun-r) + 2.5vw); }
 #hero .sun-eyebrow {
   position: absolute;
   margin: 0;
   left: var(--sun-cx);
-  top: calc(var(--sun-bottom) + 12px);
-  transform: translateX(-50%);
+  top: calc(var(--sun-cy) - var(--sun-r) - 34px);
+  transform: translate(-50%, -100%);
   white-space: nowrap;
 }
 
@@ -186,7 +190,7 @@ p {
   border-bottom: 1px solid var(--line);
   font-family: var(--body);
   font-weight: 600;
-  font-size: clamp(15px, 1.7vw, 19px);
+  font-size: var(--fs-body);
   color: var(--ink);
   text-shadow: var(--glow-mid);
   transition: padding-left 0.35s;
@@ -197,11 +201,11 @@ p {
 
 .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 .glass-card { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit; }
-.glass-card h3 { font-family: var(--body); font-weight: 600; font-size: 17px; color: var(--ink); text-shadow: var(--glow-mid); }
-.glass-card p { font-size: 15px; line-height: 1.5; margin: 0; }
+.glass-card h3 { font-family: var(--body); font-weight: 600; font-size: var(--fs-body); color: var(--ink); text-shadow: var(--glow-mid); }
+.glass-card p { font-size: var(--fs-body); line-height: 1.6; margin: 0; }
 .glass-card .meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--faint); text-transform: lowercase; }
 .glass-card .bullets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.glass-card .bullets li { position: relative; padding-left: 16px; font-size: 15px; line-height: 1.5; color: var(--dim); }
+.glass-card .bullets li { position: relative; padding-left: 16px; font-size: var(--fs-body); line-height: 1.6; color: var(--dim); }
 .glass-card .bullets li::before { content: ""; position: absolute; left: 0; top: 0.75em; width: 8px; height: 1px; background: var(--accent2); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -336,11 +340,9 @@ footer.foot { position: relative; z-index: 2; padding: 40px; text-align: center;
     font-size: clamp(40px, 15vw, 64px);
     left: auto; right: auto; top: auto;
   }
-  #hero .sun-eyebrow { position: static; transform: none; margin-top: 12px; font-size: 10px; letter-spacing: 0.3em; }
+  #hero .sun-eyebrow { position: static; transform: none; order: -1; margin-bottom: 14px; font-size: 10px; letter-spacing: 0.3em; }
 
-  h2 { font-size: 22px; }
-  h2.glass { padding: 18px 20px; }
-  p { font-size: 16px; }
+  h2.glass { padding: 16px 18px; }
   .eyebrow { margin-bottom: 14px; }
 
   .glass, .glass-card, .chip, .cta, nav.top { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
