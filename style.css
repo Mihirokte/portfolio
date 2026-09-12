@@ -85,32 +85,58 @@ html, body {
 }
 .sound-toggle:hover, .sound-toggle[aria-pressed="true"] { color: var(--jade); }
 
-/* dialogue bubble — cream, ink text, meander border strip */
+/* story panel — hanging scroll, centered, unrolls open */
 .story-panel {
   position: fixed;
+  top: 50%;
   left: 50%;
-  bottom: 14px;
-  transform: translate(-50%, calc(100% + 40px));
-  width: min(560px, calc(100% - 24px));
+  transform: translate(-50%, -50%);
+  width: min(500px, calc(100% - 48px));
   z-index: 10;
-  background: var(--bone);
+  background:
+    linear-gradient(90deg, rgba(120, 100, 60, 0.12), rgba(0,0,0,0) 8%, rgba(0,0,0,0) 92%, rgba(120, 100, 60, 0.12)),
+    var(--bone);
   color: var(--ink);
-  border-radius: 18px;
-  padding: 16px 20px calc(14px + env(safe-area-inset-bottom) / 2);
-  border: 2px solid #171712;
-  box-shadow: 0 4px 0 #171712;
-  transition: transform 0.4s cubic-bezier(0.3, 1.1, 0.35, 1);
+  padding: 34px 30px 26px;
+  border-left: 2px solid #171712;
+  border-right: 2px solid #171712;
+  clip-path: inset(50% 0 50% 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: clip-path 0.55s cubic-bezier(0.25, 0.9, 0.3, 1), opacity 0.25s ease;
 }
-.story-panel::before { /* meander strip */
+.story-panel.open {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* rollers: dark lacquer bars with gold caps, past the paper edges */
+.story-panel::before, .story-panel::after {
   content: "";
   position: absolute;
-  top: 7px; left: 20px; right: 20px;
+  left: -26px;
+  right: -26px;
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+    var(--gold) 0 14px, #171712 14px calc(100% - 14px), var(--gold) calc(100% - 14px));
+  border: 2px solid #0a0d0a;
+}
+.story-panel::before { top: -11px; }
+.story-panel::after { bottom: -11px; }
+
+/* meander strip along the top of the paper */
+.panel-head::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 16px; left: 30px; right: 30px;
   height: 3px;
   background: repeating-linear-gradient(90deg,
     var(--gold) 0 8px, transparent 8px 12px, var(--gold) 12px 14px, transparent 14px 22px);
-  opacity: 0.55;
+  opacity: 0.5;
 }
-.story-panel.open { transform: translate(-50%, 0); }
 
 .panel-head {
   display: flex;

@@ -254,18 +254,19 @@ function layoutFood() {
   });
 }
 
-/* ————— fish: spine chain, flat cel + ink outline ————— */
-const SEG = 12;
+/* ————— fish: 2-part sprite rig (body + pivoting tail) ————— */
+const bodyImg = new Image();
+const tailImg = new Image();
+bodyImg.src = "assets/fish-body.png";
+tailImg.src = "assets/fish-tail.png";
+const spritesReady = Promise.all([bodyImg.decode(), tailImg.decode()]);
+
 const fish = {
-  x: 0, y: 0, heading: 0, speed: 0, base: 0.9,
-  spine: [], state: "wander", target: null, gulpT: 0,
+  x: 0, y: 0, heading: 0, speed: 0, base: 0.9, bend: 0,
+  state: "wander", target: null, gulpT: 0,
   wanderTo: { x: 0, y: 0 }, eatenTotal: 0,
 };
 function scale() { return Math.max(0.62, Math.min(W, H) / 900); }
-function resetSpine() {
-  fish.spine = [];
-  for (let i = 0; i < SEG; i++) fish.spine.push({ x: fish.x - i * 9, y: fish.y });
-}
 function pickWander() {
   fish.wanderTo.x = W * (0.15 + Math.random() * 0.7);
   fish.wanderTo.y = H * (0.15 + Math.random() * 0.7);
@@ -302,7 +303,9 @@ function updateFish(dt) {
     let diff = wantA - fish.heading;
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
-    fish.heading += diff * Math.min(1, 3.2 * dt);
+    const turn = diff * Math.min(1, 3.2 * dt);
+    fish.heading += turn;
+    fish.bend += (turn * 6 - fish.bend) * Math.min(1, 5 * dt); // lean into turns
     fish.speed += (want - fish.speed) * 1.6 * dt;
   }
   fish.gulpT = Math.max(0, fish.gulpT - dt * 2);
@@ -312,134 +315,41 @@ function updateFish(dt) {
   fish.y += Math.sin(fish.heading) * fish.speed * px60 * dt;
   fish.x = Math.max(30, Math.min(W - 30, fish.x));
   fish.y = Math.max(30, Math.min(H - 30, fish.y));
-
-  // spine follow
-  let hx = fish.x, hy = fish.y;
-  const gap = 8 * scale();
-  fish.spine[0].x = hx; fish.spine[0].y = hy;
-  for (let i = 1; i < SEG; i++) {
-    const s = fish.spine[i];
-    const ddx = s.x - hx, ddy = s.y - hy;
-    const d = Math.hypot(ddx, ddy) || 1;
-    s.x = hx + (ddx / d) * gap;
-    s.y = hy + (ddy / d) * gap;
-    hx = s.x; hy = s.y;
-  }
-}
-
-function fishPath(side) {
-  // build one side edge of the body along the spine
-  const k = scale();
-  const widths = [];
-  for (let i = 0; i < SEG; i++) {
-    const u = i / (SEG - 1);
-    widths.push((14 * Math.sin(Math.PI * Math.min(1, u * 1.3 + 0.14)) * (1 - u * 0.4) + 1.5) * k);
-  }
-  const pts = [];
-  for (let i = 0; i < SEG; i++) {
-    const p = fish.spine[i];
-    const q = fish.spine[Math.min(i + 1, SEG - 1)];
-    const a = Math.atan2(q.y - p.y, q.x - p.x) + Math.PI / 2 * side;
-    pts.push([p.x + Math.cos(a) * widths[i], p.y + Math.sin(a) * widths[i]]);
-  }
-  return pts;
 }
 
 function drawFish(t) {
+  if (!bodyImg.complete || !bodyImg.naturalWidth) return;
   const k = scale();
-  const s = fish.spine;
-  const head = s[0], neck = s[1];
-  const ha = Math.atan2(head.y - neck.y, head.x - neck.x);
+  // sprite native: body 560x360 (head +x, tail joint at x=95, center y=180)
+  // on screen the body spans ~110px at k=1
+  const bw = 110 * k, bh = bw * (360 / 560);
+  const flap = Math.sin(t * (5 + fish.speed * 3)) * (0.28 + Math.min(0.25, fish.speed * 0.12));
+  const swayA = Math.sin(t * (5 + fish.speed * 3)) * 0.045 + fish.bend * 0.06;
 
-  // tail — two flowing blades, ink outlined, flat fill
-  const tail = s[SEG - 1], pre = s[SEG - 2];
-  const ta = Math.atan2(tail.y - pre.y, tail.x - pre.x);
-  const flap = Math.sin(t * 7) * 0.42;
-  ctx.lineJoin = "round";
-  for (const bs of [1, -1]) {
-    ctx.beginPath();
-    ctx.moveTo(tail.x, tail.y);
-    const a1 = ta + bs * (0.5 + flap * 0.4);
-    const a2 = ta + bs * 0.12 + flap * 0.25;
-    const L = 30 * k;
-    ctx.quadraticCurveTo(
-      tail.x + Math.cos(a1) * L * 0.7, tail.y + Math.sin(a1) * L * 0.7,
-      tail.x + Math.cos(a1) * L, tail.y + Math.sin(a1) * L);
-    ctx.quadraticCurveTo(
-      tail.x + Math.cos(a2) * L * 0.8, tail.y + Math.sin(a2) * L * 0.8,
-      tail.x, tail.y);
-    ctx.closePath();
-    ctx.fillStyle = P.fish;
-    ctx.fill();
-    ctx.strokeStyle = P.ink;
-    ctx.lineWidth = 2.6 * k;
-    ctx.stroke();
-  }
-
-  // body: left edge + reversed right edge, flat orange, ink outline
-  const left = fishPath(1), right = fishPath(-1);
-  ctx.beginPath();
-  ctx.moveTo(left[0][0], left[0][1]);
-  for (const [x, y] of left) ctx.lineTo(x, y);
-  for (let i = right.length - 1; i >= 0; i--) ctx.lineTo(right[i][0], right[i][1]);
-  ctx.closePath();
-  ctx.fillStyle = P.fish;
-  ctx.fill();
-  ctx.strokeStyle = P.ink;
-  ctx.lineWidth = 2.8 * k;
-  ctx.stroke();
-
-  // one-step cel shade on the trailing half
   ctx.save();
-  ctx.clip();
-  ctx.beginPath();
-  const mid = s[5];
-  ctx.arc(mid.x, mid.y, 60 * k, ta - 1.2, ta + 1.2);
-  ctx.lineTo(tail.x + Math.cos(ta) * 40 * k, tail.y + Math.sin(ta) * 40 * k);
-  ctx.closePath();
-  ctx.fillStyle = "rgba(150, 95, 8, 0.35)";
-  ctx.fill();
-  // belly light along the inner curve
-  ctx.beginPath();
-  ctx.ellipse(s[2].x, s[2].y, 16 * k, 9 * k, ha, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(242, 216, 150, 0.5)";
-  ctx.fill();
+  ctx.translate(fish.x, fish.y);
+  ctx.rotate(fish.heading + swayA);
+
+  // tail: pivot sits where the body's tail joint is.
+  // body sprite: joint at (95/560 - 0.5) * bw from center = -0.33 * bw
+  const jointX = -0.33 * bw;
+  const tw = 78 * k, th = tw * (360 / 400);
+  ctx.save();
+  ctx.translate(jointX, 0);
+  ctx.rotate(Math.PI + flap * 0.7 + fish.bend * 0.12);
+  // tail sprite pivot at (56/400, 180/360) → offset so pivot lands on origin
+  ctx.drawImage(tailImg, -tw * (56 / 400), -th * 0.5, tw, th);
   ctx.restore();
 
-  // pectoral fins — small flat blades
-  for (const side of [-1, 1]) {
-    const fx = neck.x + Math.cos(ha + side * 1.65) * 13 * k;
-    const fy = neck.y + Math.sin(ha + side * 1.65) * 13 * k;
-    const fa = ha + side * (2.1 + Math.sin(t * 5 + side) * 0.18);
-    ctx.beginPath();
-    ctx.moveTo(fx, fy);
-    ctx.quadraticCurveTo(
-      fx + Math.cos(fa) * 16 * k, fy + Math.sin(fa) * 16 * k,
-      fx + Math.cos(fa + side * 0.7) * 10 * k, fy + Math.sin(fa + side * 0.7) * 10 * k);
-    ctx.closePath();
-    ctx.fillStyle = P.fishShade;
-    ctx.fill();
-    ctx.strokeStyle = P.ink;
-    ctx.lineWidth = 2 * k;
-    ctx.stroke();
-  }
-
-  // eye — single ink dot with bone ring (the game's big flat eyes, scaled down)
-  const ex = head.x + Math.cos(ha + 0.5) * 7 * k;
-  const ey = head.y + Math.sin(ha + 0.5) * 7 * k;
-  ctx.beginPath();
-  ctx.arc(ex, ey, 4.4 * k, 0, Math.PI * 2);
-  ctx.fillStyle = P.bone;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(ex, ey, 2.6 * k, 0, Math.PI * 2);
-  ctx.fillStyle = P.ink;
-  ctx.fill();
+  ctx.drawImage(bodyImg, -bw * 0.5, -bh * 0.5, bw, bh);
+  ctx.restore();
 
   // gulp ring
   if (fish.gulpT > 0) {
+    const hx = fish.x + Math.cos(fish.heading) * bw * 0.42;
+    const hy = fish.y + Math.sin(fish.heading) * bw * 0.42;
     ctx.beginPath();
-    ctx.arc(head.x, head.y, (1 - fish.gulpT) * 26 * k + 6, 0, Math.PI * 2);
+    ctx.arc(hx, hy, (1 - fish.gulpT) * 26 * k + 6, 0, Math.PI * 2);
     ctx.strokeStyle = `rgba(236, 227, 200, ${fish.gulpT * 0.5})`;
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -824,7 +734,6 @@ function frame(now) {
 /* ————— boot ————— */
 resize();
 fish.x = W / 2; fish.y = H / 2;
-resetSpine();
 pickWander();
 requestAnimationFrame(frame);
 
