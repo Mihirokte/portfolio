@@ -1,4 +1,4 @@
-// https://coolors.co/f4d06f-ff8811-9dd9d2-fff8f0-392f5a
+// site palette
 export const PALETTE = {
   cream: '#FFF8F0', // title front, body text, star core
   gold: '#F4D06F', // title drop layer, marquee band, star mid

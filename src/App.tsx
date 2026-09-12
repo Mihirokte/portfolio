@@ -21,15 +21,20 @@ export default function App() {
         <a className="brand" href="#hero">
           mihir okte
         </a>
-        <ul>
-          {NAV.map(([label, href]) => (
-            <li key={href}>
-              <a className="link" href={href}>
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="nav-right">
+          <ul>
+            {NAV.map(([label, href]) => (
+              <li key={href}>
+                <a className="link" href={href}>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a className="pill" href="resume.html" aria-label="Plain resume view">
+            resume
+          </a>
+        </div>
       </nav>
 
       <div style={{ position: 'relative', zIndex: 2 }}>

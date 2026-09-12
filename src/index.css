@@ -60,7 +60,7 @@ body {
 /* ——— content sits above ——— */
 main { position: relative; z-index: 2; }
 
-/* ——— the glass recipe ——— */
+/* ——— frosted panels ——— */
 .glass {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(12px);
@@ -260,6 +260,22 @@ nav.top .brand { font-family: var(--display); font-weight: 900; font-size: 15px;
 nav.top ul { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
 nav.top a.link { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: lowercase; color: var(--faint); text-decoration: none; transition: color 0.2s; }
 nav.top a.link:hover { color: var(--ink); }
+nav.top .nav-right { display: flex; align-items: center; gap: 26px; }
+nav.top a.pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: lowercase;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(8, 8, 10, 0.55);
+  text-shadow: var(--glow-soft);
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+nav.top a.pill:hover { background: var(--accent); color: #000; border-color: var(--accent); text-shadow: none; }
 
 
 /* ——— reveal ——— */
@@ -350,6 +366,8 @@ footer.foot { position: relative; z-index: 2; padding: 40px; text-align: center;
   }
   nav.top ul::-webkit-scrollbar { display: none; }
   nav.top .brand { font-size: 13px; flex: none; }
+  nav.top .nav-right { gap: 12px; min-width: 0; }
+  nav.top a.pill { padding: 6px 9px; font-size: 10px; flex: none; }
 
   .orbit-label { font-size: 10px; letter-spacing: 0.2em; padding: 8px 10px; }
   footer.foot { padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); }

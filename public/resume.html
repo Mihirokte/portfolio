@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mihir Okte — Resume</title>
+<meta name="description" content="Resume of Mihir Okte — Software Engineer at Amazon, IIT Delhi graduate. Python, TypeScript, AWS, LangChain.">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #222;
+    background: #fdfcfa;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  a { color: #b35a1f; }
+  h1 {
+    font-size: 1.9rem;
+    margin: 0 0 4px;
+  }
+  .subtitle { color: #555; margin: 0 0 8px; }
+  .contact { font-size: 0.92rem; margin: 0 0 6px; }
+  .contact a { margin-right: 4px; }
+  nav.top { font-size: 0.88rem; margin-bottom: 28px; }
+  h2 {
+    font-size: 1.15rem;
+    color: #b35a1f;
+    border-bottom: 1px solid #e5d9cc;
+    padding-bottom: 4px;
+    margin: 34px 0 12px;
+  }
+  h3 { font-size: 1rem; margin: 18px 0 2px; }
+  .meta { color: #666; font-size: 0.88rem; margin: 0 0 6px; }
+  ul { margin: 6px 0 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  .skills p { margin: 4px 0; }
+  .skills strong { color: #444; }
+  @media print {
+    nav.top { display: none; }
+    main { padding: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <nav class="top"><a href="./">← visual view</a></nav>
+
+  <header>
+    <h1>Mihir Okte</h1>
+    <p class="subtitle">Software Engineer</p>
+    <p class="contact">
+      Bengaluru, India ·
+      <a href="mailto:mihirokte77@gmail.com">mihirokte77@gmail.com</a> ·
+      <a href="https://linkedin.com/in/mihirokte">linkedin.com/in/mihirokte</a> ·
+      <a href="https://github.com/Mihirokte">github.com/Mihirokte</a>
+    </p>
+  </header>
+
+  <section>
+    <h2>Education</h2>
+    <h3>Indian Institute of Technology, Delhi (IIT Delhi)</h3>
+    <p class="meta">Bachelor of Technology, Mathematics and Computing · Jul 2019 – May 2023</p>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+
+    <h3>Amazon, Global Stores Team — Software Engineer</h3>
+    <p class="meta">Bengaluru · Aug 2024 – Present</p>
+    <ul>
+      <li>Moved 19 core ordering and refund services onto new AWS infrastructure with zero downtime by sequencing the migration and keeping upstream and downstream systems in sync.</li>
+      <li>Led a team of 8 over 10 months through infrastructure setup, regression testing, migration, and post-migration validation of the Region Flex campaign.</li>
+      <li>Cut risk-mitigation time by 97% by connecting legacy monolith service logs to automated diagnosis agents.</li>
+      <li>Delivered the organization's first fully AI-led end-to-end rollout by redesigning the legacy infrastructure behind customer order updates.</li>
+      <li>Made customer data deletion for returns automatic and audit-ready by engineering on-demand erasure under privacy controls.</li>
+      <li>Resolved 70+ high-severity and 130+ production issues, unblocked 11 partner teams, and owned service health as SME for 3 ordering services.</li>
+    </ul>
+
+    <h3>YOptima, Programmatic Ads — Founding Engineer, CEO Office</h3>
+    <p class="meta">Bengaluru · Jul 2023 – Aug 2024</p>
+    <ul>
+      <li>Cut client onboarding from days to minutes by building nYO, a self-serve campaign automation platform for YouTube and DV360.</li>
+      <li>Reduced overspend-alert latency from 2 hours to 10 minutes, blocking wasted ad spend, by rebuilding monitoring around real-time signals.</li>
+      <li>Cut live ad-placement variance by 40% by fine-tuning a language model on channel metadata to match ads to the right inventory.</li>
+    </ul>
+
+    <h3>E-Ring Inc, Core Product Team — Software Engineer Intern (PPO)</h3>
+    <p class="meta">Hyderabad · Jun 2022 – Jul 2022</p>
+    <ul>
+      <li>Shipped features for a US land-tax Mass Appraisal System by building web pages, database queries, and the data-access layer.</li>
+      <li>Cut query time by 30% by restructuring the database and optimizing stored procedures and multi-source data migration flows.</li>
+    </ul>
+
+    <h3>Various Startups — Frontend (Materate), Designer (Pricing), Adhoc Engineer (StoryProcess)</h3>
+    <p class="meta">Remote, semester-parallel · Jun 2020 – Mar 2023</p>
+    <ul>
+      <li>Gave Materate its first dashboards by building end-to-end web apps with connected databases and authenticated student and teacher views.</li>
+      <li>Enabled StoryProcess to produce elevator pitches in bulk by creating an engine that turned local speech into SVG animations.</li>
+    </ul>
+  </section>
+
+  <section class="skills">
+    <h2>Technical Skills</h2>
+    <p><strong>Languages:</strong> Python, TypeScript, JavaScript (fluent); SQL, C/C++, Java (intermediate)</p>
+    <p><strong>Frameworks:</strong> React, Next.js, Node.js, Flask, REST APIs</p>
+    <p><strong>Cloud:</strong> AWS, GCP, Docker, CI/CD, GitHub Actions</p>
+    <p><strong>AI Tools:</strong> Claude Code, Gemini, Cursor, Kiro</p>
+    <p><strong>Orchestration:</strong> LangChain, MCPs, Context Engineering</p>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+
+    <h3>Helio — Split-Brain Personal Assistant</h3>
+    <p class="meta">FastAPI, LangGraph, Gemini CLI, Telegram, Python · Jan 2025 – Present</p>
+    <ul>
+      <li>Built a personal assistant that stays responsive even when connectivity drops by splitting it into a messaging gateway and a separate reasoning service with an offline queue.</li>
+      <li>Made it dependable for daily use, as measured by 168 automated tests passing across messaging, routing, and data-safety paths.</li>
+    </ul>
+
+    <h3>Analysis of Algebraic Groups — B.Tech Project</h3>
+    <p class="meta">MATLAB, GAP · Jan 2023 – May 2023</p>
+    <ul>
+      <li>Made Rubik's Cube solving searchable by modeling cube states as permutation groups and encoding transitions as a directed graph.</li>
+      <li>Solved 3x3x3 scrambles in under 2 seconds with sub-20-move averages by running a breadth-first search over that state space.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Scholastic Achievements</h2>
+    <ul>
+      <li><strong>KVPY (2018):</strong> Achieved AIR 233 in the two-tier national scholarship examination conducted by DST, Govt. of India.</li>
+      <li><strong>NTSE (2017):</strong> National Talent Search scholar; secured a top-1000 national rank among 1M+ candidates in the NCERT merit exam.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
