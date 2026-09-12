@@ -64,18 +64,25 @@ html, body {
 .controls > * { pointer-events: auto; }
 
 .resume-link {
-  font-family: "Fraunces", serif;
+  font-family: "Inter", sans-serif;
   font-size: clamp(0.66rem, 2.2vw, 0.74rem);
-  letter-spacing: 0.12em;
-  color: var(--bone);
-  background: var(--crimson);
-  border: 1px solid #7c1f16;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(236, 227, 200, 0.75);
+  background: rgba(236, 227, 200, 0.07);
+  border: 1px solid rgba(236, 227, 200, 0.25);
+  border-radius: 4px;
   text-decoration: none;
-  padding: 9px 12px;
-  transform: rotate(-2deg);
-  transition: transform 0.2s ease;
+  padding: 9px 14px;
+  backdrop-filter: blur(3px);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
-.resume-link:hover { transform: rotate(0deg) scale(1.04); }
+.resume-link:hover {
+  color: rgba(236, 227, 200, 1);
+  background: rgba(236, 227, 200, 0.12);
+  border-color: rgba(236, 227, 200, 0.45);
+}
 
 .sound-toggle {
   font-family: "Inter", sans-serif;
