@@ -7,15 +7,21 @@
 <meta name="description" content="Mihir Okte — software engineer. Press start.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="menu.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="menu.css?v=7">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+} }
+</script>
 </head>
 <body>
 <div id="bg" aria-hidden="true"></div>
 <canvas id="avatar-stage" aria-hidden="true"></canvas>
 
 <!-- ——— landing ——— -->
-<section class="view view-landing" id="view-home" data-view="home">
+<section class="view view-landing active" id="view-home" data-view="home">
   <p class="eyebrow">software engineer · bengaluru</p>
   <h1 class="title">Mihir<br>Okte</h1>
   <button class="start-btn" id="start-btn">
@@ -140,7 +146,7 @@
   <button class="back-btn" id="back-btn">← menu <kbd>esc</kbd></button>
 </footer>
 
-<script src="menu.js" defer></script>
-<script type="module" src="avatar.js"></script>
+<script src="menu.js?v=7" defer></script>
+<script type="module" src="avatar.js?v=7"></script>
 </body>
 </html>

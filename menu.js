@@ -28,6 +28,13 @@ function show(view, push = true) {
   if (current) {
     els[current].classList.remove("active");
     els[current].hidden = true;
+  } else {
+    // first boot: HTML pre-activates the landing as a no-JS baseline —
+    // clear every view so a deep link can't double up with it
+    for (const v of VIEWS) {
+      els[v].classList.remove("active");
+      els[v].hidden = true;
+    }
   }
   current = view;
   const el = els[view];

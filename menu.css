@@ -120,8 +120,8 @@ html, body {
 .menu-list a {
   display: inline-block;
   font-family: "Space Grotesk", sans-serif;
-  font-weight: 300;
-  font-size: clamp(1.6rem, 5.2vw, 3.1rem);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3.9vw, 2.33rem);
   line-height: 1.5;
   color: var(--fg-dim);
   text-decoration: none;
