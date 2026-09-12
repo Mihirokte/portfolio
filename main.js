@@ -312,38 +312,25 @@ function koiTexture() {
   const c = document.createElement("canvas");
   c.width = 256; c.height = 512;
   const g = c.getContext("2d");
-  g.fillStyle = "#efe4d0";
-  g.fillRect(0, 0, 256, 512);
-  // back darker along the top circumference line (u ~ 0.25 → x = 64)
-  const back = g.createLinearGradient(0, 0, 256, 0);
-  back.addColorStop(0.0, "rgba(160,140,110,0.25)");
-  back.addColorStop(0.25, "rgba(120,100,80,0.35)");
-  back.addColorStop(0.5, "rgba(160,140,110,0.2)");
-  back.addColorStop(0.75, "rgba(255,255,255,0.25)"); // belly light
-  back.addColorStop(1.0, "rgba(160,140,110,0.25)");
-  g.fillStyle = back;
+  // goldfish: deep orange back → bright orange flank → pale gold belly
+  const grad = g.createLinearGradient(0, 0, 256, 0);
+  grad.addColorStop(0.0, "#f07818");
+  grad.addColorStop(0.25, "#e35f10");  // back (u ~ 0.25)
+  grad.addColorStop(0.5, "#ff8c26");
+  grad.addColorStop(0.75, "#ffcf8a");  // belly (u ~ 0.75)
+  grad.addColorStop(1.0, "#f07818");
+  g.fillStyle = grad;
   g.fillRect(0, 0, 256, 512);
 
+  // subtle scale shimmer
   const rnd = mulberry32(5);
-  const blob = (x, y, rx, ry, color) => {
-    for (const dx of [-256, 0, 256]) { // wrap seam
-      g.save();
-      g.translate(x + dx, y);
-      g.rotate(rnd() * 0.9 - 0.45);
-      g.beginPath();
-      g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-      g.fillStyle = color;
-      g.filter = "blur(3px)";
-      g.fill();
-      g.restore();
-      g.filter = "none";
-    }
-  };
-  blob(70, 90, 60, 55, "#d95f1e");   // head-back orange
-  blob(200, 200, 55, 70, "#e2681f");
-  blob(60, 300, 48, 60, "#d94f1e");
-  blob(170, 400, 40, 45, "#2e2a26"); // charcoal near tail
-  blob(120, 250, 22, 26, "#2e2a26");
+  for (let i = 0; i < 900; i++) {
+    const x = rnd() * 256, y = rnd() * 512;
+    g.beginPath();
+    g.arc(x, y, 1.2 + rnd() * 2.2, 0, Math.PI * 2);
+    g.fillStyle = rnd() > 0.5 ? "rgba(255,255,255,0.05)" : "rgba(150,60,10,0.06)";
+    g.fill();
+  }
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = THREE.RepeatWrapping;
@@ -351,9 +338,9 @@ function koiTexture() {
 }
 
 function koiBodyGeometry() {
-  const keys = [ // z, radius
-    [1.12, 0.03], [1.0, 0.13], [0.72, 0.22], [0.35, 0.27], [0.0, 0.28],
-    [-0.42, 0.22], [-0.8, 0.13], [-1.08, 0.06], [-1.2, 0.045],
+  const keys = [ // z, radius — short round goldfish body
+    [1.02, 0.035], [0.9, 0.15], [0.65, 0.25], [0.3, 0.3], [0.0, 0.29],
+    [-0.35, 0.23], [-0.65, 0.13], [-0.88, 0.06], [-0.98, 0.05],
   ];
   const radiusAt = (z) => {
     for (let i = 0; i < keys.length - 1; i++) {
@@ -369,7 +356,7 @@ function koiBodyGeometry() {
   const rings = 30, seg = 18;
   const pos = [], uv = [], idx = [];
   for (let i = 0; i <= rings; i++) {
-    const z = 1.12 - (i / rings) * 2.32;
+    const z = 1.02 - (i / rings) * 2.0;
     const r = radiusAt(z);
     for (let j = 0; j <= seg; j++) {
       const a = (j / seg) * Math.PI * 2;
@@ -409,14 +396,14 @@ const koi = new THREE.Group();
   koi.add(body);
 
   const finMat = swimmable(new THREE.MeshStandardMaterial({
-    color: 0xe2681f, roughness: 0.6, transparent: true, opacity: 0.88, side: THREE.DoubleSide,
+    color: 0xff8b2e, roughness: 0.55, transparent: true, opacity: 0.82, side: THREE.DoubleSide,
   }));
 
-  // tail (drawn in XY, x becomes -z after rotateY(PI/2))
+  // big flowing goldfish tail (drawn in XY, x becomes -z after rotateY(PI/2))
   const tail = new THREE.Mesh(
-    finShape([[0, 0], [0.55, 0.34], [0.42, 0.02], [0.55, -0.3]]), finMat);
+    finShape([[0, 0], [0.5, 0.42], [0.78, 0.5], [0.5, 0.04], [0.78, -0.46], [0.48, -0.38]]), finMat);
   tail.geometry.rotateY(Math.PI / 2);
-  tail.geometry.translate(0, 0.02, -1.16);
+  tail.geometry.translate(0, 0.02, -0.94);
   tail.castShadow = true;
   koi.add(tail);
 
@@ -440,12 +427,12 @@ const koi = new THREE.Group();
   const eyeMat = new THREE.MeshStandardMaterial({ color: 0x14181a, roughness: 0.3 });
   for (const side of [-1, 1]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), eyeMat);
-    eye.position.set(side * 0.12, 0.05, 0.86);
+    eye.position.set(side * 0.12, 0.05, 0.76);
     koi.add(eye);
   }
 }
 koi.position.set(0, -1.15, 0);
-koi.scale.setScalar(1.15);
+koi.scale.setScalar(0.72);
 underGroup.add(koi);
 
 /* ————————————————— lily pads + lotus ————————————————— */
@@ -674,43 +661,64 @@ function updateDragonfly(d, t, dt) {
 
 /* ————————————————— food pellets ————————————————— */
 const pellets = [];
-const pelletCluster = { x: 2.2, z: 1.4, drift: Math.random() * 6 };
+function glowTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d");
+  const grad = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+  grad.addColorStop(0, "rgba(255, 214, 140, 0.9)");
+  grad.addColorStop(0.35, "rgba(255, 180, 80, 0.4)");
+  grad.addColorStop(1, "rgba(255, 160, 60, 0)");
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+const glowTex = glowTexture();
+
 function spawnPellets() {
   while (pellets.length) {
     const p = pellets.pop();
-    overGroup.remove(p.mesh, p.hit);
+    overGroup.remove(p.mesh, p.hit, p.glow);
   }
-  const pelletMat = new THREE.MeshStandardMaterial({ color: 0x6b4a2f, roughness: 0.95 });
+  // well-separated spots on an ellipse biased to depth (stays on screen in portrait)
   for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2 + Math.random();
-    const r = 0.5 + Math.random() * 0.9;
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.085, 10, 8), pelletMat);
-    mesh.scale.y = 0.75;
-    mesh.castShadow = true;
+    const a = (i / 5) * Math.PI * 2 + 0.35 + (Math.random() - 0.5) * 0.3;
+    const bx = Math.cos(a) * (2.4 + Math.random() * 0.6);
+    const bz = Math.sin(a) * (3.9 + Math.random() * 0.8);
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.16, 14, 12),
+      new THREE.MeshStandardMaterial({
+        color: 0xffb545, emissive: 0xff9224, emissiveIntensity: 1.5, roughness: 0.35,
+      })
+    );
+    mesh.scale.y = 0.8;
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTex, color: 0xffc06a, transparent: true, opacity: 0.7,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    glow.scale.setScalar(1.1);
     const hit = new THREE.Mesh(
-      new THREE.SphereGeometry(0.45, 8, 6),
+      new THREE.SphereGeometry(0.6, 8, 6),
       new THREE.MeshBasicMaterial({ visible: false })
     );
-    overGroup.add(mesh, hit);
-    pellets.push({
-      mesh, hit, eaten: false,
-      ox: Math.cos(a) * r, oz: Math.sin(a) * r,
-      phase: Math.random() * 6,
-    });
+    overGroup.add(mesh, glow, hit);
+    pellets.push({ mesh, glow, hit, eaten: false, bx, bz, phase: Math.random() * 6 });
   }
 }
 spawnPellets();
 
 function updatePellets(t) {
-  pelletCluster.x = 2.2 + Math.sin(t * 0.05 + pelletCluster.drift) * 1.6;
-  pelletCluster.z = 1.4 + Math.cos(t * 0.04 + pelletCluster.drift) * 1.2;
   for (const p of pellets) {
     if (p.eaten) continue;
-    const x = pelletCluster.x + p.ox + Math.sin(t * 0.4 + p.phase) * 0.08;
-    const z = pelletCluster.z + p.oz + Math.cos(t * 0.35 + p.phase) * 0.08;
-    const y = 0.02 + Math.sin(t * 1.4 + p.phase) * 0.012;
+    const x = p.bx + Math.sin(t * 0.22 + p.phase) * 0.3;
+    const z = p.bz + Math.cos(t * 0.19 + p.phase * 1.3) * 0.25;
+    const y = 0.05 + Math.sin(t * 1.2 + p.phase) * 0.02;
     p.mesh.position.set(x, y, z);
+    p.glow.position.set(x, y + 0.06, z);
     p.hit.position.set(x, y, z);
+    const pulse = 0.9 + Math.sin(t * 2.1 + p.phase) * 0.2;
+    p.glow.scale.setScalar(1.1 * pulse);
+    p.glow.material.opacity = 0.5 + 0.25 * pulse;
   }
 }
 
@@ -759,7 +767,7 @@ function updateFish(dt, t) {
     if (k >= 1) { // gulp
       const p = fish.target;
       p.eaten = true;
-      p.mesh.visible = false; p.hit.visible = false;
+      p.mesh.visible = false; p.hit.visible = false; p.glow.visible = false;
       triggerRipple(pos.x, pos.z, 0.11);
       splash(pos.x, pos.z);
       audio.plip();
