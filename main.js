@@ -25,27 +25,27 @@ const P = {
 const STORIES = [
   {
     title: "一",
-    text: "The one who feeds me is called Mihir. He studied mathematics at IIT Delhi and writes software in Bengaluru now. He comes to this pond when the city gets loud. I let him think here. He leaves crumbs.",
+    text: "My feeder is Mihir. Mathematics at IIT Delhi, engineer at Amazon now. He thinks by this pond. The best ones need quiet.",
     links: [],
   },
   {
     title: "二",
-    text: "He was the first engineer at an ad startup, building a campaign platform out of nothing for a year. Then Amazon took him. He led eight people through moving nineteen ordering services onto new machines, and nothing went down. I watched him worry about it from here.",
+    text: "He led eight engineers and moved nineteen of Amazon's ordering services onto new infrastructure. Zero downtime. Before that, founding engineer at a startup. He builds calm out of chaos.",
     links: [],
   },
   {
     title: "三",
-    text: "From what he mutters while feeding me: Python and TypeScript for most things, React when it needs a face, AWS when it needs somewhere to live. Lately it is all agents, LangChain, MCP servers. He once fine-tuned a Llama to place YouTube ads. A llama. I am told it is not an animal.",
+    text: "Python, TypeScript, React, AWS. Lately it is agents: LangChain, MCP. He once tuned a Llama to place YouTube ads and cut placement variance by forty percent.",
     links: [],
   },
   {
     title: "四",
-    text: "His current obsession is Helio, an assistant with a split brain: half of it lives on Telegram, half in a LangGraph service, held together by 168 tests. Before that, his college thesis taught a computer to solve a Rubik's Cube with group theory. Under twenty moves, in under two seconds.",
+    text: "He is building Helio, a split-brain assistant: Telegram on one side, a LangGraph brain on the other, 168 tests deep. His thesis solved the Rubik's Cube with group theory. Under two seconds.",
     links: [{ label: "github", href: "https://github.com/Mihirokte" }],
   },
   {
     title: "五",
-    text: "That is everything I know, and I know him better than most. If you want him: mihirokte77@gmail.com, or mihirokte on GitHub and LinkedIn. Tell him the fish sent you.",
+    text: "That is all I know. Write to him. Tell him the fish sent you.",
     links: [
       { label: "email", href: "mailto:mihirokte77@gmail.com" },
       { label: "linkedin", href: "https://linkedin.com/in/mihirokte" },
@@ -504,17 +504,25 @@ const panelTitle = document.getElementById("panel-title");
 const panelText = document.getElementById("panel-text");
 const panelLinks = document.getElementById("panel-links");
 const panelProgress = document.getElementById("panel-progress");
-document.getElementById("panel-close").addEventListener("click", () => panel.classList.remove("open"));
 const eatenSet = new Set();
 STORIES.forEach(() => {
   const d = document.createElement("span");
   d.className = "dot";
   panelProgress.appendChild(d);
 });
-function openStory(story, idx) {
-  eatenSet.add(idx);
-  panelTitle.textContent = story.title;
-  panelText.textContent = story.text;
+let typeTimer = null, closeTimer = null;
+function cancelAutoClose() { clearTimeout(closeTimer); closeTimer = null; }
+panel.addEventListener("pointerenter", cancelAutoClose);
+panel.addEventListener("pointerdown", cancelAutoClose);
+
+function closePanel() {
+  clearInterval(typeTimer);
+  cancelAutoClose();
+  panel.classList.remove("open");
+}
+document.getElementById("panel-close").addEventListener("click", closePanel);
+
+function renderLinks(story) {
   panelLinks.innerHTML = "";
   for (const l of story.links) {
     const a = document.createElement("a");
@@ -522,8 +530,38 @@ function openStory(story, idx) {
     if (!l.href.startsWith("mailto:")) { a.target = "_blank"; a.rel = "noopener"; }
     panelLinks.appendChild(a);
   }
+}
+
+function openStory(story, idx) {
+  eatenSet.add(idx);
+  clearInterval(typeTimer);
+  cancelAutoClose();
+  panelTitle.textContent = story.title;
+  panelLinks.innerHTML = "";
   [...panelProgress.children].forEach((d, i) => d.classList.toggle("eaten", eatenSet.has(i)));
   panel.classList.add("open");
+
+  const finish = () => {
+    panelText.textContent = story.text;
+    renderLinks(story);
+    closeTimer = setTimeout(closePanel, story.links.length ? 4000 : 2000);
+  };
+
+  if (REDUCED) { finish(); return; }
+  panelText.innerHTML = '<span class="cursor"></span>';
+  let i = 0;
+  typeTimer = setInterval(() => {
+    i += 2;
+    if (i >= story.text.length) {
+      clearInterval(typeTimer);
+      finish();
+      return;
+    }
+    panelText.innerHTML = escapeHtml(story.text.slice(0, i)) + '<span class="cursor"></span>';
+  }, 16);
+}
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /* ————— input ————— */
@@ -540,7 +578,7 @@ canvas.addEventListener("pointerdown", (e) => {
   if (best) {
     fish.target = best;
     fish.state = "seek";
-    panel.classList.remove("open");
+    closePanel();
   } else {
     audio.drip();
   }
