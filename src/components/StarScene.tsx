@@ -136,8 +136,8 @@ export default function StarScene() {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80)
-    camera.position.set(0, 0.15, 6.6)
-    camera.lookAt(0, 0, 0)
+    camera.position.set(0, -0.35, 6.8)
+    camera.lookAt(0, 0.2, 0)
 
     const rig = new THREE.Group()
     scene.add(rig)
@@ -270,9 +270,7 @@ export default function StarScene() {
     window.addEventListener('pointerup', onUp)
     canvas.addEventListener('pointerleave', onLeave)
 
-    let visible = true
-    const io = new IntersectionObserver(([en]) => { visible = en.isIntersecting }, { threshold: 0 })
-    io.observe(wrap)
+    const visible = true // fixed background: always on screen
 
     /* ——— projection for HTML labels ——— */
     const world = new THREE.Vector3()
@@ -359,7 +357,6 @@ export default function StarScene() {
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
-      io.disconnect()
       canvas.removeEventListener('pointermove', onMove)
       canvas.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
@@ -372,7 +369,7 @@ export default function StarScene() {
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
   return (
-    <div ref={wrapRef} className="absolute inset-0" style={{ zIndex: 10 }}>
+    <div ref={wrapRef} id="webgl" aria-hidden>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" style={{ touchAction: 'pan-y' }} />
       {SECTIONS.map((sct, i) => (
         <button

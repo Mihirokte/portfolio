@@ -1,172 +1,147 @@
-import type { ReactNode } from 'react'
-import { ABOUT, ACHIEVEMENTS, CONTACT, EXPERIENCE, PROJECTS, SKILLS, TAGLINE } from '../content'
-import { PALETTE } from '../palette'
+import { useEffect } from 'react'
+import { ABOUT, ACHIEVEMENTS, CONTACT, EXPERIENCE, PROJECTS, SKILLS } from '../content'
 
-function Section({
-  id,
-  title,
-  accent,
-  children,
-}: {
-  id: string
-  title: string
-  accent: string
-  children: ReactNode
-}) {
-  return (
-    <section
-      id={id}
-      className="w-full px-[6vw] py-16 md:py-24 border-t"
-      style={{ borderColor: 'rgba(255, 248, 240, 0.12)' }}
-    >
-      <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16">
-        <h2
-          className="font-display uppercase leading-none select-none"
-          style={{ color: accent, fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
-        >
-          {title}
-        </h2>
-        <div>{children}</div>
-      </div>
-    </section>
-  )
+const FOCUS = [
+  'moving core services onto new infrastructure with zero downtime',
+  'wiring legacy systems to ai agents that diagnose faster than people',
+  'building platforms that turn days of setup into minutes',
+  'shipping tools that keep working while i sleep',
+]
+
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>('.reveal')
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          if (en.isIntersecting) {
+            en.target.classList.add('in')
+            io.unobserve(en.target)
+          }
+        }
+      },
+      { threshold: 0.15 },
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
 }
 
-const body = 'leading-relaxed text-base md:text-lg'
-const bodyColor = { color: 'rgba(255, 248, 240, 0.85)' } as const
-const dimColor = { color: 'rgba(255, 248, 240, 0.5)' } as const
-const poppins = { fontFamily: '"Poppins", sans-serif', fontWeight: 500 } as const
-
 export default function Sections() {
+  useReveal()
   return (
-    <main style={{ backgroundColor: PALETTE.space, color: PALETTE.cream }}>
-      <Section id="about" title="About" accent={PALETTE.gold}>
-        <p className="text-xl md:text-2xl mb-6" style={{ ...poppins, color: PALETTE.cream }}>
-          {TAGLINE}
-        </p>
-        {ABOUT.map((p) => (
-          <p key={p} className={`${body} mb-4`} style={bodyColor}>
-            {p}
-          </p>
-        ))}
-      </Section>
+    <main>
+      <section id="about">
+        <p className="eyebrow reveal">about</p>
+        <h2 className="glass reveal">mathematician by training, builder by habit.</h2>
+        <div className="glass reveal" style={{ padding: '28px 32px', marginTop: 24 }}>
+          {ABOUT.map((t) => (
+            <p key={t} style={{ marginBottom: 12 }}>
+              {t}
+            </p>
+          ))}
+        </div>
+      </section>
 
-      <Section id="experience" title="Work" accent={PALETTE.mint}>
-        <div className="flex flex-col gap-10">
+      <section id="focus">
+        <p className="eyebrow reveal">what i do</p>
+        <ul className="focus-list glass reveal">
+          {FOCUS.map((f, i) => (
+            <li key={f}>
+              <span className="mono">{String(i + 1).padStart(2, '0')}</span>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section id="experience">
+        <p className="eyebrow reveal">work</p>
+        <h2 className="glass reveal">where the calm under load got built.</h2>
+        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
           {EXPERIENCE.map((job) => (
-            <article key={job.company}>
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-3">
-                <h3 className="text-xl md:text-2xl" style={{ ...poppins, color: PALETTE.cream }}>
-                  {job.company}
-                </h3>
-                <span className="text-sm md:text-base" style={dimColor}>
-                  {job.role}
-                </span>
-                <span className="text-sm ml-auto" style={dimColor}>
-                  {job.when}
-                </span>
-              </div>
-              <ul className="flex flex-col gap-2">
+            <article key={job.company} className="glass-card">
+              <span className="meta">{job.when}</span>
+              <h3>
+                {job.company} <span style={{ color: 'var(--faint)', fontWeight: 500 }}>· {job.role}</span>
+              </h3>
+              <ul className="bullets">
                 {job.bullets.map((b) => (
-                  <li key={b} className={`${body} pl-5 relative`} style={bodyColor}>
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-[0.8em] h-[2px] w-3"
-                      style={{ background: PALETTE.orange }}
-                    />
-                    {b}
-                  </li>
+                  <li key={b}>{b}</li>
                 ))}
               </ul>
             </article>
           ))}
         </div>
-      </Section>
+      </section>
 
-      <Section id="skills" title="Skills" accent={PALETTE.cream}>
-        <div className="grid sm:grid-cols-2 gap-8">
+      <section id="skills">
+        <p className="eyebrow reveal">skills</p>
+        <h2 className="glass reveal">the toolkit.</h2>
+        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
           {SKILLS.map((g) => (
-            <div key={g.label}>
-              <h3 className="uppercase tracking-[0.2em] text-xs mb-3" style={dimColor}>
-                {g.label}
-              </h3>
-              <ul className="flex flex-wrap gap-2">
+            <div key={g.label} className="glass-card">
+              <span className="meta">{g.label.toLowerCase()}</span>
+              <div className="chips">
                 {g.items.map((s) => (
-                  <li
-                    key={s}
-                    className="px-3 py-1.5 rounded-full border text-sm"
-                    style={{ ...poppins, borderColor: 'rgba(157, 217, 210, 0.5)', color: PALETTE.cream }}
-                  >
+                  <span key={s} className="chip">
                     {s}
-                  </li>
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           ))}
         </div>
-      </Section>
+      </section>
 
-      <Section id="projects" title="Projects" accent={PALETTE.gold}>
-        <div className="flex flex-col gap-8">
-          {PROJECTS.map((p) => (
-            <article key={p.name}>
-              <div className="flex flex-wrap items-baseline gap-x-4 mb-2">
-                <h3 className="text-xl" style={{ ...poppins, color: PALETTE.cream }}>
-                  {p.name}
-                </h3>
-                <span className="text-sm" style={dimColor}>
-                  {p.when}
-                </span>
-              </div>
-              <p className={body} style={bodyColor}>
-                {p.blurb}
-              </p>
-              {p.link && (
-                <a
-                  href={p.link}
-                  target="_blank"
-                  rel="noopener"
-                  className="inline-block mt-2 text-sm underline underline-offset-4"
-                  style={{ color: PALETTE.mint }}
-                >
-                  github ↗
-                </a>
-              )}
-            </article>
+      <section id="projects">
+        <p className="eyebrow reveal">projects</p>
+        <h2 className="glass reveal">things built on the side.</h2>
+        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
+          {PROJECTS.map((p) =>
+            p.link ? (
+              <a key={p.name} className="glass-card" href={p.link} target="_blank" rel="noopener">
+                <span className="meta">{p.when}</span>
+                <h3>{p.name} ↗</h3>
+                <p>{p.blurb}</p>
+              </a>
+            ) : (
+              <article key={p.name} className="glass-card">
+                <span className="meta">{p.when}</span>
+                <h3>{p.name}</h3>
+                <p>{p.blurb}</p>
+              </article>
+            ),
+          )}
+        </div>
+        <div className="glass reveal" style={{ padding: '20px 24px', marginTop: 16 }}>
+          {ACHIEVEMENTS.map((a) => (
+            <p key={a} style={{ fontSize: 15, marginBottom: 6 }}>
+              {a}
+            </p>
           ))}
         </div>
-        <ul className="mt-12 flex flex-col gap-2">
-          {ACHIEVEMENTS.map((a) => (
-            <li key={a} className="text-sm md:text-base" style={dimColor}>
-              {a}
-            </li>
-          ))}
-        </ul>
-      </Section>
+      </section>
 
-      <Section id="contact" title="Say hi" accent={PALETTE.orange}>
-        <ul className="flex flex-col gap-3">
+      <section id="contact" style={{ minHeight: '70vh' }}>
+        <p className="eyebrow reveal">say hi</p>
+        <h2 className="glass reveal">let's talk.</h2>
+        <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 28 }}>
           {CONTACT.map((c) => (
-            <li key={c.label} className="flex flex-wrap items-baseline gap-x-4">
-              <span className="uppercase tracking-[0.2em] text-xs w-20" style={dimColor}>
-                {c.label}
-              </span>
-              <a
-                href={c.href}
-                target={c.href.startsWith('mailto:') ? undefined : '_blank'}
-                rel="noopener"
-                className="text-lg md:text-xl hover:underline underline-offset-4"
-                style={{ ...poppins, color: PALETTE.cream }}
-              >
-                {c.text}
-              </a>
-            </li>
+            <a
+              key={c.label}
+              className="cta"
+              href={c.href}
+              target={c.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel="noopener"
+            >
+              {c.label} <span aria-hidden>→</span>
+            </a>
           ))}
-        </ul>
-        <p className="mt-16 text-xs tracking-[0.2em] uppercase" style={{ color: 'rgba(255, 248, 240, 0.3)' }}>
-          Mihir Okte · Bengaluru
-        </p>
-      </Section>
+        </div>
+      </section>
+
+      <footer className="foot mono">mihir okte · bengaluru</footer>
     </main>
   )
 }

@@ -1,4 +1,3 @@
-export const NAME = 'MIHIR'
 export const TAGLINE = 'Software engineer at Amazon. Mathematician by training, builder by habit.'
 
 export const ABOUT = [
