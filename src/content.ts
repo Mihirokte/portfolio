@@ -70,6 +70,13 @@ export const BELT_WORDS: string[] = [...SKILLS.flatMap((g) => g.items), 'Llama-2
 export type Project = { name: string; when: string; blurb: string; link?: string }
 export const PROJECTS: Project[] = [
   {
+    name: 'Prep',
+    when: '2026 — now',
+    blurb:
+      'My personal problem gym. Coding problems run and get graded right here in the browser — no accounts, no servers — and it remembers where I left off.',
+    link: 'prep/',
+  },
+  {
     name: 'Helio',
     when: '2025 — now',
     blurb:
