@@ -6,16 +6,16 @@ import StarScene from './StarScene'
 // render order back -> front
 const TITLE_LAYERS: { color: string; desktop: number; mobile: number }[] = [
   { color: PALETTE.orange, desktop: 36, mobile: 18 },
-  { color: PALETTE.purple, desktop: 24, mobile: 12 }, // gap = background
+  { color: PALETTE.space, desktop: 24, mobile: 12 }, // gap = background
   { color: PALETTE.gold, desktop: 12, mobile: 6 },
   { color: PALETTE.cream, desktop: 0, mobile: 0 },
 ]
 
 // space, kept simple: deep purple with two faint nebula tints
 const COSMOS = [
-  'radial-gradient(900px 600px at 78% 22%, rgba(157, 217, 210, 0.13), transparent 62%)',
-  'radial-gradient(800px 700px at 18% 82%, rgba(255, 136, 17, 0.10), transparent 60%)',
-  `linear-gradient(180deg, ${PALETTE.purple} 0%, #241d3f 55%, ${PALETTE.space} 100%)`,
+  'radial-gradient(900px 600px at 78% 22%, rgba(157, 217, 210, 0.07), transparent 62%)',
+  'radial-gradient(800px 700px at 18% 82%, rgba(255, 136, 17, 0.06), transparent 60%)',
+  `linear-gradient(180deg, #0b0b14 0%, ${PALETTE.space} 60%, #000000 100%)`,
 ].join(', ')
 
 export default function Hero() {
@@ -79,7 +79,7 @@ export default function Hero() {
                   className={`font-display leading-[0.85] select-none ${isFront ? 'relative' : 'absolute inset-0'}`}
                   style={{
                     color: layer.color,
-                    fontSize: 'clamp(7.5rem, 30vw, 28rem)',
+                    fontSize: 'clamp(4.6rem, 20vw, 19rem)',
                     transform: `translateY(${y}px)`,
                   }}
                 >

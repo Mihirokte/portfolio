@@ -389,7 +389,7 @@ export default function StarScene() {
         <span
           key={w}
           ref={(el) => { beltRefs.current[j] = el }}
-          className={`belt-label ${j % 4 === 0 ? 'big' : ''}`}
+          className="belt-label"
           style={{ opacity: 0 }}
           aria-hidden
         >

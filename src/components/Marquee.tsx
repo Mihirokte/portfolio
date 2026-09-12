@@ -11,7 +11,7 @@ export default function Marquee() {
             aria-hidden={i > 0}
             className="shrink-0 uppercase select-none"
             style={{
-              fontFamily: '"Bricolage Grotesque", sans-serif', fontWeight: 800,
+              fontFamily: '"Orbitron", sans-serif', fontWeight: 900,
               color: PALETTE.purple,
               fontSize: 'clamp(2.5rem, 6vw, 5rem)',
               lineHeight: 1,

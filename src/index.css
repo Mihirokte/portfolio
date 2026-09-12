@@ -7,15 +7,15 @@ html {
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: #14102A;
+  background: #050507;
   overflow-x: hidden;
 }
 
+/* tech display face — name + section headings */
 .font-display {
-  font-family: "Bricolage Grotesque", sans-serif;
-  font-weight: 800;
-  font-variation-settings: "opsz" 96;
-  letter-spacing: -0.02em;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.02em;
 }
 
 @keyframes marquee-scroll {
@@ -37,13 +37,13 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: "Orbitron", sans-serif;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: clamp(0.8rem, 1.9vw, 1.3rem);
+  letter-spacing: 0.1em;
+  font-size: clamp(0.7rem, 1.6vw, 1.1rem);
   color: #FFF8F0;
-  text-shadow: 0 0 14px rgba(244, 208, 111, 0.55), 0 1px 2px rgba(20, 16, 42, 0.7);
+  text-shadow: 0 0 14px rgba(244, 208, 111, 0.55), 0 1px 2px rgba(0, 0, 0, 0.7);
   padding: 6px 10px;
   will-change: transform, opacity;
   transition: color 0.2s ease;
@@ -55,24 +55,20 @@ body {
   outline: none;
 }
 
+/* skill belt — thin mono, deliberately small */
 .belt-label {
   position: absolute;
   left: 0;
   top: 0;
   pointer-events: none;
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: clamp(0.56rem, 1.15vw, 0.8rem);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 300;
+  text-transform: lowercase;
+  letter-spacing: 0.06em;
+  font-size: clamp(0.42rem, 0.62vw, 0.5rem);
   color: rgba(157, 217, 210, 0.9);
   will-change: transform, opacity;
   white-space: nowrap;
-}
-.belt-label.big {
-  font-size: clamp(0.72rem, 1.6vw, 1.1rem);
-  font-weight: 800;
-  color: #9DD9D2;
 }
 
 @media (prefers-reduced-motion: reduce) {
