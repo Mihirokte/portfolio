@@ -361,6 +361,15 @@ export default function StarScene() {
 
       corona.position.copy(starCenter)
       corona.quaternion.copy(camera.quaternion)
+
+      // publish the sun's screen geometry so the hero type can lock to it
+      proj.copy(starCenter).project(camera)
+      const sunPx = (STAR_R * rig.scale.x) / (Math.tan((camera.fov * Math.PI) / 360) * (camera.position.z - starCenter.z)) * (H / 2)
+      const rootStyle = document.documentElement.style
+      rootStyle.setProperty('--sun-cx', `${((proj.x * 0.5 + 0.5) * W).toFixed(1)}px`)
+      rootStyle.setProperty('--sun-cy', `${((-proj.y * 0.5 + 0.5) * H).toFixed(1)}px`)
+      rootStyle.setProperty('--sun-r', `${sunPx.toFixed(1)}px`)
+
       renderer.render(scene, camera)
     }
     raf = requestAnimationFrame(tick)

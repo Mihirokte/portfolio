@@ -134,26 +134,47 @@ p {
   color: var(--faint);
 }
 
-/* ——— hero ——— */
+/* ——— hero: the name flanks the sun, eyebrow sits beneath it.
+   --sun-cx / --sun-cy / --sun-r are published each frame by StarScene. ——— */
+:root { --sun-cx: 50vw; --sun-cy: 45vh; --sun-r: 30vh; }
 #hero {
-  min-height: 100vh;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding-bottom: 10vh;
+  position: relative;
+  display: block;
+  min-height: 100svh;
+  padding: 0;
   max-width: none;
+  /* room beside the sun, used to size the halves so they always fit */
+  --sun-side: calc(var(--sun-cx) - var(--sun-r) - 4vw);
+  --name-size: clamp(34px, calc(var(--sun-side) / 4.3), 128px);
+  --sun-bottom: calc(var(--sun-cy) + var(--sun-r));
 }
-#hero h1 {
+.name-stack { display: contents; }
+#hero h1.half {
+  position: absolute;
+  margin: 0;
   font-family: var(--display);
   font-weight: 900;
-  font-size: clamp(52px, 10vw, 120px);
+  font-size: var(--name-size);
   letter-spacing: -0.02em;
   line-height: 0.92;
   color: var(--ink);
   text-transform: lowercase;
   text-shadow: var(--glow-strong);
+  white-space: nowrap;
+  /* baseline a few px above the eyebrow */
+  top: calc(var(--sun-bottom) + 2px);
+  transform: translateY(-100%);
 }
-#hero .tag { display: inline-block; padding: 20px 24px; margin-top: 26px; }
-#hero .tag p { font-size: clamp(15px, 1.6vw, 18px); margin: 0; }
+#hero h1.half.left { right: calc(100% - var(--sun-cx) + var(--sun-r) + 3vw); }
+#hero h1.half.right { left: calc(var(--sun-cx) + var(--sun-r) + 3vw); }
+#hero .sun-eyebrow {
+  position: absolute;
+  margin: 0;
+  left: var(--sun-cx);
+  top: calc(var(--sun-bottom) + 12px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
 
 /* ——— lists / cards ——— */
 .focus-list { list-style: none; margin: 0; padding: 0 26px; overflow: hidden; }
@@ -283,12 +304,23 @@ nav.top a.link:hover { color: var(--ink); }
 footer.foot { position: relative; z-index: 2; padding: 40px; text-align: center; }
 
 /* ——— phones ——— */
-#hero { min-height: 100svh; }
 @media (max-width: 640px) {
-  #hero { padding-bottom: calc(8vh + env(safe-area-inset-bottom)); padding-top: 80px; }
-  #hero h1 { font-size: clamp(44px, 15vw, 72px); }
-  #hero .tag { padding: 14px 16px; margin-top: 18px; }
-  #hero .tag p { font-size: 15px; }
+  /* no room beside the sun: stack the halves under it, then the eyebrow */
+  .name-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(var(--sun-bottom) + 10px);
+  }
+  #hero h1.half, #hero h1.half.left, #hero h1.half.right {
+    position: static;
+    transform: none;
+    font-size: clamp(40px, 15vw, 64px);
+    left: auto; right: auto; top: auto;
+  }
+  #hero .sun-eyebrow { position: static; transform: none; margin-top: 12px; font-size: 10px; letter-spacing: 0.3em; }
 
   h2 { font-size: 22px; }
   h2.glass { padding: 18px 20px; }

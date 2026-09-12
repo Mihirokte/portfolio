@@ -1,4 +1,3 @@
-export const TAGLINE = 'Software engineer at Amazon. Mathematician by training, builder by habit.'
 
 export const ABOUT = [
   'I studied Mathematics and Computing at IIT Delhi and now write software in Bengaluru.',
