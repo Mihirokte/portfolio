@@ -1,5 +1,4 @@
-const MARQUEE_TEXT =
-  'SPARK \u00B7 RENDER \u00B7 IGNITE \u00B7 UNFOLD \u00B7 GENESIS \u00B7 EVOLVE \u00B7 PURPOSE \u00B7 BEYOND \u00B7 '
+import { MARQUEE_TEXT } from '../content'
 
 export default function Marquee() {
   return (

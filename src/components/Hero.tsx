@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { NAME, LEFT_WORDS, RIGHT_WORDS } from '../content'
 
-const CHARACTER_SRC =
-  'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260801_104316_80b428ea-dc99-4399-afb3-8ccb7b34b2d0.png&w=1280&q=85'
-
-const LEFT_WORDS = ['spark', 'imagine', 'evolve', 'render']
-const RIGHT_WORDS = ['blaze', 'genesis', 'purpose', 'ignite']
+// Drop a transparent PNG of yourself (chest-up, centered) at
+// public/images/mihir.png — the hero hides the slot until it exists.
+const CHARACTER_SRC = `${import.meta.env.BASE_URL}images/mihir.png`
 
 // render order back -> front
 const TITLE_LAYERS: { color: string; desktop: number; mobile: number }[] = [
@@ -17,6 +16,7 @@ const TITLE_LAYERS: { color: string; desktop: number; mobile: number }[] = [
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
   const [progress, setProgress] = useState(0)
+  const [hasImage, setHasImage] = useState(true)
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false,
   )
@@ -82,7 +82,7 @@ export default function Hero() {
                     transform: `translateY(${y}px)`,
                   }}
                 >
-                  BEYOND
+                  {NAME}
                 </h1>
               )
             })}
@@ -120,14 +120,17 @@ export default function Hero() {
       </div>
 
       {/* A. character (z 10) */}
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
-        <img
-          src={CHARACTER_SRC}
-          alt=""
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-auto max-w-none block"
-          style={{ height: '115%', maxHeight: '115%', minHeight: '80%' }}
-        />
-      </div>
+      {hasImage && (
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
+          <img
+            src={CHARACTER_SRC}
+            alt=""
+            onError={() => setHasImage(false)}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-auto max-w-none block"
+            style={{ height: '115%', maxHeight: '115%', minHeight: '80%' }}
+          />
+        </div>
+      )}
     </section>
   )
 }
