@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NAME, LEFT_WORDS, RIGHT_WORDS } from '../content'
+import { PALETTE } from '../palette'
 
 // Drop a transparent PNG of yourself (chest-up, centered) at
 // public/images/mihir.png — the hero hides the slot until it exists.
@@ -7,10 +8,10 @@ const CHARACTER_SRC = `${import.meta.env.BASE_URL}images/mihir.png`
 
 // render order back -> front
 const TITLE_LAYERS: { color: string; desktop: number; mobile: number }[] = [
-  { color: '#89CFF0', desktop: 36, mobile: 18 },
-  { color: '#EC612C', desktop: 24, mobile: 12 },
-  { color: '#90EE90', desktop: 12, mobile: 6 },
-  { color: '#FFFFFF', desktop: 0, mobile: 0 },
+  { color: PALETTE.ink, desktop: 36, mobile: 18 },
+  { color: PALETTE.sky, desktop: 24, mobile: 12 }, // gap = background
+  { color: PALETTE.aqua, desktop: 12, mobile: 6 },
+  { color: PALETTE.white, desktop: 0, mobile: 0 },
 ]
 
 export default function Hero() {
@@ -59,7 +60,7 @@ export default function Hero() {
     <section
       ref={sectionRef}
       className="relative w-full overflow-hidden"
-      style={{ height: '120vh', backgroundColor: '#EC612C' }}
+      style={{ height: '120vh', backgroundColor: PALETTE.sky }}
     >
       {/* B. sticky text overlay (z 5) */}
       <div className="sticky top-0 h-screen w-full" style={{ zIndex: 5 }}>
