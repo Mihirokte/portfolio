@@ -18,17 +18,6 @@ body {
   letter-spacing: 0.02em;
 }
 
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.marquee-track {
-  display: flex;
-  white-space: nowrap;
-  animation: marquee-scroll 18s linear infinite;
-}
-
 /* star system labels — positioned each frame from 3D projections */
 .orbit-label {
   position: absolute;
@@ -71,6 +60,3 @@ body {
   white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
-}

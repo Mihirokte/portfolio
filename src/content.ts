@@ -1,12 +1,6 @@
 export const NAME = 'MIHIR'
 export const TAGLINE = 'Software engineer at Amazon. Mathematician by training, builder by habit.'
 
-export const LEFT_WORDS = ['build', 'scale', 'migrate', 'ship']
-export const RIGHT_WORDS = ['python', 'react', 'aws', 'agents']
-
-export const MARQUEE_TEXT =
-  'AMAZON \u00B7 IIT DELHI \u00B7 PYTHON \u00B7 TYPESCRIPT \u00B7 AWS \u00B7 AGENTS \u00B7 BENGALURU \u00B7 MIHIR \u00B7 '
-
 export const ABOUT = [
   'I studied Mathematics and Computing at IIT Delhi and now write software in Bengaluru.',
   'I like systems that stay calm under load and tools that work while I sleep. When the city gets loud, I think next to water.',
