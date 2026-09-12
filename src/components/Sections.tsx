@@ -101,8 +101,8 @@ export default function Sections() {
       </section>
 
       <section id="contact" style={{ minHeight: '60vh' }}>
-        <p className="eyebrow reveal">say hi</p>
-        <h2 className="glass reveal">let's talk.</h2>
+        <p className="eyebrow reveal">contact</p>
+        <h2 className="glass reveal">say hi.</h2>
         <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 24 }}>
           {CONTACT.map((c) => (
             <a
