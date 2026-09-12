@@ -3,17 +3,7 @@ import * as THREE from 'three'
 import { BELT_WORDS } from '../content'
 import { PALETTE } from '../palette'
 
-const SECTIONS = [
-  { id: 'about', label: 'About' },
-  { id: 'experience', label: 'Work' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Say hi' },
-]
-
 const STAR_R = 0.5
-const ORBIT_R = 1.45
-const ORBIT_TILT = 0.32 // rad — the "clock face" leans back slightly
 const BELT_R = [2.15, 2.65]
 
 /* ——— GLSL ——— */
@@ -132,7 +122,6 @@ const hex = (c: string) => new THREE.Color(c)
 export default function StarScene() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const titleRefs = useRef<(HTMLButtonElement | null)[]>([])
   const beltRefs = useRef<(HTMLSpanElement | null)[]>([])
 
   useEffect(() => {
@@ -258,11 +247,6 @@ export default function StarScene() {
       magnetic.add(beam)
     }
 
-    /* ——— orbiting titles (clock face) ——— */
-    const orbit = new THREE.Group()
-    orbit.rotation.x = ORBIT_TILT
-    rig.add(orbit)
-
     /* ——— word belt — flipped over the horizontal axis vs. the rock belt ——— */
     const belt = new THREE.Group()
     belt.rotation.set(0.48, 0, -0.14)
@@ -335,7 +319,7 @@ export default function StarScene() {
     const world = new THREE.Vector3()
     const proj = new THREE.Vector3()
     const starCenter = new THREE.Vector3()
-    const place = (el: HTMLElement | null, p: THREE.Vector3, kind: 'title' | 'belt') => {
+    const place = (el: HTMLElement | null, p: THREE.Vector3) => {
       if (!el) return
       star.getWorldPosition(starCenter)
       proj.copy(p).project(camera)
@@ -347,11 +331,10 @@ export default function StarScene() {
       const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
       const starPx = (STAR_R * rig.scale.x) / (Math.tan((camera.fov * Math.PI) / 360) * (camera.position.z - starCenter.z)) * (H / 2)
       const d = Math.hypot(px - sx, py - sy)
-      let opacity = depth < 0 ? (kind === 'title' ? 0.45 : 0.38) : 1
+      let opacity = depth < 0 ? 0.38 : 1
       if (depth < 0 && d < starPx * 0.98) opacity = 0
       el.style.transform = `translate(-50%, -50%) translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(${scale.toFixed(3)})`
       el.style.opacity = String(opacity)
-      el.style.pointerEvents = kind === 'title' && opacity > 0.05 ? 'auto' : 'none'
       el.style.zIndex = depth < 0 ? '1' : '3'
     }
 
@@ -388,27 +371,19 @@ export default function StarScene() {
       if (!reduced) {
         star.rotation.y = t * 0.6
         spin.rotation.y = t * 2.4                     // fast neutron-star spin sweeps the beams
-        orbit.rotation.y = -t * 0.11
         belt.rotation.y = t * 0.05
       }
       // sharp lighthouse pulse, in step with the sweep
       const ph = 0.5 + 0.5 * Math.sin(t * 2.4 * 2.0)
       uniforms.uPulse.value = reduced ? 0.5 : Math.pow(ph, 4.0)
 
-      const n = SECTIONS.length
-      for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2
-        world.set(Math.cos(a) * ORBIT_R, 0, Math.sin(a) * ORBIT_R)
-        orbit.localToWorld(world)
-        place(titleRefs.current[i], world, 'title')
-      }
       const m = BELT_WORDS.length
       for (let j = 0; j < m; j++) {
         const a = (j / m) * Math.PI * 2
         const r = j % 2 === 0 ? BELT_R[0] : BELT_R[1]
         world.set(Math.cos(a) * r, ((j % 3) - 1) * 0.09, Math.sin(a) * r)
         belt.localToWorld(world)
-        place(beltRefs.current[j], world, 'belt')
+        place(beltRefs.current[j], world)
       }
 
       corona.position.copy(starCenter)
@@ -440,22 +415,9 @@ export default function StarScene() {
     }
   }, [])
 
-  const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-
   return (
     <div ref={wrapRef} id="webgl" aria-hidden>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" style={{ touchAction: 'pan-y' }} />
-      {SECTIONS.map((sct, i) => (
-        <button
-          key={sct.id}
-          ref={(el) => { titleRefs.current[i] = el }}
-          className="orbit-label"
-          onClick={() => go(sct.id)}
-          style={{ opacity: 0 }}
-        >
-          {sct.label}
-        </button>
-      ))}
       {BELT_WORDS.map((w, j) => (
         <span
           key={w}

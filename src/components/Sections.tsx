@@ -1,12 +1,6 @@
 import { useEffect } from 'react'
-import { ABOUT, ACHIEVEMENTS, CONTACT, EXPERIENCE, PROJECTS, SKILLS } from '../content'
-
-const FOCUS = [
-  'moving core services onto new infrastructure with zero downtime',
-  'wiring legacy systems to ai agents that diagnose faster than people',
-  'building platforms that turn days of setup into minutes',
-  'shipping tools that keep working while i sleep',
-]
+import { ABOUT, ABOUT_LEDE, ACCOLADES, CONTACT, EXPERIENCE, FOCUS, PROJECTS } from '../content'
+import SkillMap from './SkillMap'
 
 function useReveal() {
   useEffect(() => {
@@ -20,7 +14,7 @@ function useReveal() {
           }
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.12 },
     )
     els.forEach((el) => io.observe(el))
     return () => io.disconnect()
@@ -33,38 +27,39 @@ export default function Sections() {
     <main>
       <section id="about">
         <p className="eyebrow reveal">about</p>
-        <h2 className="glass reveal">mathematician by training, builder by habit.</h2>
-        <div className="glass reveal" style={{ padding: '28px 32px', marginTop: 24 }}>
+        <h2 className="glass reveal">{ABOUT_LEDE}</h2>
+        <div className="glass reveal about-body">
           {ABOUT.map((t) => (
-            <p key={t} style={{ marginBottom: 12 }}>
-              {t}
-            </p>
+            <p key={t}>{t}</p>
           ))}
         </div>
-      </section>
-
-      <section id="focus">
-        <p className="eyebrow reveal">what i do</p>
-        <ul className="focus-list glass reveal">
-          {FOCUS.map((f, i) => (
-            <li key={f}>
-              <span className="mono">{String(i + 1).padStart(2, '0')}</span>
-              <span>{f}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="about-row reveal">
+          <ul className="focus-list glass">
+            {FOCUS.map((f, i) => (
+              <li key={f}>
+                <span className="mono">{String(i + 1).padStart(2, '0')}</span>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <ul className="accolades glass">
+            {ACCOLADES.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section id="experience">
         <p className="eyebrow reveal">work</p>
-        <h2 className="glass reveal">where the calm under load got built.</h2>
-        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
+        <div className="stack">
           {EXPERIENCE.map((job) => (
-            <article key={job.company} className="glass-card">
-              <span className="meta">{job.when}</span>
-              <h3>
-                {job.company} <span style={{ color: 'var(--faint)', fontWeight: 500 }}>· {job.role}</span>
-              </h3>
+            <article key={job.company} className="glass-card reveal">
+              <div className="card-head">
+                <h3>{job.company}</h3>
+                <span className="meta">{job.role}</span>
+                <span className="meta when">{job.when}</span>
+              </div>
               <ul className="bullets">
                 {job.bullets.map((b) => (
                   <li key={b}>{b}</li>
@@ -76,57 +71,39 @@ export default function Sections() {
       </section>
 
       <section id="skills">
-        <p className="eyebrow reveal">skills</p>
-        <h2 className="glass reveal">the toolkit.</h2>
-        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
-          {SKILLS.map((g) => (
-            <div key={g.label} className="glass-card">
-              <span className="meta">{g.label.toLowerCase()}</span>
-              <div className="chips">
-                {g.items.map((s) => (
-                  <span key={s} className="chip">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <p className="eyebrow reveal">toolkit</p>
+        <SkillMap />
       </section>
 
       <section id="projects">
         <p className="eyebrow reveal">projects</p>
-        <h2 className="glass reveal">things built on the side.</h2>
-        <div className="grid-cards reveal" style={{ marginTop: 24 }}>
+        <div className="stack">
           {PROJECTS.map((p) =>
             p.link ? (
-              <a key={p.name} className="glass-card" href={p.link} target="_blank" rel="noopener">
-                <span className="meta">{p.when}</span>
-                <h3>{p.name} ↗</h3>
+              <a key={p.name} className="glass-card reveal" href={p.link} target="_blank" rel="noopener">
+                <div className="card-head">
+                  <h3>{p.name} ↗</h3>
+                  <span className="meta when">{p.when}</span>
+                </div>
                 <p>{p.blurb}</p>
               </a>
             ) : (
-              <article key={p.name} className="glass-card">
-                <span className="meta">{p.when}</span>
-                <h3>{p.name}</h3>
+              <article key={p.name} className="glass-card reveal">
+                <div className="card-head">
+                  <h3>{p.name}</h3>
+                  <span className="meta when">{p.when}</span>
+                </div>
                 <p>{p.blurb}</p>
               </article>
             ),
           )}
         </div>
-        <div className="glass reveal" style={{ padding: '20px 24px', marginTop: 16 }}>
-          {ACHIEVEMENTS.map((a) => (
-            <p key={a} style={{ fontSize: 15, marginBottom: 6 }}>
-              {a}
-            </p>
-          ))}
-        </div>
       </section>
 
-      <section id="contact" style={{ minHeight: '70vh' }}>
+      <section id="contact" style={{ minHeight: '60vh' }}>
         <p className="eyebrow reveal">say hi</p>
         <h2 className="glass reveal">let's talk.</h2>
-        <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 28 }}>
+        <div className="reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 24 }}>
           {CONTACT.map((c) => (
             <a
               key={c.label}
