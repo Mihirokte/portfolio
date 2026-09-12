@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { SKILLS } from '../content'
+import { BELT_WORDS } from '../content'
 import { PALETTE } from '../palette'
 
 const SECTIONS = [
@@ -10,12 +10,11 @@ const SECTIONS = [
   { id: 'projects', label: 'Projects' },
   { id: 'contact', label: 'Say hi' },
 ]
-const BELT_SKILLS = SKILLS.flatMap((g) => g.items.slice(0, 3))
 
 const STAR_R = 1.1
 const ORBIT_R = 1.85
 const ORBIT_TILT = 0.32 // rad — the "clock face" leans back slightly
-const BELT_R = [2.45, 3.0]
+const BELT_R = [2.5, 3.05]
 
 /* ——— GLSL ——— */
 const NOISE = /* glsl */ `
@@ -27,7 +26,6 @@ const NOISE = /* glsl */ `
   }
   float fbm(vec3 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * noise(p); p = p * 2.03 + vec3(19.1, 7.3, 3.7); a *= 0.5; } return v; }
 `
-
 const STAR_VERT = /* glsl */ `
   varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
   void main() {
@@ -45,17 +43,15 @@ const STAR_FRAG = /* glsl */ `
   void main() {
     vec3 p = normalize(vPos);
     float t = uTime * 0.05;
-    // large convection cells drifting + fine granulation churning faster
     float cells = fbm(p * 3.5 + vec3(t, -t * 0.6, t * 0.3));
     float grain = fbm(p * 11.0 - vec3(t * 2.1, t * 1.4, -t));
     float g = cells * 0.7 + grain * 0.45;
-    // cooler "spots" where cells are lowest
     vec3 col = mix(uEdge * 0.55, uMid, smoothstep(0.22, 0.58, g));
     col = mix(col, uCore, smoothstep(0.58, 0.92, g));
     float ndv = max(dot(normalize(vNormal), normalize(vView)), 0.0);
-    float limb = pow(ndv, 0.6);                 // limb darkening
+    float limb = pow(ndv, 0.6);
     col *= 0.5 + 0.65 * limb;
-    col += uMid * pow(1.0 - ndv, 3.0) * 1.1;    // hot rim
+    col += uEdge * pow(1.0 - ndv, 3.0) * 1.1;
     col *= 1.0 + uFlare * 0.45;
     gl_FragColor = vec4(col, 1.0);
   }
@@ -86,14 +82,33 @@ const CORONA_FRAG = /* glsl */ `
     float rays = pow(max(0.0, streaks - 0.38), 1.6) * exp(-r * 2.0) * 1.4;
     float a = (halo * 1.4 + rays) * (1.0 + uFlare * 0.7);
     a *= smoothstep(1.0, 0.72, r);
-    a *= smoothstep(uInner - 0.04, uInner + 0.08, r);   // hollow where the star is
+    a *= smoothstep(uInner - 0.04, uInner + 0.08, r);
     gl_FragColor = vec4(uColor * a, a);
   }
 `
+/* twinkling starfield */
+const STARS_VERT = /* glsl */ `
+  attribute float aSize; attribute float aPhase;
+  uniform float uTime;
+  varying float vTwinkle;
+  void main() {
+    vTwinkle = 0.55 + 0.45 * sin(uTime * 1.4 + aPhase);
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = aSize * (300.0 / -mv.z);
+    gl_Position = projectionMatrix * mv;
+  }
+`
+const STARS_FRAG = /* glsl */ `
+  uniform vec3 uColor;
+  varying float vTwinkle;
+  void main() {
+    float d = length(gl_PointCoord - 0.5) * 2.0;
+    float a = smoothstep(1.0, 0.2, d) * vTwinkle;
+    gl_FragColor = vec4(uColor, a);
+  }
+`
 
-function hex(c: string) {
-  return new THREE.Color(c)
-}
+const hex = (c: string) => new THREE.Color(c)
 
 export default function StarScene() {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -120,20 +135,41 @@ export default function StarScene() {
     renderer.toneMappingExposure = 1.05
 
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60)
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80)
     camera.position.set(0, 0.15, 6.6)
     camera.lookAt(0, 0, 0)
 
-    const rig = new THREE.Group() // everything; drag + parallax rotate this
+    const rig = new THREE.Group()
     scene.add(rig)
 
-    /* ——— star ——— */
+    /* ——— starfield (cosmos) ——— */
+    const N = isMobile ? 700 : 1400
+    const pos = new Float32Array(N * 3), size = new Float32Array(N), phase = new Float32Array(N)
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 60
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 36
+      pos[i * 3 + 2] = -10 - Math.random() * 30
+      size[i] = 0.4 + Math.pow(Math.random(), 3) * 2.2
+      phase[i] = Math.random() * Math.PI * 2
+    }
+    const starsGeo = new THREE.BufferGeometry()
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    starsGeo.setAttribute('aSize', new THREE.BufferAttribute(size, 1))
+    starsGeo.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1))
+    const starsUniforms = { uTime: { value: 0 }, uColor: { value: hex(PALETTE.cream) } }
+    const starfield = new THREE.Points(
+      starsGeo,
+      new THREE.ShaderMaterial({ uniforms: starsUniforms, vertexShader: STARS_VERT, fragmentShader: STARS_FRAG, transparent: true, depthWrite: false }),
+    )
+    scene.add(starfield)
+
+    /* ——— the sun ——— */
     const uniforms = {
       uTime: { value: 0 },
       uFlare: { value: 0 },
-      uCore: { value: hex(PALETTE.white) },
-      uMid: { value: hex(PALETTE.aqua) },
-      uEdge: { value: hex(PALETTE.sky) },
+      uCore: { value: hex(PALETTE.cream) },
+      uMid: { value: hex(PALETTE.gold) },
+      uEdge: { value: hex(PALETTE.orange) },
     }
     const star = new THREE.Mesh(
       new THREE.SphereGeometry(STAR_R, 96, 64),
@@ -144,7 +180,7 @@ export default function StarScene() {
     const rim = new THREE.Mesh(
       new THREE.SphereGeometry(STAR_R * 1.04, 64, 48),
       new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: hex(PALETTE.aqua) }, uFlare: uniforms.uFlare },
+        uniforms: { uColor: { value: hex(PALETTE.gold) }, uFlare: uniforms.uFlare },
         vertexShader: STAR_VERT,
         fragmentShader: RIM_FRAG,
         transparent: true,
@@ -161,7 +197,7 @@ export default function StarScene() {
         uniforms: {
           uTime: uniforms.uTime,
           uFlare: uniforms.uFlare,
-          uColor: { value: hex(PALETTE.aqua).lerp(hex(PALETTE.sky), 0.35) },
+          uColor: { value: hex(PALETTE.orange).lerp(hex(PALETTE.gold), 0.5) },
           uInner: { value: (STAR_R * 2) / CORONA_SIZE },
         },
         vertexShader: CORONA_VERT,
@@ -172,39 +208,17 @@ export default function StarScene() {
       }),
     )
     corona.renderOrder = 2
-    scene.add(corona) // billboard: stays camera-facing, outside the rotating rig
-
-    /* ——— lights for the rocks (the star is the light source) ——— */
-    const starLight = new THREE.PointLight(hex(PALETTE.aqua), 40, 20, 1.6)
-    rig.add(starLight)
-    scene.add(new THREE.AmbientLight(hex(PALETTE.sky), 0.25))
+    scene.add(corona)
 
     /* ——— orbiting titles (clock face) ——— */
     const orbit = new THREE.Group()
     orbit.rotation.x = ORBIT_TILT
     rig.add(orbit)
 
-    /* ——— asteroid belt ——— */
+    /* ——— word belt — flipped over the horizontal axis vs. the rock belt ——— */
     const belt = new THREE.Group()
-    belt.rotation.set(-0.48, 0, 0.14)
+    belt.rotation.set(0.48, 0, -0.14)
     rig.add(belt)
-    const ROCKS = isMobile ? 420 : 820
-    const rockGeo = new THREE.IcosahedronGeometry(1, 0)
-    const rockMat = new THREE.MeshStandardMaterial({ color: hex(PALETTE.steel), roughness: 0.95, metalness: 0.05, flatShading: true })
-    const rocks = new THREE.InstancedMesh(rockGeo, rockMat, ROCKS)
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3()
-    for (let i = 0; i < ROCKS; i++) {
-      const a = Math.random() * Math.PI * 2
-      const r = BELT_R[0] + Math.random() * (BELT_R[1] - BELT_R[0])
-      v.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.16, Math.sin(a) * r)
-      e.set(Math.random() * 6, Math.random() * 6, Math.random() * 6)
-      q.setFromEuler(e)
-      const sc = 0.012 + Math.pow(Math.random(), 2.2) * 0.06
-      s.set(sc, sc * (0.7 + Math.random() * 0.6), sc)
-      m.compose(v, q, s)
-      rocks.setMatrixAt(i, m)
-    }
-    belt.add(rocks)
 
     /* ——— sizing ——— */
     let W = 1, H = 1
@@ -214,7 +228,6 @@ export default function StarScene() {
       renderer.setSize(W, H, false)
       camera.aspect = W / H
       camera.updateProjectionMatrix()
-      // keep the belt on screen in portrait
       const fit = Math.min(1, (W / H) / 1.25)
       rig.scale.setScalar(0.92 * fit + 0.08)
     }
@@ -249,12 +262,7 @@ export default function StarScene() {
       hover = hit ? 1 : 0
       canvas.style.cursor = drag.on ? 'grabbing' : hit ? 'grab' : 'default'
     }
-    const onDown = (ev: PointerEvent) => {
-      drag.on = true
-      drag.lastX = ev.clientX
-      drag.lastY = ev.clientY
-      drag.vy = drag.vx = 0
-    }
+    const onDown = (ev: PointerEvent) => { drag.on = true; drag.lastX = ev.clientX; drag.lastY = ev.clientY; drag.vy = drag.vx = 0 }
     const onUp = () => { drag.on = false; canvas.style.cursor = hover ? 'grab' : 'default' }
     const onLeave = () => { pointer.active = false; hover = 0 }
     canvas.addEventListener('pointermove', onMove)
@@ -262,34 +270,31 @@ export default function StarScene() {
     window.addEventListener('pointerup', onUp)
     canvas.addEventListener('pointerleave', onLeave)
 
-    /* ——— only render while the hero is on screen ——— */
     let visible = true
     const io = new IntersectionObserver(([en]) => { visible = en.isIntersecting }, { threshold: 0 })
     io.observe(wrap)
 
-    /* ——— projection helpers for HTML labels ——— */
+    /* ——— projection for HTML labels ——— */
     const world = new THREE.Vector3()
     const proj = new THREE.Vector3()
     const starCenter = new THREE.Vector3()
-    const place = (el: HTMLElement | null, pos: THREE.Vector3, kind: 'title' | 'belt') => {
+    const place = (el: HTMLElement | null, p: THREE.Vector3, kind: 'title' | 'belt') => {
       if (!el) return
-      proj.copy(pos).project(camera)
+      star.getWorldPosition(starCenter)
+      proj.copy(p).project(camera)
       const px = (proj.x * 0.5 + 0.5) * W
       const py = (-proj.y * 0.5 + 0.5) * H
-      // depth: things farther than the star center read smaller + dimmer
-      const depth = pos.z - starCenter.z // + toward camera
-      const scale = THREE.MathUtils.clamp(1 + depth * 0.13, 0.72, 1.22)
-      // occluded by the star disc when behind it
-      star.getWorldPosition(starCenter)
+      const depth = p.z - starCenter.z
+      const scale = THREE.MathUtils.clamp(1 + depth * 0.13, 0.7, 1.24)
       proj.copy(starCenter).project(camera)
       const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
       const starPx = (STAR_R * rig.scale.x) / (Math.tan((camera.fov * Math.PI) / 360) * (camera.position.z - starCenter.z)) * (H / 2)
       const d = Math.hypot(px - sx, py - sy)
-      let opacity = depth < 0 ? (kind === 'title' ? 0.45 : 0.4) : 1
+      let opacity = depth < 0 ? (kind === 'title' ? 0.45 : 0.38) : 1
       if (depth < 0 && d < starPx * 0.98) opacity = 0
       el.style.transform = `translate(-50%, -50%) translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(${scale.toFixed(3)})`
       el.style.opacity = String(opacity)
-      el.style.pointerEvents = opacity > 0.05 ? 'auto' : 'none'
+      el.style.pointerEvents = kind === 'title' && opacity > 0.05 ? 'auto' : 'none'
       el.style.zIndex = depth < 0 ? '1' : '3'
     }
 
@@ -303,8 +308,8 @@ export default function StarScene() {
       const dt = Math.min(0.05, clock.getDelta())
       const t = clock.elapsedTime
       uniforms.uTime.value = reduced ? 20 : t
+      starsUniforms.uTime.value = reduced ? 0 : t
 
-      // proximity + hover -> flare
       let prox = 0
       if (pointer.active) {
         const dx = pointer.x - 0.5, dy = pointer.y - 0.5
@@ -313,24 +318,22 @@ export default function StarScene() {
       const targetFlare = prox * 0.55 + hover * 0.6
       flare += (targetFlare - flare) * Math.min(1, 5 * dt)
       uniforms.uFlare.value = flare
-      starLight.intensity = 40 + flare * 30
 
-      // inertia after drag
       if (!drag.on) { drag.vy *= 0.92; drag.vx *= 0.92; dragY += drag.vy; dragX = THREE.MathUtils.clamp(dragX + drag.vx, -0.6, 0.6) }
 
-      // parallax toward the pointer
       const px = pointer.active ? (pointer.x - 0.5) : 0
       const py = pointer.active ? (pointer.y - 0.5) : 0
       rig.rotation.y += ((px * 0.35 + dragY) - rig.rotation.y) * Math.min(1, 4 * dt)
       rig.rotation.x += ((py * 0.18 + dragX) - rig.rotation.x) * Math.min(1, 4 * dt)
+      starfield.rotation.y = rig.rotation.y * 0.15 // distant stars drift less: parallax
+      starfield.rotation.x = rig.rotation.x * 0.15
 
       if (!reduced) {
         star.rotation.y = t * 0.03
         orbit.rotation.y = -t * 0.11
-        belt.rotation.y = t * 0.045
+        belt.rotation.y = t * 0.05
       }
 
-      // titles: clock hands
       const n = SECTIONS.length
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2
@@ -338,17 +341,16 @@ export default function StarScene() {
         orbit.localToWorld(world)
         place(titleRefs.current[i], world, 'title')
       }
-      // skills: riding the belt
-      const mcount = BELT_SKILLS.length
-      const midR = (BELT_R[0] + BELT_R[1]) / 2
-      for (let j = 0; j < mcount; j++) {
-        const a = (j / mcount) * Math.PI * 2
-        world.set(Math.cos(a) * midR, ((j % 3) - 1) * 0.07, Math.sin(a) * midR)
+      const m = BELT_WORDS.length
+      for (let j = 0; j < m; j++) {
+        const a = (j / m) * Math.PI * 2
+        const r = j % 2 === 0 ? BELT_R[0] : BELT_R[1]
+        world.set(Math.cos(a) * r, ((j % 3) - 1) * 0.09, Math.sin(a) * r)
         belt.localToWorld(world)
         place(beltRefs.current[j], world, 'belt')
       }
 
-      corona.position.copy(star.getWorldPosition(starCenter))
+      corona.position.copy(starCenter)
       corona.quaternion.copy(camera.quaternion)
       renderer.render(scene, camera)
     }
@@ -363,8 +365,7 @@ export default function StarScene() {
       window.removeEventListener('pointerup', onUp)
       canvas.removeEventListener('pointerleave', onLeave)
       renderer.dispose()
-      rockGeo.dispose()
-      rockMat.dispose()
+      starsGeo.dispose()
     }
   }, [])
 
@@ -384,9 +385,15 @@ export default function StarScene() {
           {sct.label}
         </button>
       ))}
-      {BELT_SKILLS.map((sk, j) => (
-        <span key={sk} ref={(el) => { beltRefs.current[j] = el }} className="belt-label" style={{ opacity: 0 }} aria-hidden>
-          {sk}
+      {BELT_WORDS.map((w, j) => (
+        <span
+          key={w}
+          ref={(el) => { beltRefs.current[j] = el }}
+          className={`belt-label ${j % 4 === 0 ? 'big' : ''}`}
+          style={{ opacity: 0 }}
+          aria-hidden
+        >
+          {w}
         </span>
       ))}
     </div>

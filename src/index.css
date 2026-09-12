@@ -7,7 +7,7 @@ html {
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: #03191E;
+  background: #14102A;
   overflow-x: hidden;
 }
 
@@ -42,8 +42,8 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: clamp(0.8rem, 1.9vw, 1.3rem);
-  color: #ffffff;
-  text-shadow: 0 0 14px rgba(89, 248, 232, 0.55), 0 1px 2px rgba(3, 25, 30, 0.6);
+  color: #FFF8F0;
+  text-shadow: 0 0 14px rgba(244, 208, 111, 0.55), 0 1px 2px rgba(20, 16, 42, 0.7);
   padding: 6px 10px;
   will-change: transform, opacity;
   transition: color 0.2s ease;
@@ -51,7 +51,7 @@ body {
 }
 .orbit-label:hover,
 .orbit-label:focus-visible {
-  color: #59F8E8;
+  color: #F4D06F;
   outline: none;
 }
 
@@ -61,13 +61,18 @@ body {
   top: 0;
   pointer-events: none;
   font-family: "Poppins", sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: clamp(0.48rem, 1vw, 0.66rem);
-  color: rgba(193, 207, 218, 0.85);
+  font-size: clamp(0.56rem, 1.15vw, 0.8rem);
+  color: rgba(157, 217, 210, 0.9);
   will-change: transform, opacity;
   white-space: nowrap;
+}
+.belt-label.big {
+  font-size: clamp(0.72rem, 1.6vw, 1.1rem);
+  font-weight: 800;
+  color: #9DD9D2;
 }
 
 @media (prefers-reduced-motion: reduce) {

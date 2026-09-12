@@ -17,7 +17,7 @@ function Section({
     <section
       id={id}
       className="w-full px-[6vw] py-16 md:py-24 border-t"
-      style={{ borderColor: 'rgba(193, 207, 218, 0.12)' }}
+      style={{ borderColor: 'rgba(255, 248, 240, 0.12)' }}
     >
       <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16">
         <h2
@@ -33,15 +33,15 @@ function Section({
 }
 
 const body = 'leading-relaxed text-base md:text-lg'
-const bodyColor = { color: 'rgba(193, 207, 218, 0.85)' } as const
-const dimColor = { color: 'rgba(193, 207, 218, 0.5)' } as const
+const bodyColor = { color: 'rgba(255, 248, 240, 0.85)' } as const
+const dimColor = { color: 'rgba(255, 248, 240, 0.5)' } as const
 const poppins = { fontFamily: '"Poppins", sans-serif', fontWeight: 500 } as const
 
 export default function Sections() {
   return (
-    <main style={{ backgroundColor: PALETTE.ink, color: PALETTE.white }}>
-      <Section id="about" title="About" accent={PALETTE.sky}>
-        <p className="text-xl md:text-2xl mb-6" style={{ ...poppins, color: PALETTE.white }}>
+    <main style={{ backgroundColor: PALETTE.space, color: PALETTE.cream }}>
+      <Section id="about" title="About" accent={PALETTE.gold}>
+        <p className="text-xl md:text-2xl mb-6" style={{ ...poppins, color: PALETTE.cream }}>
           {TAGLINE}
         </p>
         {ABOUT.map((p) => (
@@ -51,12 +51,12 @@ export default function Sections() {
         ))}
       </Section>
 
-      <Section id="experience" title="Work" accent={PALETTE.aqua}>
+      <Section id="experience" title="Work" accent={PALETTE.mint}>
         <div className="flex flex-col gap-10">
           {EXPERIENCE.map((job) => (
             <article key={job.company}>
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-3">
-                <h3 className="text-xl md:text-2xl" style={{ ...poppins, color: PALETTE.white }}>
+                <h3 className="text-xl md:text-2xl" style={{ ...poppins, color: PALETTE.cream }}>
                   {job.company}
                 </h3>
                 <span className="text-sm md:text-base" style={dimColor}>
@@ -72,7 +72,7 @@ export default function Sections() {
                     <span
                       aria-hidden
                       className="absolute left-0 top-[0.8em] h-[2px] w-3"
-                      style={{ background: PALETTE.crimson }}
+                      style={{ background: PALETTE.orange }}
                     />
                     {b}
                   </li>
@@ -83,7 +83,7 @@ export default function Sections() {
         </div>
       </Section>
 
-      <Section id="skills" title="Skills" accent={PALETTE.steel}>
+      <Section id="skills" title="Skills" accent={PALETTE.cream}>
         <div className="grid sm:grid-cols-2 gap-8">
           {SKILLS.map((g) => (
             <div key={g.label}>
@@ -95,7 +95,7 @@ export default function Sections() {
                   <li
                     key={s}
                     className="px-3 py-1.5 rounded-full border text-sm"
-                    style={{ ...poppins, borderColor: 'rgba(32, 164, 243, 0.45)', color: PALETTE.steel }}
+                    style={{ ...poppins, borderColor: 'rgba(157, 217, 210, 0.5)', color: PALETTE.cream }}
                   >
                     {s}
                   </li>
@@ -106,12 +106,12 @@ export default function Sections() {
         </div>
       </Section>
 
-      <Section id="projects" title="Projects" accent={PALETTE.sky}>
+      <Section id="projects" title="Projects" accent={PALETTE.gold}>
         <div className="flex flex-col gap-8">
           {PROJECTS.map((p) => (
             <article key={p.name}>
               <div className="flex flex-wrap items-baseline gap-x-4 mb-2">
-                <h3 className="text-xl" style={{ ...poppins, color: PALETTE.white }}>
+                <h3 className="text-xl" style={{ ...poppins, color: PALETTE.cream }}>
                   {p.name}
                 </h3>
                 <span className="text-sm" style={dimColor}>
@@ -127,7 +127,7 @@ export default function Sections() {
                   target="_blank"
                   rel="noopener"
                   className="inline-block mt-2 text-sm underline underline-offset-4"
-                  style={{ color: PALETTE.aqua }}
+                  style={{ color: PALETTE.mint }}
                 >
                   github ↗
                 </a>
@@ -144,7 +144,7 @@ export default function Sections() {
         </ul>
       </Section>
 
-      <Section id="contact" title="Say hi" accent={PALETTE.crimson}>
+      <Section id="contact" title="Say hi" accent={PALETTE.orange}>
         <ul className="flex flex-col gap-3">
           {CONTACT.map((c) => (
             <li key={c.label} className="flex flex-wrap items-baseline gap-x-4">
@@ -156,14 +156,14 @@ export default function Sections() {
                 target={c.href.startsWith('mailto:') ? undefined : '_blank'}
                 rel="noopener"
                 className="text-lg md:text-xl hover:underline underline-offset-4"
-                style={{ ...poppins, color: PALETTE.white }}
+                style={{ ...poppins, color: PALETTE.cream }}
               >
                 {c.text}
               </a>
             </li>
           ))}
         </ul>
-        <p className="mt-16 text-xs tracking-[0.2em] uppercase" style={{ color: 'rgba(193, 207, 218, 0.3)' }}>
+        <p className="mt-16 text-xs tracking-[0.2em] uppercase" style={{ color: 'rgba(255, 248, 240, 0.3)' }}>
           Mihir Okte · Bengaluru
         </p>
       </Section>

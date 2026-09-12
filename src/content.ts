@@ -63,6 +63,16 @@ export const SKILLS: SkillGroup[] = [
   { label: 'AI & Agents', items: ['LangChain', 'MCP', 'Context engineering', 'Claude Code', 'Cursor', 'Kiro'] },
 ]
 
+/** Every skill plus every other keyword on the page — rides the belt as text. */
+export const BELT_WORDS: string[] = Array.from(
+  new Set([
+    ...SKILLS.flatMap((g) => g.items),
+    ...LEFT_WORDS,
+    ...RIGHT_WORDS,
+    'Amazon', 'IIT Delhi', 'Bengaluru', 'agents', 'zero downtime', 'LLMs', 'mathematics',
+  ].map((w) => w.toLowerCase())),
+)
+
 export type Project = { name: string; when: string; blurb: string; link?: string }
 export const PROJECTS: Project[] = [
   {

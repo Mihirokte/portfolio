@@ -5,11 +5,18 @@ import StarScene from './StarScene'
 
 // render order back -> front
 const TITLE_LAYERS: { color: string; desktop: number; mobile: number }[] = [
-  { color: PALETTE.ink, desktop: 36, mobile: 18 },
-  { color: PALETTE.sky, desktop: 24, mobile: 12 }, // gap = background
-  { color: PALETTE.aqua, desktop: 12, mobile: 6 },
-  { color: PALETTE.white, desktop: 0, mobile: 0 },
+  { color: PALETTE.orange, desktop: 36, mobile: 18 },
+  { color: PALETTE.purple, desktop: 24, mobile: 12 }, // gap = background
+  { color: PALETTE.gold, desktop: 12, mobile: 6 },
+  { color: PALETTE.cream, desktop: 0, mobile: 0 },
 ]
+
+// space, kept simple: deep purple with two faint nebula tints
+const COSMOS = [
+  'radial-gradient(900px 600px at 78% 22%, rgba(157, 217, 210, 0.13), transparent 62%)',
+  'radial-gradient(800px 700px at 18% 82%, rgba(255, 136, 17, 0.10), transparent 60%)',
+  `linear-gradient(180deg, ${PALETTE.purple} 0%, #241d3f 55%, ${PALETTE.space} 100%)`,
+].join(', ')
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -56,7 +63,7 @@ export default function Hero() {
     <section
       ref={sectionRef}
       className="relative w-full overflow-hidden"
-      style={{ height: '120vh', backgroundColor: PALETTE.sky }}
+      style={{ height: '120vh', background: COSMOS }}
     >
       {/* sticky overlay: title + words (z 5) with the star system on top (z 10) */}
       <div className="sticky top-0 h-screen w-full" style={{ zIndex: 5 }}>
@@ -89,14 +96,14 @@ export default function Hero() {
         >
           <div className="flex flex-col gap-1 md:gap-2">
             {LEFT_WORDS.map((w, i) => (
-              <span key={w} className="uppercase text-white/80 select-none" style={wordStyle(-offset(i))}>
+              <span key={w} className="uppercase text-[#FFF8F0]/80 select-none" style={wordStyle(-offset(i))}>
                 {w}
               </span>
             ))}
           </div>
           <div className="flex flex-col gap-1 md:gap-2 items-end">
             {RIGHT_WORDS.map((w, i) => (
-              <span key={w} className="uppercase text-white/80 select-none text-right" style={wordStyle(offset(i))}>
+              <span key={w} className="uppercase text-[#FFF8F0]/80 select-none text-right" style={wordStyle(offset(i))}>
                 {w}
               </span>
             ))}
