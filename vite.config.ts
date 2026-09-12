@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 // publishes the committed `docs/` folder on `main`.
 export default defineConfig({
   base: '/portfolio/',
-  build: { outDir: 'docs', emptyOutDir: true },
+  build: {
+    outDir: 'docs',
+    emptyOutDir: true,
+    rollupOptions: { output: { manualChunks: { three: ['three'] } } },
+  },
   plugins: [react(), tailwindcss()],
 })

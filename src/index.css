@@ -11,9 +11,11 @@ body {
   overflow-x: hidden;
 }
 
-.font-bamboly {
-  font-family: "Bamboly Demo", sans-serif;
-  letter-spacing: 0.02em;
+.font-display {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 800;
+  font-variation-settings: "opsz" 96;
+  letter-spacing: -0.02em;
 }
 
 @keyframes marquee-scroll {
@@ -25,4 +27,49 @@ body {
   display: flex;
   white-space: nowrap;
   animation: marquee-scroll 18s linear infinite;
+}
+
+/* star system labels — positioned each frame from 3D projections */
+.orbit-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(0.8rem, 1.9vw, 1.3rem);
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(89, 248, 232, 0.55), 0 1px 2px rgba(3, 25, 30, 0.6);
+  padding: 6px 10px;
+  will-change: transform, opacity;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+.orbit-label:hover,
+.orbit-label:focus-visible {
+  color: #59F8E8;
+  outline: none;
+}
+
+.belt-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: clamp(0.48rem, 1vw, 0.66rem);
+  color: rgba(193, 207, 218, 0.85);
+  will-change: transform, opacity;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
 }

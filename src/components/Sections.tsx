@@ -21,7 +21,7 @@ function Section({
     >
       <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_2fr] gap-8 md:gap-16">
         <h2
-          className="font-bamboly uppercase leading-none select-none"
+          className="font-display uppercase leading-none select-none"
           style={{ color: accent, fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
         >
           {title}
