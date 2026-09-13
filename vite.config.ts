@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 // publishes the committed `docs/` folder on `main`.
 // Two pages: the portfolio itself (/) and the prep portal (/prep/).
 export default defineConfig({
-  base: '/portfolio/',
+  base: '/',
   build: {
     outDir: 'docs',
     emptyOutDir: true,
