@@ -26,6 +26,11 @@ function statusOf(p: Progress, id: string): Status {
   return p[id]?.status ?? 'none'
 }
 
+/** Plain-text-ify the light markdown in descriptions (we render in a <pre>). */
+function mdLite(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1')
+}
+
 // ---------- dashboard --------------------------------------------------------
 
 function Dashboard({ progress }: { progress: Progress }) {
@@ -235,7 +240,7 @@ function ProblemView({
   return (
     <div className="problem-cols">
       <div className="problem-desc">
-        <pre className="desc">{problem.description_md}</pre>
+        <pre className="desc">{mdLite(problem.description_md)}</pre>
         <p>
           <a className="ext" href={problem.link} target="_blank" rel="noopener">
             open on LeetCode ↗
@@ -253,8 +258,18 @@ function ProblemView({
       <div className="problem-code">
         <Editor key={problem.id} initial={code} onChange={setCode} />
         <div className="row gap run-row">
-          <button className="cta run" onClick={run} disabled={running || judgeState === 'failed'}>
-            {running ? 'running…' : judgeState === 'booting' ? 'run (python loading…)' : 'run tests'}
+          <button
+            className="cta run"
+            onClick={run}
+            disabled={running || judgeState !== 'ready'}
+          >
+            {running
+              ? 'running…'
+              : judgeState === 'booting'
+                ? 'loading python… (first visit takes a few seconds)'
+                : judgeState === 'failed'
+                  ? 'python failed to load'
+                  : 'run tests'}
           </button>
           <button
             className="chip"

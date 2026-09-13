@@ -7,12 +7,18 @@ type Pending = {
   timer: ReturnType<typeof setTimeout>
 }
 
-/** Wraps the Pyodide worker. Timeout = terminate + respawn (works even when
- * user code is stuck in an infinite loop — no SharedArrayBuffer needed). */
+const BOOT_BUDGET_MS = 120_000 // first visit downloads the Python runtime (~10 MB)
+
+/** Wraps the Pyodide worker. The execution timeout only starts AFTER the
+ * runtime is booted; timeout = terminate + respawn (works even when user
+ * code is stuck in an infinite loop — no SharedArrayBuffer needed). */
 export class Judge {
   private worker: Worker | null = null
   private pending = new Map<string, Pending>()
   private seq = 0
+  private ready: Promise<void> = Promise.resolve()
+  private readyOk: (() => void) | null = null
+  private readyFail: ((e: Error) => void) | null = null
   state: JudgeState = 'booting'
   onState: (s: JudgeState) => void = () => {}
 
@@ -21,20 +27,29 @@ export class Judge {
     this.spawn()
   }
 
+  private setState(s: JudgeState): void {
+    this.state = s
+    this.onState(s)
+  }
+
   private spawn(): void {
-    this.state = 'booting'
-    this.onState(this.state)
+    this.setState('booting')
+    this.ready = new Promise<void>((ok, fail) => {
+      this.readyOk = ok
+      this.readyFail = fail
+    })
+    this.ready.catch(() => {}) // avoid unhandled rejection when nobody awaits
     this.worker = new Worker(`${import.meta.env.BASE_URL}prep/judge-worker.js`)
     this.worker.onmessage = (e: MessageEvent) => {
       const msg = e.data
       if (msg.type === 'ready') {
-        this.state = 'ready'
-        this.onState(this.state)
+        this.setState('ready')
+        this.readyOk?.()
         return
       }
       if (msg.type === 'boot_error') {
-        this.state = 'failed'
-        this.onState(this.state)
+        this.setState('failed')
+        this.readyFail?.(new Error(msg.message as string))
         return
       }
       const p = this.pending.get(msg.id)
@@ -46,8 +61,25 @@ export class Judge {
     }
   }
 
-  run(code: string, problem: Problem, timeoutMs = 15000): Promise<RunOutcome> {
+  async run(code: string, problem: Problem, timeoutMs = 15000): Promise<RunOutcome> {
     this.start()
+    // Wait for the runtime itself first — booting is not the user's code.
+    try {
+      await Promise.race([
+        this.ready,
+        new Promise<never>((_, rej) =>
+          setTimeout(() => rej(new Error('boot budget exceeded')), BOOT_BUDGET_MS),
+        ),
+      ])
+    } catch (e) {
+      return {
+        status: 'error',
+        message:
+          'The Python runtime could not load (' +
+          (e instanceof Error ? e.message : String(e)) +
+          '). Check your connection and reload the page.',
+      }
+    }
     const id = String(++this.seq)
     return new Promise<RunOutcome>((resolve) => {
       const timer = setTimeout(() => {
