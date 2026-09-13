@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prep": "vite build -c vite.prep.config.ts",
+    "deploy:prep": "npm run build:prep && node scripts/deploy-prep.mjs"
   },
   "dependencies": {
     "@codemirror/lang-python": "6.2.1",

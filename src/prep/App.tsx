@@ -75,7 +75,7 @@ function Dashboard({ progress }: { progress: Progress }) {
             if (f) importProgress(f).then(() => window.location.reload())
           }}
         />
-        <a className="cta" href={`${import.meta.env.BASE_URL}`}>
+        <a className="cta" href={import.meta.env.VITE_HOME_URL ?? import.meta.env.BASE_URL}>
           ← portfolio
         </a>
       </div>
