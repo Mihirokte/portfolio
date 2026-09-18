@@ -38,8 +38,8 @@ const STAR_FRAG = /* glsl */ `
     vec3 col = mix(uMid, uCore, smoothstep(0.3, 0.8, g));
     float ndv = max(dot(normalize(vNormal), normalize(vView)), 0.0);
     col = mix(col, uCore, 0.35);                  // nearly white overall
-    col += uCore * pow(1.0 - ndv, 2.0) * 1.6;     // blazing limb
-    col *= 1.2 + uPulse * 1.1 + uFlare * 0.4;
+    col += uEdge * pow(1.0 - ndv, 2.0) * 1.1;     // blue limb
+    col *= 0.78 + uPulse * 0.55 + uFlare * 0.3;
     gl_FragColor = vec4(col, 1.0);
   }
 `
@@ -49,7 +49,7 @@ const RIM_FRAG = /* glsl */ `
   void main() {
     float f = pow(1.0 - max(dot(normalize(vNormal), normalize(vView)), 0.0), 2.2);
     f *= 1.0 + uFlare * 0.8 + uPulse * 1.2;
-    gl_FragColor = vec4(uColor * f * 1.5, f);
+    gl_FragColor = vec4(uColor * f * 0.9, f * 0.8);
   }
 `
 const CORONA_VERT = /* glsl */ `
@@ -67,7 +67,7 @@ const CORONA_FRAG = /* glsl */ `
     float streaks = fbm(vec3(cos(ang) * 2.2, sin(ang) * 2.2, r * 3.0 - uTime * 0.12));
     float halo = exp(-r * 3.4) * (0.7 + 0.6 * streaks);
     float rays = pow(max(0.0, streaks - 0.38), 1.6) * exp(-r * 2.0) * 1.4;
-    float a = (halo * 1.4 + rays) * (1.0 + uFlare * 0.7 + uPulse * 0.9);
+    float a = (halo * 0.9 + rays * 0.7) * (1.0 + uFlare * 0.5 + uPulse * 0.6);
     a *= smoothstep(1.0, 0.72, r);
     a *= smoothstep(uInner - 0.04, uInner + 0.08, r);
     gl_FragColor = vec4(uColor * a, a);
@@ -91,7 +91,7 @@ const BEAM_FRAG = /* glsl */ `
     float along = vUv.y;                                   // 0 at the star, 1 at the tip
     float fade = pow(1.0 - along, 1.7);
     float edge = pow(max(dot(normalize(vN), normalize(vV)), 0.0), 1.4);
-    float a = fade * edge * (0.25 + 0.75 * uPulse) * 0.9;
+    float a = fade * edge * (0.2 + 0.8 * uPulse) * 0.6;
     gl_FragColor = vec4(uColor * a, a);
   }
 `
@@ -140,7 +140,7 @@ export default function StarScene() {
     }
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isMobile ? 1.5 : 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.05
+    renderer.toneMappingExposure = 0.82
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80)
@@ -176,9 +176,9 @@ export default function StarScene() {
       uTime: { value: 0 },
       uFlare: { value: 0 },
       uPulse: { value: 0 },
-      uCore: { value: hex(PALETTE.cream) },
-      uMid: { value: hex(PALETTE.gold) },
-      uEdge: { value: hex(PALETTE.orange) },
+      uCore: { value: hex(PALETTE.starCore) },
+      uMid: { value: hex(PALETTE.starMid) },
+      uEdge: { value: hex(PALETTE.starEdge) },
     }
     const star = new THREE.Mesh(
       new THREE.SphereGeometry(STAR_R, 96, 64),
@@ -189,7 +189,7 @@ export default function StarScene() {
     const rim = new THREE.Mesh(
       new THREE.SphereGeometry(STAR_R * 1.04, 64, 48),
       new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: hex(PALETTE.cream) }, uFlare: uniforms.uFlare, uPulse: uniforms.uPulse },
+        uniforms: { uColor: { value: hex(PALETTE.starGlow) }, uFlare: uniforms.uFlare, uPulse: uniforms.uPulse },
         vertexShader: STAR_VERT,
         fragmentShader: RIM_FRAG,
         transparent: true,
@@ -207,7 +207,7 @@ export default function StarScene() {
           uTime: uniforms.uTime,
           uFlare: uniforms.uFlare,
           uPulse: uniforms.uPulse,
-          uColor: { value: hex(PALETTE.gold).lerp(hex(PALETTE.cream), 0.35) },
+          uColor: { value: hex(PALETTE.starGlow) },
           uInner: { value: (STAR_R * 2) / CORONA_SIZE },
         },
         vertexShader: CORONA_VERT,
@@ -229,7 +229,7 @@ export default function StarScene() {
     const beamGeo = new THREE.CylinderGeometry(0.75, 0.08, BEAM_LEN, 40, 1, true)
     beamGeo.translate(0, BEAM_LEN / 2, 0)
     const beamMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: hex(PALETTE.mint).lerp(hex(PALETTE.cream), 0.45) }, uPulse: uniforms.uPulse },
+      uniforms: { uColor: { value: hex(PALETTE.starMid) }, uPulse: uniforms.uPulse },
       vertexShader: BEAM_VERT,
       fragmentShader: BEAM_FRAG,
       transparent: true,

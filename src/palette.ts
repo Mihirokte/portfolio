@@ -7,4 +7,9 @@ export const PALETTE = {
   purple: '#392F5A', // space base, marquee text
   space: '#050507', // black space / body background
   white: '#FFFFFF',
+  // the star: blue → white
+  starCore: '#FFFFFF',
+  starMid: '#CFE3FF',
+  starEdge: '#4F8CFF',
+  starGlow: '#8FB8FF',
 } as const
