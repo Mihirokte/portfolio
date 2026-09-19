@@ -95,6 +95,33 @@ Two parts of the pipeline decide quality more than the choice of vector DB does:
 - **Contextual retrieval** (Anthropic, 2024). Prepend a short LLM-generated explanation of *where a chunk came from* before embedding it, so a chunk like "revenue grew 3% this quarter" doesn't lose the company and quarter when read out of context. This cut failed retrievals by ~49%, and ~67% when combined with reranking.
 
 The honest interview line: the retriever is the product. Most RAG failures are retrieval failures, not generation failures.`,
+          deeper: `**Deeper mechanism.** The pipeline has knobs that matter far more than the vector DB brand:
+
+- **Chunking.** A common baseline is ~200–500 token chunks with ~10–15% overlap so a sentence split across a boundary still lands whole in at least one chunk. Fixed-size is the naive floor; recursive/structural splitting (respect headings, paragraphs, code blocks) beats it. Too small → each chunk lacks context; too large → the embedding averages many topics and retrieval gets fuzzy.
+- **Embedding dimensions.** Typical production models sit at 768–1536 dims (e.g. many OpenAI/open models land near 1536; 2025 Matryoshka-style embeddings let you truncate to 256–512 to save memory/latency with modest recall loss). Higher dims ≠ strictly better — they cost more RAM and ANN index time.
+- **top-k.** Retrieve k≈20–50 candidates cheaply, then **rerank** down to the 3–8 you actually put in the prompt. A cross-encoder reranker re-scores each (query, chunk) pair jointly — 10–50 ms per candidate but far more accurate than the bi-encoder that produced the initial list.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Q as Query
+    participant Bi as Bi-encoder (top-k=30)
+    participant Rr as Cross-encoder rerank
+    participant LLM
+    Q->>Bi: fast ANN search
+    Bi-->>Rr: 30 candidates
+    Rr-->>LLM: top 5 re-scored chunks
+\`\`\`
+
+**Worked example.** 2M-doc support KB. Chunk articles at 400 tokens / 60 overlap → ~2.5M chunks, embed at 1536 dims. Query flow: retrieve top-30 by cosine, rerank to top-5, prompt the model with those 5 plus the question. Contextual Retrieval (prepend an LLM-written "this chunk is from the Q3 refund-policy article" line before embedding) cut failed retrievals ~49%, and ~67% stacked with reranking (Anthropic, 2024).
+
+**The pitfall.** Teams tune the generation prompt for weeks while the real defect is that the right chunk never made it into top-k. If the answer text isn't in the retrieved context, no prompt can save it — measure recall@k *first*.
+
+**Common follow-ups**
+
+- *How do you pick chunk size?* Empirically, on your own eval set — there's no confirmed universal best. Start 300–500 tokens with overlap, measure recall@k, adjust.
+- *Why rerank if the vector search already ranks?* The bi-encoder embeds query and chunk separately; a cross-encoder reads them together, catching relevance the separate embeddings miss — but it's too slow to run on the whole corpus, only the small candidate set.
+- *Where do most RAG systems fail?* Retrieval, not generation. Evaluate the two halves separately (recall@k / MRR vs. faithfulness).
+- *(2026, fast-moving)* Embedding models and reranker choices churn fast — re-benchmark on your data before quoting a specific model or dimension.`,
         },
         {
           id: 'ai-hybrid-search',
@@ -170,6 +197,35 @@ Two things separate agents that ship from agents that thrash:
 - **Stopping conditions.** Autonomous loops don't reliably self-terminate. Set explicit max-iteration and cost caps rather than trusting the loop to stop itself.
 
 For interviews this maps onto ReAct-style "reason + act" loops if you need the academic vocabulary, though Anthropic describes the same mechanism in plainer language.`,
+          deeper: `**Deeper mechanism.** The loop is a state machine over the context window, not magic. Each iteration appends: the model's reasoning, the tool call it chose, and the tool result — then re-invokes the model on the whole growing transcript. Three forces govern whether it converges:
+
+- **Context growth.** Every observation is appended, so a 20-step loop can 10x the token count. Uncurated, this hits context rot (see the context-engineering lesson) and the agent starts ignoring early instructions.
+- **Error compounding.** If each step is 95% reliable, a 10-step chain is 0.95¹⁰ ≈ 60% end-to-end. Autonomy multiplies per-step error rates, which is why more steps is not free.
+- **Tool interface (ACI) design.** Ambiguous or overlapping tools make the model pick wrong. Anthropic's principles: simplicity, transparency (surface the plan), and treating tool defs like a human API — minimal overlap, unambiguous descriptions, error-prevention baked in (e.g. absolute paths, since relative paths broke once the agent changed directories).
+
+\`\`\`mermaid
+sequenceDiagram
+    participant M as Model
+    participant Cap as Guard (max-iter + cost cap)
+    participant T as Tool
+    M->>Cap: propose step N
+    Cap-->>M: under cap -> proceed
+    M->>T: call tool
+    T-->>M: result appended to context
+    Note over M: re-plan on full transcript, repeat
+    Cap->>M: cap hit -> force stop / checkpoint
+\`\`\`
+
+**Worked example.** A coding agent asked to "fix the failing test": plan → run tests (act) → read the traceback (observe) → open the offending file → edit → re-run tests → observe green → stop. The ACI matters: a \`run_tests\` tool that returns only pass/fail forces guesswork; one that returns the failing assertion and line lets the model act directly. Absolute paths in every tool arg prevent the classic "cwd changed, path broke" failure.
+
+**The pitfall.** Loops don't reliably self-terminate — a confused agent will retry the same broken action forever or declare victory prematurely. You must impose an explicit max-iteration count *and* a cost/token cap externally; never trust the model to stop itself.
+
+**Common follow-ups**
+
+- *ReAct vs. this?* Same mechanism — ReAct is the academic name for interleaving reasoning and acting; Anthropic just describes plan→act→observe→adjust in plainer terms.
+- *How do you stop runaway loops?* External caps: max iterations, token/cost budget, and a checkpoint that hands back to a human on high-blast-radius actions.
+- *Why do good tool descriptions matter so much?* The model routes purely on the tool schema and description; overlap or ambiguity is the single biggest driver of wrong tool calls.
+- *(2026, fast-moving)* Native "agentic" loop support in provider SDKs (server-side tool loops, computer-use) is evolving quickly — check current SDK capabilities before hand-rolling the loop.`,
         },
         {
           id: 'ai-single-vs-multi-agent',
@@ -188,6 +244,34 @@ A 2026 Anthropic/Claude post names five coordination patterns and when to use ea
 - **shared-state** — collaborative work building on each other's findings.
 
 Their recommendation: **start with the simplest pattern and evolve based on where it struggles** — never pick one because it "sounds sophisticated." And say the quiet part if asked to judge the hype — Anthropic's own line is that *"true multi-agent systems are still in their infancy."* That's a direct quote, not your opinion.`,
+          deeper: `**Deeper mechanism.** The 15x cost isn't overhead you can optimise away — it's structural. A lead agent plus N subagents means N separate context windows, each re-reading its slice of the task, each doing its own tool calls, plus the lead's synthesis pass. Where the design earns that cost:
+
+- **Context isolation.** Each subagent explores in a *clean* window and returns only a condensed 1,000–2,000 token summary. The lead never sees the subagent's messy intermediate transcript, so the lead's own context stays small and high-signal — this is the real win, not "more brains."
+- **Parallelism.** Breadth-first tasks (research 8 competitors, check 12 files) run concurrently; wall-clock time drops even as token cost rises.
+- **The failure mode.** Interdependent subtasks. If subagent B needs subagent A's output, you've serialised them *and* paid the coordination tax — worse than a single agent. Multi-agent wins only when subtasks are genuinely independent.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Lead
+    participant A as Subagent A
+    participant B as Subagent B
+    Lead->>A: bounded subtask (own context)
+    Lead->>B: bounded subtask (own context)
+    A-->>Lead: 1-2k token summary
+    B-->>Lead: 1-2k token summary
+    Note over Lead: synthesize; subagent transcripts never enter lead context
+\`\`\`
+
+**Worked example.** "Compare our pricing against 6 competitors." Single agent: sequential, 6 web trips crammed into one window that bloats and degrades by competitor 4. Multi-agent: lead spawns 6 subagents, each researches one competitor in isolation and returns a 1.5k-token digest; lead synthesizes 6 clean digests. On Anthropic's internal research eval this shape beat a single agent by 90.2% — at ~15x tokens.
+
+**The pitfall.** Reaching for multi-agent because it "sounds sophisticated" on a narrow, latency-sensitive, or tightly-coupled task. You pay 15x and get worse coordination. The 90.2% number is for *breadth-first, parallelisable* work only — quoting it for the wrong task shape is the trap.
+
+**Common follow-ups**
+
+- *When is single agent the right call?* Narrow scope, latency- or cost-sensitive, or interdependent subtasks. Start here by default.
+- *What actually justifies the 15x?* Parallelisable breadth plus context isolation — subagents return summaries so the lead's window never bloats.
+- *Which coordination pattern do you pick?* Simplest that fits: generator-verifier (quality gates), orchestrator-subagent (clear decomposition), agent teams (independent long tasks), message bus (event pipelines), shared-state (collaborative). Evolve from the simplest.
+- *(2026, fast-moving)* Anthropic's own framing is that true multi-agent systems are "in their infancy" — patterns and tooling are still churning; don't present any as settled.`,
         },
         {
           id: 'ai-hitl',
@@ -243,6 +327,39 @@ Concrete techniques for long-horizon tasks:
 - **Just-in-time retrieval** — hand the agent lightweight references (file paths, queries) and let it load data on demand, like a human using an index instead of memorising everything.
 
 One-liner: prompt engineering optimises the words in one instruction; context engineering curates a finite, degrading window at every turn, because "just add more information" loses past a point.`,
+          deeper: `**Deeper mechanism — the window budget.** Treat the context window as a fixed byte budget you allocate deliberately, not a bucket you fill. A rough allocation for a working agent turn (illustrative, tune to your model):
+
+- **System prompt + tool definitions** — stable, cacheable, keep first. ~5–15% of the budget; bloated tool schemas quietly eat this.
+- **Retrieved documents / RAG context** — variable, the biggest swing. Cap it: 3–8 reranked chunks, not 50.
+- **Message history** — grows every turn; the first thing to compact.
+- **Scratch / working state** — the current file, the plan, open bugs. Protect this.
+- **Headroom for the response** — reserve output tokens; a full window with no room to answer fails.
+
+The reason budgeting matters is **context rot**: recall degrades *within* the advertised limit because attention is O(n²) over token pairs and training skews to shorter sequences — an effective "attention budget" that depletes gradually, not a hard cliff. The verbatim principle: *"finding the smallest possible set of high-signal tokens that maximise the likelihood of some desired outcome."*
+
+**What to keep vs. drop when compacting:** keep decisions made, unresolved bugs, the current goal, and file/line anchors; drop stale tool output, superseded plans, and verbose intermediate reasoning. The whole skill of compaction is that choice.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Agent
+    participant Win as Context window
+    participant Notes as NOTES.md (external)
+    Agent->>Win: near limit -> summarize
+    Win-->>Notes: persist decisions + open bugs
+    Notes-->>Agent: reload after reset (small, high-signal)
+    Note over Agent: just-in-time retrieval for the rest
+\`\`\`
+
+**Worked example.** A coding agent 40 tool-calls into a refactor nears the limit. Compaction: summarise "migrated auth module to new API; tests X and Y still failing; do NOT touch config.ts" into ~300 tokens, write it to \`NOTES.md\`, restart from that summary plus the two files currently open. The agent keeps momentum without re-reading 40 stale observations.
+
+**The pitfall.** "Just add more context" — dumping the whole codebase, all history, every retrieved doc into one giant window. Past the effective attention budget, accuracy *drops*; the model buries your actual instruction under low-signal filler. More tokens can make it worse.
+
+**Common follow-ups**
+
+- *Isn't a bigger window the fix?* No — context rot means recall degrades before the advertised limit. Curation beats capacity.
+- *How do you handle a task longer than the window?* Compaction (summarise + restart), structured note-taking (external memory), sub-agents (isolated windows returning digests), and just-in-time retrieval (pass references, load on demand).
+- *Prompt vs. context engineering?* Prompt engineering writes one instruction well; context engineering curates the *entire* window — system prompt, tools, RAG data, history — iteratively, every turn.
+- *(2026, fast-moving)* Window sizes and prompt-caching economics keep shifting; the curation discipline holds even as the specific numbers move.`,
         },
       ],
     },
@@ -267,6 +384,39 @@ Two axes you'll be asked to design across:
 Neither substitutes for direct human inspection of real outputs, and it's not "pick one" — you need both plus the manual work.
 
 A concrete design worth having ready: for a RAG chatbot, **evaluate retrieval and generation separately** — retrieval metrics (recall@k, MRR) tell you if the right chunks came back; generation metrics (faithfulness, relevance) tell you if the model used them well. Conflating the two hides which half is broken.`,
+          deeper: `**Deeper mechanism.** Evals split along two axes you should name explicitly.
+
+*Offline vs. online:*
+- **Offline** runs pre-deploy against a fixed dataset — cheap, repeatable, gates every prompt/model change. Blind spot: only as good as dataset coverage; goes stale as real inputs drift.
+- **Online** measures live traffic — user signals (👍/👎, edits, re-asks), sampled human review, production metrics. Catches the real distribution but is slower and noisier to attribute.
+
+*Dataset construction* (the part people skip and Huyen calls the highest-value manual work): seed with **golden examples** (known-good Q/A), add **adversarial cases** (edge inputs, prompt injections), and continuously **harvest regressions** from production failures so every fixed bug becomes a permanent test. Aim for coverage of real usage, not volume.
+
+*Metrics by task:* classification → precision/recall/F1; retrieval → recall@k, MRR, nDCG; generation → faithfulness (is it grounded in context?), answer relevance, and often an LLM-judge score validated against humans.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Dev
+    participant Off as Offline eval set
+    participant Prod as Production traffic
+    Dev->>Off: run new prompt/model (gate)
+    Off-->>Dev: regression? block
+    Dev->>Prod: ship behind A/B
+    Prod-->>Dev: online signal (success/edit/thumbs)
+    Note over Dev: harvest failures back into Off
+\`\`\`
+
+**Worked example.** RAG support bot. Build 200 golden (question, expected-answer, expected-source-doc) triples. Retrieval eval: does the expected source appear in top-k? → recall@k = 0.86. Generation eval, run only on cases where retrieval succeeded: is the answer faithful to the retrieved chunk (LLM-judge + 50 human-labelled spot checks)? Splitting them reveals "generation looks 92% good but recall@5 is only 0.71" — so the fix is chunking/reranking, not the prompt.
+
+**The pitfall.** A single blended "is the answer good?" score. When it dips you can't tell if retrieval missed the doc or the model reasoned badly over a good doc — completely different fixes. Always decompose. Second pitfall: trusting offline numbers alone; they can't anticipate the live input distribution.
+
+**Common follow-ups**
+
+- *Why not just eyeball outputs?* Manual inspection is essential (highest value/ratio per Huyen) but doesn't scale — pair it with automated offline + online eval, don't replace it.
+- *How do you build the dataset?* Golden + adversarial + harvested regressions; grow it from real failures over time.
+- *Offline said +5%, online flat — why?* Offline set doesn't match production distribution; the online A/B is the real gate.
+- *How do you eval a RAG system?* Retrieval and generation separately (recall@k / MRR vs. faithfulness / relevance) so you know which half to fix.
+- *(2026, fast-moving)* Eval tooling (RAGAS, DeepEval, LangSmith, Braintrust, Phoenix) churns fast — pick by taxonomy fit, not a blog ranking, and re-check current options.`,
         },
         {
           id: 'ai-llm-as-judge',

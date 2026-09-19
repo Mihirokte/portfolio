@@ -85,6 +85,18 @@ The current discourse is an actively-forming trend, not settled doctrine, but it
 **Working rule of thumb for 2026:** default to a modular monolith. Reach for microservices only when a *specific, already-felt* pain forces it — independent team scaling (Conway's Law), genuinely independent deploy cadences, or a real per-service scaling bottleneck. Splitting a monolith into network-connected pieces that still share a database and still deploy together is not microservices; it is "a monolith with extra HTTP calls," and strictly worse.
 
 **Interview framing:** if asked "microservices or monolith," don't pick one. Name the actual forcing function — team count, deploy cadence, blast radius — and reason from there.`,
+          deeper: `**The mechanism people skip: the distributed-systems tax.** The moment a call crosses the network you inherit partial failure (the callee may have done the work but the response was lost), latency variance, the need for retries + idempotency, and the CAP trade-off. A modular monolith keeps those calls in-process, so an invocation is a function call: no serialization, no timeout tuning, one transaction, one stack trace. Microservices trade that simplicity for *independent deployability* and *independent scaling* — and if you're not cashing in on at least one of those, you paid the tax for nothing.
+
+**Concrete scenario.** A payments team runs a modular monolith with three modules: \`ledger\`, \`payouts\`, \`reconciliation\`. Reconciliation runs a nightly batch that pegs 8 CPU cores for two hours; the rest of the app is a steady 5% CPU. That's a *real* independent-scaling forcing function — you'd rather not provision the whole box for a nightly spike. So you extract \`reconciliation\` (and only that) into its own service with its own autoscaling group. \`ledger\` and \`payouts\` stay in-process because they share transactions and always deploy together. This is the correct shape: extract on a felt bottleneck, not on a diagram.
+
+**The failure mode people get wrong: the distributed monolith.** Teams split by noun (\`user-service\`, \`order-service\`, \`product-service\`), then discover every request fans out to all three and they still share one database. Now they have network hops, distributed transactions, *and* coupled deploys — every downside of microservices with none of the independence. The tell: you can't deploy one service without deploying the others, or a schema change touches three repos.
+
+**Common follow-ups**
+
+- *"When is the network hop actually worth it?"* — When a service scales, deploys, or fails on a genuinely different curve from its neighbours (the reconciliation batch above), or when a distinct team needs to own its release cadence.
+- *"How do you split a monolith safely?"* — Enforce module boundaries in-process first (Spring Modulith / Service Weaver), let them harden, then extract the module that has a proven bottleneck. Boundaries earn extraction; extraction doesn't create boundaries.
+- *"What breaks first when you go distributed too early?"* — Data consistency. A shared database across services means no service truly owns its data, so you get lock contention and hidden coupling. Each service must own its store first.
+- *"Isn't the Prime Video result proof microservices are bad?"* — No — it's one high-throughput, tightly-coupled workload where per-step orchestration and S3 hops dominated. It argues against *over*-decomposition, not against the style.`,
         },
         {
           id: 'arch-cqrs',
@@ -97,6 +109,32 @@ Fowler's own bliki is the load-bearing quote: "you can use a different model to 
 **When it wins:** read and write workloads have genuinely different shapes — writes are normalised and transactional, while reads need heavily denormalised, pre-joined views for dashboards — or read and write scale independently by orders of magnitude.
 
 **When it hurts:** most systems should not use it. It is a targeted tool for a specific asymmetry, not a default architecture. It introduces eventual consistency between the write model and the read model that every caller and every UI now has to account for. If you can't name the read/write asymmetry that forces it, you don't need it.`,
+          deeper: `**The mechanism: two models, and how the read side stays fresh.** The write model is normalised and validation-heavy — it accepts commands (\`PlaceOrder\`, \`CancelOrder\`), enforces invariants, and persists the change. The read model is one or more denormalised *projections* shaped exactly for a query ("orders per customer with totals", "today's revenue by region"), often in a different store (Postgres for writes, Elasticsearch/Redis for reads). The link between them is a *propagation* step: the write side emits a change (a domain event or a CDC stream), a projector consumes it and updates the read views. That propagation is asynchronous, which is precisely where the eventual-consistency lag lives.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant U as UI
+    participant W as Write model
+    participant P as Projector
+    participant R as Read model
+    U->>W: command (PlaceOrder)
+    W-->>U: 202 accepted
+    W->>P: OrderPlaced event
+    P->>R: update projection
+    Note over R: read view now fresh
+    U->>R: query "my orders"
+\`\`\`
+
+**Concrete scenario.** An e-commerce catalog takes ~200 writes/sec (price and stock edits) but serves ~50,000 reads/sec on product pages, many with complex filters. Writes go to a normalised Postgres schema; a projector consumes change events and maintains a flattened Elasticsearch index with pre-computed facets. Reads never touch Postgres. Read and write scale on completely independent hardware — the exact asymmetry that justifies CQRS.
+
+**The failure mode people get wrong: assuming read-after-write consistency.** A user edits their profile, the command returns 202, the UI immediately re-queries the read model — and shows the *old* value because the projector hasn't caught up (typically tens to hundreds of ms). Teams that don't design for this ship confusing "my change didn't save" bugs. Fixes: return the new value from the command directly, read from the write model for that one screen, or show an optimistic UI. You cannot pretend the lag is zero.
+
+**Common follow-ups**
+
+- *"CQRS vs event sourcing — same thing?"* — No. CQRS is separate read/write models; event sourcing is storing state as an event log. They pair well (events feed projections) but each stands alone.
+- *"Do you need two databases?"* — No. CQRS can be two models against one store. Separate stores is an optimisation for the scaling/shape asymmetry, not a requirement.
+- *"How do you handle the eventual-consistency window?"* — Bound it and make it visible: measure projection lag, and on write-then-read screens either read the write model or echo the command result.
+- *"When is CQRS the wrong call?"* — Any CRUD app where reads and writes share the same shape and scale. It adds a projector, a second model, and consistency reasoning for zero payoff.`,
         },
         {
           id: 'arch-event-sourcing',
@@ -109,6 +147,18 @@ Two independent sources say the same thing. Fowler: "Event Sourcing ensures that
 **When it wins:** you need a true audit trail, temporal queries ("what did this look like on date X"), or you are already doing CQRS and want the write-side events to double as the mechanism that feeds the read-side projections.
 
 **When it hurts:** most systems don't need it, and the long-term cost people underestimate is **schema versioning** — replaying events written years ago, in an old shape, forever. Once an event is in the log it is history; you can't migrate it the way you'd ALTER a table.`,
+          deeper: `**The mechanism: rebuild state by folding the log.** Current state isn't stored — it's *computed*. You load every event for an entity in order and apply each to an initially-empty aggregate: \`state = events.reduce(apply, empty)\`. \`AccountOpened\` → balance 0; \`Deposited 100\` → 100; \`Withdrew 30\` → 70. The event store is append-only, so writing is a single insert with an optimistic-concurrency check (expected version N, reject if the stream moved). The obvious problem — an account with 4 million events would take forever to replay — is solved with **snapshots**: periodically persist the folded state at version N, then on load start from the latest snapshot and replay only the events after it. A snapshot is a cache, not a source of truth; you can always delete every snapshot and rebuild from the raw log.
+
+**Concrete scenario.** A bank ledger uses event sourcing because the audit requirement is absolute: every balance must be explainable by a sequence of legal transactions, and regulators can ask "what was this balance on 2024-03-15?". That's a native temporal query — replay the stream up to that timestamp. Snapshots are taken every 500 events; a typical account loads one snapshot + a handful of recent events. The log *is* the audit trail, for free.
+
+**The failure mode people get wrong: event schema evolution.** You emitted \`{ amount: 100 }\` for three years, then the business needs currency, so you want \`{ amount: 100, currency: "USD" }\`. You cannot ALTER the old events — they're immutable history. So every consumer and the fold logic must handle *both* shapes forever, usually via an **upcaster** that transforms old event versions into the current shape on read (defaulting \`currency\` to USD for legacy events). Teams that treat events like mutable rows corrupt their history or break replay. Rule: events are facts that happened; you version and upcast, you never rewrite.
+
+**Common follow-ups**
+
+- *"How do you query 'all accounts with balance > X'?"* — You don't, against the log — that's a cross-entity read. You build a projection (a read model / CQRS view) that the events feed. Event sourcing answers "how did *this* entity get here," not ad-hoc aggregate queries.
+- *"What are snapshots and when do you take them?"* — A cached fold of state at a version, taken every N events or on a timer, to bound replay cost. Rebuildable from the log, so never authoritative.
+- *"How do you handle a bad event that was written by mistake?"* — Append a corrective/compensating event; you don't delete. The mistake and its correction are both part of the true history.
+- *"When is event sourcing overkill?"* — When you don't need audit, temporal queries, or event-driven projections. For most CRUD, current-state rows are simpler and sufficient — Azure's own guidance says so.`,
         },
         {
           id: 'arch-saga',
@@ -140,6 +190,20 @@ Two implementation styles:
 - **Choreography** — each service publishes events and reacts to others' events, with no central coordinator. More decoupled, but the flow is implicit: to understand it end-to-end you have to read every service's event handlers.
 
 **The hard part:** compensations are not free rollbacks. "Refund the payment" is a different operation from "the charge never happened," with its own edge cases (what if the money was already spent downstream?). Choreographed sagas are notoriously hard to debug without strong distributed tracing.`,
+          deeper: `**The mechanism, spelled out.** A saga is a state machine over local ACID transactions. Each forward step \`Tᵢ\` has a compensator \`Cᵢ\` that semantically undoes it. On failure at step \`k\`, you run \`C₍ₖ₋₁₎ … C₁\` in reverse. The non-obvious requirements: every step must be **idempotent** (the coordinator may retry after a lost response, so \`chargeCard\` must not double-charge — key it on the saga ID), and every compensator must be **commutative-safe** and able to run even if the forward step's result was ambiguous. Sagas give you *atomicity* (all-or-nothing eventually) but explicitly **not isolation** — other transactions can observe the intermediate states, which is where the subtle bugs live.
+
+**Orchestration vs choreography, concretely.** In *orchestration*, an \`OrderSaga\` object holds the state (\`AWAITING_PAYMENT\`, \`AWAITING_STOCK\`, \`COMPENSATING\`) and issues commands; the compensation flow is one readable method. In *choreography*, \`Payment\` emits \`PaymentCharged\`, \`Inventory\` listens and emits \`StockReserved\`, \`Shipping\` listens — and on failure \`Shipping\` emits \`ShipmentFailed\`, which \`Inventory\` and \`Payment\` must each listen for to trigger their own compensation. No single place holds the flow.
+
+**Concrete scenario.** Order fulfilment: charge €50, reserve one unit of SKU-123, book a courier. The courier API returns 503. The orchestrator runs \`releaseStock(SKU-123)\` then \`refund(€50)\`. The isolation gap: between "stock reserved" and "stock released," a second customer saw the item as out of stock — a real, observable intermediate state a 2PC transaction would have hidden.
+
+**The failure mode people get wrong: unreliable compensation and lost isolation.** Teams assume \`refund\` always succeeds — but the payment provider can be down exactly when you need to compensate, so compensators themselves need retries, a dead-letter queue, and an alert for stuck sagas. And they forget the isolation gap: money is charged before the order is confirmed, stock is held mid-flight. You mitigate with *semantic locks* (mark the record \`PENDING\` so others treat it carefully) and by ordering steps so the reversible/cheap ones run first.
+
+**Common follow-ups**
+
+- *"Orchestration or choreography — which do you pick?"* — Orchestration for complex flows (4+ steps, conditional branches) because the state machine is explicit and debuggable; choreography for 2–3 loosely-coupled steps where a central coordinator is overkill.
+- *"Why not two-phase commit?"* — 2PC needs a blocking coordinator holding locks across services for the whole transaction; it doesn't scale and it stalls everything if the coordinator dies mid-commit. Sagas trade isolation for availability.
+- *"What if a compensation itself fails?"* — Retry with backoff, then dead-letter and alert a human. Compensators must be idempotent so retries are safe; a permanently stuck saga is an operational, not silent, failure.
+- *"How do you make steps idempotent?"* — Key every operation on the saga/transaction ID so a retried \`charge\` or \`reserve\` recognises it already ran and returns the prior result instead of repeating the effect.`,
         },
       ],
     },
@@ -234,6 +298,38 @@ sequenceDiagram
 **Pitfall:** tuned too aggressively, it trips on transient blips and makes a healthy system look down; too loosely, it doesn't protect you in time. It must be paired with a sane fallback (cached data, degraded response) — "fail fast" alone just moves the outage to the caller.
 
 **One recency note:** Netflix's Hystrix popularised this pattern but has been in maintenance mode since 2018 and was dropped from Spring Cloud. The current reference implementation is resilience4j (JVM), Polly (.NET), or opossum (Node). Citing Hystrix as your *current* tool in 2026 is a stale-knowledge signal.`,
+          deeper: `**The state machine, with the thresholds that actually matter.** Three states, and the transitions are threshold-driven, not vibes:
+
+\`\`\`mermaid
+sequenceDiagram
+    participant C as Caller
+    participant B as Breaker
+    Note over B: CLOSED — count failures in a rolling window
+    C->>B: call fails past threshold
+    Note over B: failure rate >= 50% over >= 20 calls -> OPEN
+    C->>B: call while OPEN
+    B-->>C: fail fast instantly
+    Note over B: cooldown 30s elapses -> HALF-OPEN
+    C->>B: limited trial calls
+    Note over B: trials succeed -> CLOSED; any fail -> OPEN
+\`\`\`
+
+- **Closed:** calls pass through; the breaker counts failures over a *rolling window* — the key config is a **failure-rate threshold over a minimum call volume** (e.g. resilience4j default: open when ≥50% of the last ≥20 calls fail — the volume floor stops one bad call in a quiet period from tripping it).
+- **Open:** every call fails fast (no downstream call) for a fixed **cooldown** (e.g. 30s), giving the dependency room to recover.
+- **Half-open:** after cooldown, admit a small number of *trial* calls; if they succeed, close; if any fail, re-open and restart the cooldown. This is what prevents flapping straight back into a still-broken dependency.
+
+Also count **slow calls** as failures (resilience4j does): a dependency at p99 = 10s isn't erroring, but it's exhausting your thread pool just as effectively as one returning 500s.
+
+**Concrete scenario.** A checkout service calls a fraud-scoring API with a 200ms budget. The fraud API degrades to 8s latency. Without a breaker, checkout threads block on those 8s calls, the thread pool saturates, and checkout — a healthy service — goes down because of a *dependency's* slowness. With a breaker configured on slow-call rate, it opens after the fraud API's slow-call rate crosses 50%, and checkout instantly falls back to "approve with async review," staying up.
+
+**The failure mode people get wrong: a breaker with no fallback.** "Fail fast" without a fallback just relocates the outage — the caller now errors instantly instead of slowly. The breaker's value is realised by what happens in the open state: serve cached/stale data, a degraded response, or a queued async path. Second common mistake: tuning too tight (trips on transient blips, false outages) or too loose (never protects in time). Tune against real traffic, not guesses.
+
+**Common follow-ups**
+
+- *"Circuit breaker vs retry — when each?"* — Retry handles *transient* single-call failures; the breaker handles *sustained* dependency failure. Pair them, but never retry while open (that defeats the point). Retries feed the breaker's failure count.
+- *"What thresholds do you set?"* — A failure-rate % over a minimum call volume, a cooldown before half-open, and a slow-call duration threshold. Numbers come from the dependency's SLO and your latency budget, not defaults.
+- *"How does it prevent cascading failure?"* — By capping resources spent on a down dependency, so one failing service can't exhaust the thread/connection pools of everything calling it.
+- *"Why is Hystrix a red flag now?"* — Maintenance mode since 2018, dropped from Spring Cloud. Current tools: resilience4j, Polly, opossum.`,
         },
         {
           id: 'arch-retry-backoff',

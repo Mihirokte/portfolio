@@ -27,6 +27,13 @@ export function LessonPage({ courseKey, lessonId }: { courseKey: string; lessonI
       <h1>{lesson.title}</h1>
       <Markdown body={lesson.body} />
 
+      {lesson.deeper && (
+        <details className="deeper">
+          <summary>Go deeper — mechanism, numbers & follow-ups</summary>
+          <Markdown body={lesson.deeper} />
+        </details>
+      )}
+
       <div className="lesson-notes">
         <LessonNotes id={lessonId} initial={entry?.notes} />
       </div>

@@ -11,6 +11,10 @@ export interface Lesson {
   title: string
   minutes: number // rough read time
   body: string // markdown; ```mermaid fences render as diagrams
+  /** Optional deeper dive for high-frequency interview topics: more mechanism,
+   *  concrete numbers, a worked example, and common follow-up Q&A. Rendered as
+   *  a collapsed "Go deeper" section under the lesson body. */
+  deeper?: string
 }
 
 export interface Chapter {

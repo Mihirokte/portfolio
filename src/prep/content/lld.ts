@@ -112,6 +112,33 @@ The senior tell is holding DRY and KISS in tension out loud: "I'd keep this inli
 - **L — Liskov Substitution.** A subclass must work anywhere the base does. A \`Penguin(Bird)\` whose \`fly()\` raises is a violation; split the capability into a \`FlyingBird\`. Red flags: a subclass raising \`NotImplementedError\`, or callers doing \`if isinstance(x, Penguin)\`.
 - **I — Interface Segregation.** Don't force implementers to stub methods they don't need. A \`Robot\` shouldn't implement \`eat()\`/\`sleep()\` as no-ops — split into small \`Workable\` / \`Feedable\` interfaces composed per capability.
 - **D — Dependency Inversion.** Depend on an abstraction your business logic defines, not a concrete class. \`NotificationService\` takes a \`MessageSender\` interface in its constructor (dependency injection is the technique; DIP is the principle) — now you unit-test with a mock and swap email for SMS with zero changes.`,
+          deeper: `The precise version of each letter is sharper than the slogan. **SRP's "one reason to change"** means one *actor* — group behaviour by who requests the change, not by what the code touches. An accountant and a DBA both editing a \`Report\` class is the smell, even if both changes are "about reports". **OCP** is achieved by depending on a stable abstraction and adding new *implementations*; you don't literally never edit files, you avoid editing the *tested, working* class. **LSP** is about behavioural substitutability, not just compiling — a subclass may not strengthen preconditions or weaken postconditions (a \`ReadOnlyList\` that throws on \`add()\` breaks callers written against \`List\`).
+
+Worked example — a naïve order processor that violates all five, then the DIP+OCP fix:
+
+\`\`\`python
+class OrderService:
+    def __init__(self, sender: MessageSender, store: OrderStore):
+        self._sender = sender      # abstraction, not EmailSender
+        self._store = store
+
+    def place(self, order: Order) -> None:
+        self._store.save(order)                    # SRP: persistence elsewhere
+        self._sender.send(order.customer, "placed") # DIP: interface
+
+class DiscountPolicy(ABC):
+    @abstractmethod
+    def apply(self, order: Order) -> Money: ...
+# new policy = new class, OrderService untouched (OCP)
+\`\`\`
+
+**The subtle point that trips people up:** SRP is about *reasons to change*, not *number of methods*. A class with ten cohesive methods that all change for the same reason is fine; a two-method class that changes for two unrelated reasons violates SRP. People split by size and think they've "done SOLID".
+
+**Common follow-ups**
+- Q: How is DIP different from just dependency injection? A: DI is the *mechanism* (pass the dependency in); DIP is the *principle* (the dependency is an abstraction your module owns, so the arrow points inward). You can DI a concrete class and still violate DIP.
+- Q: Doesn't OCP mean I can never edit a class? A: No — you avoid modifying *stable, tested* behaviour. Bug fixes and new abstractions are fine; adding a variant should mean a new implementation, not an edit to the branching.
+- Q: When is inheritance an LSP violation vs fine? A: Fine when every subtype honours the base contract everywhere the base is used. A violation the moment callers must \`isinstance\`-check or a subclass throws on an inherited method.
+- Q: Is applying all five always right? A: No — over-applying ISP/DIP on a small design adds ceremony. Name the tradeoff: "I'd keep this concrete until a second implementation is real."`,
         },
         {
           id: 'lld-composition',
@@ -201,6 +228,34 @@ class ShoppingCart:
 - **Splitwise** — an \`ExpenseSplit\` interface with \`EqualSplit\`, \`ExactSplit\`, \`PercentSplit\`, validated so shares sum to the total. This is the textbook Strategy slot.
 - **URL Shortener** — a \`ShortCodeGenerator\` strategy: base62 counter vs. random-with-collision-check vs. hash-of-URL. (The LLD version is about the in-memory map and the generation algorithm, not distributed IDs — say so if the prompt is ambiguous.)
 - Parking-fee calculation by vehicle type, surge vs. flat pricing, discount rules — all Strategy.`,
+          deeper: `Strategy has three moving parts people conflate: the **Context** (holds a reference and delegates), the **Strategy interface** (the one method the context calls), and the **concrete strategies**. The context must *not* know which concrete one it holds — if it ever \`isinstance\`-checks the strategy, the pattern has collapsed back into the conditional you were escaping.
+
+A fuller Splitwise slice showing validation living *in* each strategy, which is where the correctness lives:
+
+\`\`\`python
+class ExpenseSplit(ABC):
+    @abstractmethod
+    def shares(self, total: float, users: list, meta: dict) -> dict: ...
+
+class PercentSplit(ExpenseSplit):
+    def shares(self, total, users, meta):
+        pct = meta["percents"]            # {user: percent}
+        if abs(sum(pct.values()) - 100) > 1e-9:
+            raise ValueError("percents must sum to 100")
+        return {u: total * pct[u] / 100 for u in users}
+
+class Expense:
+    def __init__(self, split: ExpenseSplit): self._split = split
+    def compute(self, total, users, meta): return self._split.shares(total, users, meta)
+\`\`\`
+
+**The subtle point that trips people up:** where does validation live? A weak answer validates in the \`Expense\`/context (\`if isinstance(split, PercentSplit): check...\`) — that re-couples the context to every concrete type and defeats the pattern. Each strategy validates its *own* invariant (percents sum to 100, exact shares sum to the total). The context stays ignorant.
+
+**Common follow-ups**
+- Q: How is Strategy different from just passing a function? A: For one behaviour, a first-class function *is* a lightweight Strategy. The pattern earns its keep when the strategy needs multiple methods, its own state/config, or a name in the type system — then an object beats a bare lambda.
+- Q: Strategy vs State — same UML, so what's the difference? A: Intent. Strategy is chosen by the *client* and rarely changes itself; State transitions *itself* to the next state based on events. Strategy objects usually don't know each other; State objects do.
+- Q: Where does the factory fit? A: A factory picks *which* strategy to instantiate from input ("EQUAL" → \`EqualSplit\`); Strategy governs how the chosen one behaves. They compose — factory creates, strategy executes.
+- Q: How do you set the strategy — constructor or setter? A: Constructor injection when it's fixed for the object's life; a setter only if it genuinely varies at runtime. Prefer the constructor to keep the object always-valid.`,
         },
         {
           id: 'lld-state',
@@ -226,6 +281,39 @@ Compare that to one giant conditional keyed on a status string — the State pat
 **Where else it maps:**
 - **ATM** — IDLE → CARD_INSERTED → PIN_VALIDATED → TRANSACTION_SELECTED → DISPENSING; the state gates which operation is valid at each step. Same shape as the vending machine.
 - **Food Delivery** — the \`Order\` lifecycle (placed → confirmed → preparing → out for delivery → delivered); delivering a *cancelled* order should be structurally rejected, not conditionally checked.`,
+          deeper: `The mechanism has one rule people skip: the transition logic lives *inside the state classes*, and the context exposes a package-private \`set_state()\` that only states call. If the context decides transitions, you've rebuilt the giant conditional with extra steps. Each state answers *every* event of the machine — usually by doing nothing (an illegal transition) or moving the machine forward. That "handle every event, mostly by rejecting" is what makes illegal transitions structurally impossible.
+
+A fuller vending slice, including a rejected event and the context wiring:
+
+\`\`\`python
+class State(ABC):
+    def insert_coin(self, m): ...
+    def select(self, m): ...
+    def dispense(self, m): ...
+
+class NoCoinState(State):
+    def insert_coin(self, m): m.set_state(HasCoinState())
+    def select(self, m): raise InvalidOp("insert coin first")  # rejected
+
+class HasCoinState(State):
+    def select(self, m):
+        if m.stock == 0: m.set_state(NoCoinState()); raise SoldOut()
+        m.set_state(DispenseState())
+
+class VendingMachine:
+    def __init__(self): self._state: State = NoCoinState()
+    def set_state(self, s): self._state = s
+    def insert_coin(self): self._state.insert_coin(self)
+    def select(self): self._state.select(self)
+\`\`\`
+
+**The subtle point that trips people up:** where do transitions live? Put them in the context (a \`transition_to(status)\` on the machine that switches on the target) and you're back to a conditional — just relocated. The state *object itself* decides the next state, so adding a state means adding a class, not editing a growing \`if\`. The second subtlety: guard conditions (out of stock, insufficient funds) belong to the state handling the event, not a pre-check in the context.
+
+**Common follow-ups**
+- Q: When is a simple enum + switch actually fine? A: When there are 2–3 states and transitions are trivial with no per-state behaviour. State earns its place when behaviour differs *per state* and illegal transitions must be prevented, not just checked.
+- Q: How is this different from Strategy? A: Strategy is set by the client and doesn't change itself; State transitions *itself* in response to events and the states know each other. Same class diagram, opposite control of change.
+- Q: Where do you store shared data like the coin balance? A: On the context (\`machine.balance\`), not the state objects — states are behaviour, the context is data. States are often stateless singletons.
+- Q: How do you handle an event invalid in the current state? A: The current state's handler rejects it (raise / return an error) — the machine never reaches the illegal action, versus a status-field design that must remember to check.`,
         },
         {
           id: 'lld-observer',
@@ -364,6 +452,31 @@ sequenceDiagram
 \`\`\`
 
 **Semaphores** — a counting lock with N permits, for Scarcity: at most 5 elevators moving, at most 10 concurrent downloads. Always release in a \`finally\`.`,
+          deeper: `The choice among these follows from the problem *type*, not taste. Correctness on one variable → atomic; correctness across two related fields → lock; handoff/waiting → blocking queue or condition variable; a capped resource → semaphore. The commonest live-coding bug is scope: too coarse and you serialise unrelated work (throughput dies), too fine and you invite deadlock. The right granularity is "lock the smallest unit that must change together."
+
+The atomic-vs-lock boundary is where people slip. A single counter is atomic-safe; two fields that must agree are not:
+
+\`\`\`python
+# WRONG — two atomics don't compose: the pair can be observed mid-update
+balance = AtomicInt(); count = AtomicInt()
+balance.add(-100); count.inc()   # another thread can read between these
+
+# RIGHT — one lock guards the invariant "balance and count move together"
+class Account:
+    def __init__(self): self._lock = Lock(); self._balance = 0; self._count = 0
+    def withdraw(self, amt):
+        with self._lock:                 # atomic across BOTH fields
+            if self._balance < amt: raise Insufficient()
+            self._balance -= amt; self._count += 1
+\`\`\`
+
+**The subtle point that trips people up:** atomicity does not compose. Two individually-atomic operations are *not* atomic together — a reader can observe the state between them. The moment an invariant spans more than one variable, atomics are insufficient and you need a lock (or a CAS loop on a single immutable snapshot object). Also: in CPython the GIL makes many ops *look* atomic, but \`+=\` on a shared int is still a read-modify-write race — use a \`Lock\`.
+
+**Common follow-ups**
+- Q: When do you pick a semaphore over a lock? A: A lock is a semaphore with one permit (mutual exclusion). Use a semaphore when N > 1 things may proceed concurrently — a pool of 5 connections, 10 concurrent downloads.
+- Q: Coarse vs fine-grained locking — how do you decide? A: Start coarse for correctness, then split locks only where profiling shows contention. Fine-grained buys throughput at the cost of deadlock risk (multiple locks) and complexity.
+- Q: Why prefer immutability over locking? A: An object that can't change after construction has no modify step to race on, so it needs no lock at all — the cheapest correctness. Pass immutable value objects between threads.
+- Q: A blocking queue vs a lock + condition variable? A: The blocking queue *is* that pattern packaged: it hides the condition variables and the empty/full waits, so you get producer-consumer safety without hand-rolling wait/notify.`,
         },
         {
           id: 'lld-deadlocks-memory',
@@ -461,6 +574,32 @@ def charge(self, idempotency_key, amount):
 Distinguish it from concurrency-safety: idempotency guards against the *same request arriving more than once over time*; locks guard against *different threads racing at the same instant*. A good payment \`charge()\` needs both — a lock around the check-and-insert of the key, plus the key itself for retry safety. In HTTP terms, \`PUT\`/\`DELETE\` are naturally idempotent; \`POST\` isn't, which is exactly why create endpoints need an explicit key.
 
 **API-design rules of thumb** for the "now design the API" tail: design from the caller's need, not implementation convenience; keep methods small and intention-revealing (\`makeMove(player, row, col)\` over \`execute(command)\`); return domain types not primitives (\`getWinner() -> Player?\`); push validation to the boundary and keep the core clean; and model errors explicitly (a result type or \`InvalidMoveException\`, never a silent no-op).`,
+          deeper: `The mechanism is a three-state key, not a two-state one, and that third state is what people miss. An idempotency key isn't just "seen / not seen" — it's **not-started / in-progress / completed**. The gap between "started but not finished" and "finished" is exactly where a concurrent retry double-charges, so the record and the side effect must be committed together (one transaction) or the key stored *before* the side effect and reconciled.
+
+\`\`\`python
+def charge(self, key: str, amount: Money) -> Result:
+    with self._lock:                               # guard check-and-claim
+        rec = self._keys.get(key)
+        if rec and rec.state == "completed":
+            return rec.result                      # replay, no re-charge
+        if rec and rec.state == "in_progress":
+            raise Conflict("retry in flight")      # 409, client backs off
+        self._keys[key] = Record(state="in_progress")
+    result = self._gateway.charge(amount)          # side effect OUTSIDE lock
+    with self._lock:
+        self._keys[key] = Record("completed", result)
+    return result
+\`\`\`
+
+**The subtle point that trips people up:** the key must be scoped to the *logical operation*, not the HTTP request, and the response must be *stored*, not recomputed — recomputing can drift (a new timestamp, a changed price) and break the "same result" promise. And "idempotent" ≠ "returns success twice": a second \`DELETE\` legitimately returns 404/no-op; the guarantee is *same effect*, not *same status code*.
+
+The flip side is the Amazon-Locker contrast: a pickup code must *invalidate* after use (idempotency's opposite — succeed once, fail after), while a payment key *replays*. Same question ("seen before?"), opposite required behaviour.
+
+**Common follow-ups**
+- Q: How do you make an operation idempotent under retries? A: Client sends a stable UUID per logical action; server records key→result and replays the stored result on any retry instead of re-running side effects. Claim the key before the side effect to close the concurrent-retry window.
+- Q: Which HTTP verbs are idempotent, and why does POST need a key? A: \`GET\`/\`PUT\`/\`DELETE\` are idempotent by spec (repeat → same state); \`POST\` creates a new resource each call, so a retried create duplicates unless an explicit idempotency key dedupes it.
+- Q: Idempotency vs locking — do I need both? A: Yes for payments. The lock stops two threads racing at one instant; the key stops the *same request replayed over time*. Neither substitutes for the other.
+- Q: Where does the key live in a multi-server deployment? A: A shared store (Redis/DB), not per-server memory — a load balancer can route the retry to a different instance, so in-memory dedup would miss it.`,
         },
       ],
     },

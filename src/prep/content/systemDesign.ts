@@ -119,6 +119,21 @@ Alternatives: **write-through** (write to cache and DB together — consistent, 
 **Invalidation is the hard part.** Two real options: a **TTL** (simple, but serves stale data until it expires) or **explicit invalidation** on write (fresh, but easy to miss a path and leak stale entries). Most systems use TTL plus explicit invalidation on the paths that matter.
 
 Watch for the **thundering herd**: when a hot key expires, thousands of requests miss simultaneously and stampede the DB. Mitigate with a short lock on repopulation or slightly randomised TTLs.`,
+          deeper: `**Mechanism.** Redis and Memcached are in-memory hash tables reached over the network. The win isn't just "RAM is fast" — it's skipping the DB's query planner, buffer-pool lookup, and disk seeks. A Redis GET is a single hash probe plus a network round trip; the data structure work is nanoseconds, so the cost is dominated by the network.
+
+**Numbers an interviewer expects.**
+- Redis GET, same data centre: **~0.5–1 ms** end to end (sub-ms compute, RTT dominates).
+- Process-local / in-memory cache (no network): **~100 ns**.
+- SSD-backed DB point read: **~1–10 ms**; a query needing disk seeks or a scan: **tens of ms to seconds**.
+- A single Redis node handles **~100k+ ops/sec**; memory is the ceiling, so hit ratio is what you tune. A 90% hit ratio turns 10k QPS into 1k DB QPS.
+
+**Worked example.** Product page at 10k QPS, each read costing the DB ~5 ms. Uncached, the DB needs ~50 concurrent busy connections just for reads — near its limit. Add cache-aside with a 90% hit ratio: 9k reads served from Redis at ~1 ms, 1k reach the DB. DB load drops 10x and p99 improves because most reads never queue behind slow DB work.
+
+**Common follow-ups**
+- *Q: How do you prevent a cache stampede on a hot key?* A: On miss, take a short per-key lock (e.g. \`SET key lock NX EX 5\`) so only the first request repopulates while others briefly wait or serve stale; add jittered TTLs so keys don't all expire together. For very hot keys, refresh ahead of expiry (early recompute).
+- *Q: Cache and DB disagree after a write — how?* A: Update the DB, then **delete** the cache key (don't write it — a concurrent read could re-populate stale). Accept a tiny stale window bounded by TTL. Write-through only if you need the cache always warm.
+- *Q: What do you evict when full?* A: LRU is the default; LFU (Redis \`allkeys-lfu\`) is better when a stable hot set exists. Always set \`maxmemory\` + a policy, or Redis OOMs.
+- *Q: Cache the whole object or fields?* A: Cache the read shape you actually serve. Caching normalized fields forces re-joins on read; cache the denormalized response and invalidate on the write paths that touch it.`,
         },
         {
           id: 'sd-sql-vs-nosql',
@@ -137,6 +152,20 @@ Watch for the **thundering herd**: when a hot key expires, thousands of requests
 The interviewer's real question is **"why?"** "I'll use DynamoDB because the only access pattern is get-cart-by-user-id, writes are heavy, and I never join" is a strong answer. "NoSQL scales better" is not.
 
 A useful tell: if you find yourself wanting joins and transactions on top of a NoSQL store, you probably picked wrong.`,
+          deeper: `**Mechanism.** A relational DB stores rows in B-tree/heap pages and enforces ACID with a write-ahead log (WAL) plus MVCC — every transaction sees a consistent snapshot, and joins happen in the engine. NoSQL trades this: DynamoDB and Cassandra hash your **partition key** to a node and store items together, so a get-by-key is one hop with no coordinator. There are no cross-partition joins because there is no single node that sees all the data — you denormalize instead.
+
+**Numbers an interviewer expects.**
+- A well-tuned single Postgres node: **tens of thousands of simple TPS**, and comfortably holds **hundreds of GB to a few TB** before partitioning is forced.
+- DynamoDB single-item read/write: **single-digit ms**, and it scales writes horizontally to **millions of ops/sec** because throughput is per-partition and it adds partitions.
+- Rule of thumb: reach for horizontal write scaling only when one primary's write throughput or storage is genuinely the wall — usually **>~10k sustained writes/sec** or **multi-TB** with a simple access pattern.
+
+**Worked example.** A shopping cart: only access pattern is get/put-cart-by-user-id, writes are frequent, no joins, no reporting. DynamoDB with \`userId\` as partition key gives O(1) single-digit-ms access and scales writes for free — a textbook NoSQL fit. Contrast an orders + payments + inventory system: you need a transaction that debits inventory and records payment atomically. That's Postgres; forcing it onto DynamoDB means reinventing transactions in app code.
+
+**Common follow-ups**
+- *Q: Can't Postgres scale to millions of users?* A: Yes — read replicas for read scaling, then table partitioning / Citus for write scaling get you very far. "NoSQL for scale" is usually premature; the real driver is access-pattern simplicity.
+- *Q: How does DynamoDB do transactions then?* A: \`TransactWriteItems\` gives ACID across a bounded set of items, but it's limited and pricier; if you lean on it heavily, a relational DB was the right call.
+- *Q: What's the cost of a bad partition key?* A: A **hot partition** — one key gets disproportionate traffic and throttles while the rest of the table is idle. You choose the key to spread load *and* co-locate what you read together.
+- *Q: Schema flexibility — real advantage?* A: For genuinely heterogeneous documents, yes. But Postgres \`jsonb\` covers most "flexible" needs while keeping joins and indexes, so flexibility alone rarely justifies NoSQL.`,
         },
         {
           id: 'sd-replication-partitioning',
@@ -161,6 +190,22 @@ sequenceDiagram
 **Partitioning (sharding)** = splitting *different* data across nodes so no single node holds it all. It buys write scaling and storage beyond one machine. The cost is that cross-partition queries and transactions get hard.
 
 The make-or-break decision is the **partition key**. A good key spreads load evenly and keeps related data together. A bad key creates a **hot partition** — e.g. sharding by \`country\` when 60% of traffic is one country. When asked "what's your partition key," never answer "id" reflexively; answer with the access pattern that key serves.`,
+          deeper: `**Mechanism.** Replication ships the primary's write-ahead log to replicas. **Async** (the default) acks the client as soon as the primary commits, then streams to replicas — fast writes, but a replica can lag. **Sync** waits for a replica to confirm before acking — no data loss on primary failure, but every write pays a round trip. **Semi-sync** (wait for *one* replica) is the common middle ground.
+
+Partitioning splits data by a function of the key. **Hash partitioning** (\`hash(key) % N\`) spreads evenly but makes range scans hit every node; **range partitioning** keeps ranges scannable but risks hot ranges (e.g. "today"). **Consistent hashing** places nodes and keys on a ring so adding/removing a node only remaps ~1/N of keys, not all of them.
+
+**Numbers an interviewer expects.**
+- Async replication lag: **milliseconds normally**, spiking to **seconds** under write bursts or slow replicas.
+- Same-region replica round trip for sync: **~1 ms**; **cross-region: ~50–150 ms+** (US-East↔EU ~80–90 ms, US↔Asia ~150–200 ms). This is why synchronous cross-region writes are painful.
+- Naïve \`mod N\` resharding remaps **~(N-1)/N** of keys; consistent hashing remaps **~1/N**.
+
+**Worked example.** A messaging app partitioned by \`chat_id\` co-locates a conversation's messages on one node, so "load this chat" is one node's work. Partitioning by \`message_id\` (hash) would scatter one chat across every node — every read becomes a scatter-gather. The access pattern ("read a whole chat") dictates the key.
+
+**Common follow-ups**
+- *Q: Read-your-own-writes with async replicas?* A: Route a user's reads to the primary for a short window after their write, or pin them to a replica caught up past their write's position (LSN).
+- *Q: How do you avoid resharding pain?* A: Consistent hashing, or over-partition up front (e.g. 1024 logical shards mapped onto few physical nodes) so growth is remapping virtual shards, not rehashing keys.
+- *Q: Fix a hot partition after the fact?* A: Add a suffix to spread the hot key (\`celebrityId#0..9\`) and fan-in on read, or split that key's data into sub-partitions. Prevention via key choice beats cure.
+- *Q: Cross-partition transaction?* A: Avoid it — redesign so the transaction lives in one partition. If unavoidable, two-phase commit or a saga, both of which add latency and failure modes.`,
         },
         {
           id: 'sd-cap',
@@ -174,6 +219,20 @@ The make-or-break decision is the **partition key**. A good key spreads load eve
 CAP only describes behaviour *during a partition*, which is rare. **PACELC** completes it: **E**lse (normal operation), you still trade **L**atency vs **C**onsistency. A globally consistent write needs a round trip to a quorum; a fast local write risks staleness. So the real everyday question isn't "CP or AP" — it's "how much staleness can this feature tolerate for how much latency?"
 
 Say the trade-off in feature terms: "The balance must be consistent, so that path is CP even if it means rejecting a write during a partition. The activity feed is AP — I'd rather show a slightly stale feed than an error."`,
+          deeper: `**Mechanism.** "Consistency" in CAP is **linearizability** — every read sees the latest committed write, as if there were one copy. Systems achieve it with a **quorum**: with N replicas, if writes touch W nodes and reads touch R nodes and **W + R > N**, a read is guaranteed to overlap the latest write. A partition breaks this — some nodes are unreachable, so you either block until quorum returns (CP) or answer from whoever you can reach and reconcile later (AP).
+
+**Numbers an interviewer expects.**
+- Common quorum: **N=3, W=2, R=2** → tolerates one node down while staying consistent (2+2 > 3).
+- **AP tunable low**: W=1, R=1 → fastest, but reads can be stale until anti-entropy/read-repair converges (typically **sub-second to seconds**).
+- A linearizable cross-region write must reach a quorum, so it inherits **cross-region RTT (~80–150 ms)**; a local eventually-consistent write is **~1 ms**. That gap is the PACELC "else" trade-off made concrete.
+
+**Worked example.** Cassandra (AP, tunable): a "like" count writes with W=1 and reads with R=1 for speed — a viewer might briefly see 1,240 vs 1,241 likes, which is harmless. A bank ledger on the same cluster would use \`QUORUM\`/\`SERIAL\` (Paxos-backed lightweight transactions) so a balance is never double-spent, paying the latency for correctness. Same store, different consistency level per feature.
+
+**Common follow-ups**
+- *Q: Isn't "eventually consistent" just "sometimes wrong"?* A: It converges to correct once writes propagate and conflicts resolve; the guarantee is that with no new writes, all replicas eventually agree. You choose it where a brief disagreement is acceptable.
+- *Q: How are conflicting concurrent writes resolved?* A: Last-write-wins by timestamp (simple, can lose data), version vectors to detect concurrency, or CRDTs that merge deterministically (counters, sets).
+- *Q: Where does PACELC bite in normal operation?* A: Every day, not just during partitions — a globally strong system pays latency on every write; that's the L-vs-C leg, and it's why most consumer features pick low latency + eventual consistency.
+- *Q: Is a single-node SQL DB CA?* A: Effectively, because there's no partition to survive — CAP only forces a choice in a distributed system. Add replication and the async-vs-sync choice reintroduces the trade-off.`,
         },
         {
           id: 'sd-queues',
@@ -213,6 +272,20 @@ The properties to reason about: **delivery** (at-least-once is normal → your c
 - **Token bucket** — the usual interview answer. A bucket refills tokens at a steady rate up to a cap; each request spends one. It allows short bursts (spend the saved tokens) while bounding the sustained rate. Cap = burst tolerance, refill rate = sustained limit.
 
 Where it lives: at the edge (API gateway) for coarse per-client limits, and sometimes per-service for fine-grained ones. State (the counters/buckets) usually lives in Redis so all app servers share one view — a per-server limit is not a real limit behind a load balancer.`,
+          deeper: `**Mechanism.** Token bucket stores two numbers per client: \`tokens\` and \`last_refill_ts\`. On each request you lazily refill — \`tokens = min(cap, tokens + (now - last_refill) * rate)\` — then allow if \`tokens >= 1\` and decrement. No background timer needed; refill is computed on access. In Redis this must be **atomic** (a Lua script or \`INCR\`+\`EXPIRE\`), or two concurrent requests both read the old count and over-admit. Sliding-window-log keeps a sorted set of timestamps and trims older than the window; sliding-window-counter blends the current and previous fixed windows by weight — cheaper, slightly approximate.
+
+**Numbers an interviewer expects.**
+- Config reads as \`rate\` + \`cap\`: e.g. **100 req/s sustained, burst 200** = refill 100/s, bucket cap 200.
+- Redis \`INCR\`/Lua check: **sub-ms**, adding negligible latency to the request path.
+- Fixed-window boundary flaw: a client can send \`limit\` at 0:59.9 and \`limit\` again at 1:00.0 → **2× the limit** in a ~0.2 s span. Sliding window removes this.
+
+**Worked example.** Public API capped at 100 req/s per key, allowing short bursts to 200. Token bucket: cap 200, refill 100/s. A client idle for 2 s has a full bucket (200) and can fire a 200-request burst, then settles to 100/s as the bucket refills — exactly the "bursty but bounded" behaviour you want. A fixed-window counter would either reject the legitimate burst or leak a double-burst at the boundary.
+
+**Common follow-ups**
+- *Q: Where in the stack?* A: Coarse per-IP/per-key limits at the API gateway (cheap, protects everything behind it); fine-grained per-endpoint or per-tenant limits at the service using shared Redis state.
+- *Q: How do you tell the client?* A: **429 Too Many Requests** with a \`Retry-After\` header and \`X-RateLimit-Remaining\`/\`-Reset\` so well-behaved clients back off instead of hammering.
+- *Q: Redis is the limiter's bottleneck/SPOF?* A: Shard by key across a Redis cluster; on a Redis outage, **fail open** (allow) for availability or **fail closed** (reject) for protection — a deliberate choice. Local per-node buckets as a degraded fallback.
+- *Q: Distributed accuracy vs cost?* A: Perfectly global counts need every request to touch shared state. To cut latency, give each node a local allowance synced periodically — approximate but far cheaper; name the accuracy/latency trade-off.`,
         },
       ],
     },
@@ -235,6 +308,20 @@ A **load balancer** is a reverse proxy whose main job is spreading traffic acros
 Balancing algorithms worth naming: **round-robin** (simple), **least-connections** (favours idle servers — good for uneven request costs), and **consistent hashing** (sticks a given key to the same server — important for caches, covered later).
 
 The interview point: a load balancer also does **health checks** and stops sending traffic to a server that fails them — that's how it gives you availability, not just distribution.`,
+          deeper: `**Mechanism.** An **L4** balancer works at the TCP/UDP layer: it picks a backend once at connection setup and then just forwards packets (often via NAT or direct server return), never parsing the payload — so it's cheap and protocol-agnostic. An **L7** balancer terminates the TCP connection itself, reads the full HTTP request, and can route on path/host/header/cookie, retry failed requests, and reuse pooled upstream connections. That parsing is why L7 does more but costs a little more per request. Health checks are active (the LB probes \`/healthz\` every few seconds) or passive (it observes real failures); a backend failing K consecutive probes is ejected and re-added once it passes again.
+
+**Numbers an interviewer expects.**
+- LB-added latency: **sub-millisecond to ~1 ms** for L4, a bit more for L7 TLS termination.
+- Health-check cadence: probe every **~1–5 s**, eject after **2–3** consecutive failures → a dead server is drained in **seconds**, not on the next user's failed request.
+- A single L7 proxy (Nginx/Envoy) handles **tens of thousands of req/s** per core; you scale out with multiple LBs behind DNS or an L4 tier.
+
+**Worked example.** Requests have uneven cost — most are fast \`GET /profile\`, a few are slow report generations. Round-robin sends the next slow report to whichever server is "next," possibly one already busy, spiking its p99. **Least-connections** instead routes to the server with the fewest in-flight requests, so slow work naturally avoids piling onto a loaded box. Add health checks: when one server's report job OOMs it and it stops answering probes, the LB ejects it in ~3–9 s and no user hits the dead node.
+
+**Common follow-ups**
+- *Q: How do you avoid the LB being a single point of failure?* A: Run redundant LBs; put a floating/virtual IP or DNS round-robin (or an L4 tier) in front so a dead LB is bypassed. Cloud LBs are managed and multi-AZ by default.
+- *Q: Sticky sessions — good idea?* A: They pin a client to one server (by cookie/IP) for in-memory session state, but they break even load distribution and lose the session if that server dies. Prefer stateless servers with session state in Redis; use stickiness only when forced.
+- *Q: L4 vs L7 — when each?* A: L4 for raw throughput, non-HTTP protocols, or TCP passthrough; L7 when you need path/host routing, TLS termination, retries, or per-route policy.
+- *Q: How does traffic reach servers in multiple regions?* A: DNS/anycast or a global LB routes to the nearest healthy region; the regional LB then distributes within it and health-checks locally.`,
         },
         {
           id: 'sd-gateway-discovery',
@@ -312,6 +399,20 @@ sequenceDiagram
 \`\`\`
 
 Fix it with a **join** or a single batched \`WHERE id IN (…)\` — turning N+1 queries into 1 or 2. ORMs cause this silently; the fix is eager-loading.`,
+          deeper: `**Mechanism.** A B-tree index is a balanced tree with a high **fanout** (hundreds of keys per page), so its depth stays tiny even for huge tables. A lookup walks from root to leaf — that's the **O(log n)** cost. Because fanout is ~hundreds, depth grows painfully slowly: a table of 100M rows is only **~4 levels deep**, so a point lookup is ~4 page reads (mostly cached) instead of scanning 100M rows. A **covering index** includes every column the query needs, so the engine answers from the index alone and never touches the heap ("index-only scan"). Composite \`(a, b)\` is sorted by \`a\` then \`b\`, which is why it serves \`a\` and \`(a, b)\` but not \`b\` alone.
+
+**Numbers an interviewer expects.**
+- Full scan of 100M rows: **hundreds of ms to seconds**; indexed point lookup: **~sub-ms to low ms** (a handful of cached page reads).
+- B-tree depth for 100M rows ≈ **4** (fanout ~300 → 300⁴ ≈ 8B > 100M). Doubling the table adds essentially nothing to lookup cost.
+- Each extra index adds **~5–15% write overhead** and storage; that's why you index the columns you filter/join/sort on, not every column.
+
+**Worked example.** A dashboard lists 50 recent orders, then the ORM lazily loads each order's customer — 1 + 50 = **51 round trips**, each ~1 ms of network + DB, so ~50 ms wasted on chatter. Switch to a join (or \`WHERE customer_id IN (…50 ids)\`): **2 queries**, ~2 ms. Same data, 25× fewer round trips — the classic N+1 fix, and the reason ORMs default to eager-loading options.
+
+**Common follow-ups**
+- *Q: How do you find the missing index?* A: \`EXPLAIN (ANALYZE)\` — look for \`Seq Scan\` on a large table with a selective filter; that's the index candidate. Confirm the planner switches to \`Index Scan\` after adding it.
+- *Q: Why can too many indexes hurt?* A: Every write must update every index, so write-heavy tables slow down and bloat; drop unused indexes (Postgres \`pg_stat_user_indexes\` shows zero-scan ones).
+- *Q: Why is \`WHERE lower(email) = ?\` slow despite an index on \`email\`?* A: The function defeats the plain index — the engine can't use it. Fix with a **functional index** on \`lower(email)\` or normalize on write.
+- *Q: \`OFFSET 100000 LIMIT 20\` is slow — why?* A: The DB still walks and discards 100k rows. Use **keyset/cursor pagination** (\`WHERE id > last_seen ORDER BY id LIMIT 20\`) so it seeks straight to the page.`,
         },
         {
           id: 'sd-connection-replicas',
@@ -345,6 +446,20 @@ sequenceDiagram
 \`\`\`
 
 **Distributed locks** extend this across machines when the resource isn't a single database row (e.g. "only one worker runs this job"). Usually a key in Redis with a TTL (so a crashed holder doesn't lock forever). They're genuinely hard to get right — clock skew and lost locks cause subtle bugs — so the strong interview answer is often "avoid needing one: make the operation idempotent or partition the work so each key has a single owner."`,
+          deeper: `**Mechanism.** Pessimistic \`SELECT … FOR UPDATE\` takes a **row-level write lock** inside a transaction; other writers to that row block until you commit. The DB detects **deadlocks** (A holds row1 wants row2, B holds row2 wants row1) by finding a cycle in its wait-for graph and aborting one transaction — which is why you acquire locks in a consistent order. Optimistic control takes no lock: it does a **compare-and-set** — \`UPDATE … SET v=v+1 WHERE id=? AND version=?\` — and checks the affected-row count; 0 rows means someone else committed first, so you re-read and retry. A distributed lock (Redis \`SET key val NX PX 30000\`) is the same idea across machines, with a **TTL** so a crashed holder auto-releases and a unique token so only the owner unlocks.
+
+**Numbers an interviewer expects.**
+- Optimistic retry cost is ~zero when conflicts are rare; it degrades badly once conflict probability is high — retries storm. Rough switch point: **pessimistic when conflicts are frequent (say >~10% of writes contend)**, optimistic when they're rare.
+- Redis lock TTL: pick **> worst-case work time** (e.g. 30 s) or the lock expires mid-work and two workers run; too long and a crash blocks others for that whole TTL.
+- Lock hold time is the throughput ceiling: a row locked for 50 ms caps that row at **~20 updates/sec** serialized.
+
+**Worked example.** Selling the last concert ticket: 5,000 users click at once. Optimistic \`UPDATE tickets SET sold=sold+1 WHERE id=? AND sold<capacity\` — thousands retry-fail instantly, one succeeds; correct but a retry storm. Under this much contention, **pessimistic** \`SELECT … FOR UPDATE\` (or an atomic conditional decrement) serializes cleanly with no wasted retries. Better still: partition inventory into buckets so contention spreads, or make each purchase idempotent by a request id so retries don't double-sell.
+
+**Common follow-ups**
+- *Q: When optimistic vs pessimistic?* A: Optimistic for rare conflicts (edit-a-profile) — no lock cost in the common case; pessimistic for hot contested rows (last-item inventory, counters) where retries would storm.
+- *Q: Is a Redis lock safe?* A: Not perfectly — under GC pauses/clock skew a holder can think it still owns an expired lock (the Redlock debate). For correctness prefer a **fencing token** the resource checks, or a lock service (etcd/ZooKeeper) with leases; treat plain Redis locks as best-effort mutual exclusion.
+- *Q: How do you avoid deadlocks?* A: Acquire multiple locks in a **global order**, keep transactions short, and set a lock timeout so a cycle aborts fast instead of hanging.
+- *Q: Can you skip locking entirely?* A: Often — make the write **idempotent** (dedupe by request id) or **partition** so each key has exactly one owner/consumer; then concurrent conflicts can't arise.`,
         },
         {
           id: 'sd-latency-multiregion',
@@ -403,6 +518,20 @@ Great for read-heavy timelines — until a celebrity with 50M followers posts, a
 **Fan-out on read (pull):** store the post once. When a follower opens their feed, gather recent posts from everyone they follow and merge. Cheap writes, expensive reads.
 
 **The real answer is hybrid:** push for normal users (cheap fan-out, fast reads), pull for the handful of celebrities (avoid the storm), and merge the two at read time. Naming this hybrid — and *why* — is what separates a mid-level answer from a strong one.`,
+          deeper: `**Mechanism.** Push keeps a per-user **feed list** (a Redis sorted set or a feeds table keyed by \`user_id\`, scored by time). On a post, a fan-out worker reads the author's follower list and does an insert into each follower's list — reads are then a single range query. Pull stores each post once in the author's timeline; a read fetches the follower's followee list, does a top-K query per followee (or a merged query), and **k-way merges** the results by timestamp. Hybrid marks celebrities so their posts are *not* pushed; at read time you union the pushed feed with a live pull of the few celebrities you follow, then merge-sort by time.
+
+**Numbers an interviewer expects.**
+- Push cost per post = **O(followers)** writes. A user with 500 followers → 500 cheap writes, fine. A celebrity with **50M followers → 50M writes** per post — the fan-out storm.
+- Read cost: push read is **~1 ms** (one range read of a precomputed list); pull read fanning over, say, 500 followees is **hundreds of queries or one big merge — tens of ms**.
+- Redis sorted-set insert/range: **sub-ms**; feed lists are usually capped (keep newest ~800 entries) to bound memory.
+
+**Worked example.** Twitter-style timeline, mostly read-heavy. Regular user posts → push to ~hundreds of follower feeds, each read is a fast list fetch. A celebrity posts → **skip push entirely**; store once. When any follower loads their timeline, the service reads their pushed feed (normal followees) *and* pulls the recent posts of the ≤ handful of celebrities they follow, merges the two by time, returns. One post from a 50M-follower account thus costs 0 fan-out writes instead of 50M, while normal reads stay cheap.
+
+**Common follow-ups**
+- *Q: What's the celebrity threshold for switching to pull?* A: A follower-count cutoff (e.g. **>~100k–1M**) or a dynamic rule based on post rate × followers; above it, pull to avoid the write storm.
+- *Q: How do you bound feed storage?* A: Cap each pushed feed to the newest N entries (e.g. 800) and page older content from the source timeline on demand — the tail is rarely read.
+- *Q: A user with 50M followers still posts — fan-out lag?* A: Fan-out is async via a queue, so followers see it within seconds, not instantly; the queue absorbs the burst and smooths write load.
+- *Q: How do you inject ranking/ads/filtering?* A: Keep the feed a candidate list ordered by time, then apply ranking/filtering at read time; don't bake final ordering into the stored fan-out, or you can't re-rank.`,
         },
         {
           id: 'sd-realtime',
