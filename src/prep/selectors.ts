@@ -40,7 +40,8 @@ export function courseProblemLayout(course: Course): {
   leftovers: LeftoverGroup[]
 } {
   const all = drillsForArea(course.problemAreaKey)
-  const byId = new Map(all.map((d) => [d.id, d]))
+  const suppressed = new Set(course.suppressedProblemIds ?? [])
+  const byId = new Map(all.filter((d) => !suppressed.has(d.id)).map((d) => [d.id, d]))
   const claimed = new Set<string>()
   const perChapter: Record<string, Drill[]> = {}
 
@@ -56,7 +57,7 @@ export function courseProblemLayout(course: Course): {
     perChapter[ch.id] = list
   }
 
-  const rest = all.filter((d) => !claimed.has(d.id))
+  const rest = all.filter((d) => !claimed.has(d.id) && !suppressed.has(d.id))
   const groups = new Map<string, Drill[]>()
   for (const d of rest) {
     const key = d.topic || 'other'

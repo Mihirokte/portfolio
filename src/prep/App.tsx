@@ -1,19 +1,16 @@
 import { TopBar, NotFound } from './components/nav'
 import { useHashRoute } from './useHashRoute'
 import Home from './routes/Home'
-import { StudyHome, CoursePage } from './routes/Study'
+import { CoursePage } from './routes/Study'
 import { LessonPage } from './routes/Lesson'
-import { GymHome, AreaList } from './routes/Gym'
+import { DsaList } from './routes/Dsa'
 import { DrillPage } from './routes/Drill'
 
-// Declarative route table: first matching pattern wins. Adding a page is a
-// one-line entry here plus its component — no branching logic to touch.
+// Declarative route table: first matching pattern wins.
 const ROUTES: { re: RegExp; render: (m: RegExpExecArray) => React.ReactNode }[] = [
   { re: /^#\/study\/([^/]+)\/([^/]+)$/, render: (m) => <LessonPage courseKey={m[1]} lessonId={m[2]} /> },
   { re: /^#\/study\/([^/]+)$/, render: (m) => <CoursePage courseKey={m[1]} /> },
-  { re: /^#\/study\/?$/, render: () => <StudyHome /> },
-  { re: /^#\/gym\/([^/]+)$/, render: (m) => <AreaList areaKey={m[1]} /> },
-  { re: /^#\/gym\/?$/, render: () => <GymHome /> },
+  { re: /^#\/dsa\/?$/, render: () => <DsaList /> },
   { re: /^#\/drill\/(.+)$/, render: (m) => <DrillPage id={m[1]} /> },
   { re: /^#\/?$/, render: () => <Home /> },
 ]

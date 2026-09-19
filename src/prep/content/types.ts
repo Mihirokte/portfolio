@@ -23,11 +23,21 @@ export interface Chapter {
   problemIds?: string[]
 }
 
+export interface Reference {
+  label: string
+  url: string
+}
+
 export interface Course {
   key: string // 'sd' | 'lld' | 'arch' | 'ai'
   label: string
   blurb: string
   /** Which drills.ts area supplies this course's practice problems. */
   problemAreaKey?: string
+  /** Drills fully taught by a lesson — hidden from practice AND leftovers so
+   *  the same thing isn't asked as a "problem" right after it's been taught. */
+  suppressedProblemIds?: string[]
   chapters: Chapter[]
+  /** Further-reading links shown at the bottom of the course page. */
+  references?: Reference[]
 }

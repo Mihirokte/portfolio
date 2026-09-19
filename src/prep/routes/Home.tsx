@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { AREAS } from '../data/drills'
-import { COURSES } from '../content'
+import { COURSES, findCourse } from '../content'
+import { HOME_AREAS } from '../areas'
 import { exportProgress, readProgressFile } from '../storage'
 import { importAll } from '../store/progressSlice'
 import { useAppDispatch, useAppSelector } from '../store'
@@ -11,39 +12,49 @@ export default function Home() {
   const dispatch = useAppDispatch()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const lessonTotal = COURSES.reduce(
-    (n, c) => n + c.chapters.reduce((m, ch) => m + ch.lessons.length, 0),
-    0,
-  )
-  const lessonsRead = Object.values(progress.lessons).filter((l) => l.status === 'read').length
-  const problemTotal = AREAS.reduce((n, a) => n + a.drills.length, 0)
-  const solved = Object.values(progress.problems).filter((p) => p.status === 'solved').length
+  const areaProgress = (key: string, kind: string): { label: string; pct: number } => {
+    if (kind === 'problems') {
+      const drills = AREAS.find((a) => a.key === key)?.drills ?? []
+      const solved = drills.filter((d) => progress.problems[d.id]?.status === 'solved').length
+      return {
+        label: `${solved}/${drills.length} solved`,
+        pct: drills.length ? Math.round((solved / drills.length) * 100) : 0,
+      }
+    }
+    const course = findCourse(key)
+    const total = course?.chapters.reduce((m, ch) => m + ch.lessons.length, 0) ?? 0
+    const read =
+      course?.chapters.reduce(
+        (m, ch) => m + ch.lessons.filter((l) => progress.lessons[l.id]?.status === 'read').length,
+        0,
+      ) ?? 0
+    return { label: `${read}/${total} lessons read`, pct: total ? Math.round((read / total) * 100) : 0 }
+  }
 
   return (
     <div className="page">
       <h1>prep</h1>
       <p className="sub">
-        Learn the concepts in small lessons, then drill the problems that go with them. Everything —
-        what you've read, what you've solved, your notes — is saved in this browser only.
+        Pick an area. DSA goes straight to problems; the rest teach the concepts first, then their
+        practice. Everything — what you've read, solved, and noted — is saved in this browser only.
       </p>
 
-      <div className="split">
-        <a className="glass-card big-card" href="#/study">
-          <h2>study</h2>
-          <p className="meta">Read the concepts, then their practice problems, in order.</p>
-          <Bar value={lessonTotal ? Math.round((lessonsRead / lessonTotal) * 100) : 0} />
-          <span className="meta">
-            {lessonsRead}/{lessonTotal} lessons read
-          </span>
-        </a>
-        <a className="glass-card big-card" href="#/gym">
-          <h2>problems</h2>
-          <p className="meta">Jump straight to the problem bank. Syntax-check here, judge on LeetCode.</p>
-          <Bar value={problemTotal ? Math.round((solved / problemTotal) * 100) : 0} />
-          <span className="meta">
-            {solved}/{problemTotal} solved
-          </span>
-        </a>
+      <div className="area-grid">
+        {HOME_AREAS.map((a) => {
+          const p = areaProgress(a.key, a.kind)
+          return (
+            <a key={a.key} className="glass-card area-card" href={a.href}>
+              <div className="card-head">
+                <h3>{a.label}</h3>
+                <span className="meta">
+                  {a.kind === 'problems' ? 'problems' : 'study'} · {p.label}
+                </span>
+              </div>
+              <p className="meta blurb">{a.blurb}</p>
+              <Bar value={p.pct} />
+            </a>
+          )
+        })}
       </div>
 
       <div className="data-row">
@@ -63,6 +74,9 @@ export default function Home() {
             if (f) readProgressFile(f).then((p) => dispatch(importAll(p)))
           }}
         />
+        <span className="meta count-note">
+          {COURSES.length} study areas · {AREAS.reduce((n, a) => n + a.drills.length, 0)} problems
+        </span>
       </div>
     </div>
   )

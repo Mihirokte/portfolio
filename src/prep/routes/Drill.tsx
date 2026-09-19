@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PACKS } from '../data/packs'
-import { drillById, drillsForArea } from '../selectors'
+import { drillById } from '../selectors'
 import { AREAS } from '../data/drills'
 import { validator, type JudgeState, type ValidateOutcome } from '../judge'
 import { useAppDispatch, useAppSelector } from '../store'
@@ -129,11 +129,12 @@ export function DrillPage({ id }: { id: string }) {
   }, [id])
   if (!drill) return <NotFound />
   const problem = PACKS[id]
-  const areaLabel = drillsForArea(areaKey).length ? AREAS.find((a) => a.key === areaKey)?.label : undefined
+  // DSA drills return to the DSA list; study-course drills return to the course page.
+  const back = areaKey === 'dsa' ? { href: '#/dsa', label: 'DSA' } : areaKey ? { href: `#/study/${areaKey}`, label: 'course' } : { href: '#/', label: 'home' }
   return (
     <div className="page wide">
-      <a className="crumb" href={areaKey ? `#/gym/${areaKey}` : '#/gym'}>
-        ← {areaLabel ?? 'problems'}
+      <a className="crumb" href={back.href}>
+        ← {back.label}
       </a>
       <div className="drill-title-row">
         <h1>{drill.title}</h1>

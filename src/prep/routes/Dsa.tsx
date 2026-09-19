@@ -1,63 +1,39 @@
 import { useState } from 'react'
 import { AREAS } from '../data/drills'
-import { PACKS } from '../data/packs'
 import { useAppSelector } from '../store'
-import { Bar, ProblemRow } from '../components/ui'
+import { ProblemRow } from '../components/ui'
 import { NotFound } from '../components/nav'
 
-export function GymHome() {
+// DSA is drill-only. This is its problem list, reached from the home grid.
+export function DsaList() {
+  const area = AREAS.find((a) => a.key === 'dsa')
   const problems = useAppSelector((s) => s.progress.problems)
+  const [q, setQ] = useState('')
+  const [diff, setDiff] = useState('all')
+  const [st, setSt] = useState('all')
+  const [topic, setTopic] = useState('all')
+  if (!area) return <NotFound />
+
+  const topics = [...new Set(area.drills.map((d) => d.topic))].sort()
+  const drills = area.drills.filter((d) => {
+    const status = problems[d.id]?.status ?? 'none'
+    if (diff !== 'all' && d.difficulty.toLowerCase() !== diff) return false
+    if (st !== 'all' && status !== st) return false
+    if (topic !== 'all' && d.topic !== topic) return false
+    if (q && !(d.title + ' ' + d.topic).toLowerCase().includes(q.toLowerCase())) return false
+    return true
+  })
+  const solved = area.drills.filter((d) => problems[d.id]?.status === 'solved').length
+
   return (
     <div className="page">
       <a className="crumb" href="#/">
         ← home
       </a>
-      <h1>problems</h1>
+      <h1>DSA</h1>
       <p className="sub">
-        {Object.keys(PACKS).length} problems have a syntax-checkable editor; the rest track your
-        progress and link out. Real judging happens on LeetCode.
+        {solved}/{area.drills.length} solved. Write and syntax-check here, judge on LeetCode.
       </p>
-      <div className="area-grid">
-        {AREAS.map((a) => {
-          const solved = a.drills.filter((d) => problems[d.id]?.status === 'solved').length
-          const touched = a.drills.filter((d) => problems[d.id] && problems[d.id].status !== 'none').length
-          return (
-            <a key={a.key} className="glass-card area-card" href={`#/gym/${a.key}`}>
-              <div className="card-head">
-                <h3>{a.label}</h3>
-                <span className="meta">
-                  {solved}/{a.drills.length} solved · {touched} touched
-                </span>
-              </div>
-              <Bar value={a.drills.length ? Math.round((solved / a.drills.length) * 100) : 0} />
-            </a>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-export function AreaList({ areaKey }: { areaKey: string }) {
-  const area = AREAS.find((a) => a.key === areaKey)
-  const problems = useAppSelector((s) => s.progress.problems)
-  const [q, setQ] = useState('')
-  const [diff, setDiff] = useState('all')
-  const [st, setSt] = useState('all')
-  if (!area) return <NotFound />
-  const drills = area.drills.filter((d) => {
-    const status = problems[d.id]?.status ?? 'none'
-    if (diff !== 'all' && d.difficulty.toLowerCase() !== diff) return false
-    if (st !== 'all' && status !== st) return false
-    if (q && !(d.title + ' ' + d.topic).toLowerCase().includes(q.toLowerCase())) return false
-    return true
-  })
-  return (
-    <div className="page">
-      <a className="crumb" href="#/gym">
-        ← problems
-      </a>
-      <h1>{area.label}</h1>
       <div className="filters">
         <input
           className="search"
@@ -65,6 +41,14 @@ export function AreaList({ areaKey }: { areaKey: string }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+        <select value={topic} onChange={(e) => setTopic(e.target.value)}>
+          <option value="all">any topic</option>
+          {topics.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
         <select value={diff} onChange={(e) => setDiff(e.target.value)}>
           <option value="all">any difficulty</option>
           <option value="easy">easy</option>

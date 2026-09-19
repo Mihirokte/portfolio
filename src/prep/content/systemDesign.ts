@@ -9,6 +9,10 @@ export const systemDesign: Course = {
   key: 'sd',
   label: 'System Design',
   problemAreaKey: 'sd',
+  // These drills just ask you to recite what a lesson already teaches 1:1
+  // (CAP split, caching strategy, rate-limit algorithms, SQL-vs-NoSQL,
+  // vector-DB decision) — hidden so we don't re-ask a concept right after it.
+  suppressedProblemIds: ['sd-015', 'sd-016', 'sd-019', 'sd-020', 'sd-025'],
   blurb:
     'How to walk from a vague prompt to a defensible design, plus the fundamentals every box on your diagram rests on. Built for an SDE2-level round.',
   chapters: [
@@ -85,7 +89,7 @@ If the math doesn't move a box on your diagram, don't do it.`,
       id: 'sd-fundamentals',
       title: 'Fundamentals',
       summary: 'The building blocks every design rests on — enough to explain any box you draw.',
-      problemIds: ['sd-016', 'sd-020', 'sd-017', 'sd-018', 'sd-015', 'sd-022', 'sd-023', 'sd-019'],
+      problemIds: ['sd-017', 'sd-018', 'sd-022', 'sd-023'],
       lessons: [
         {
           id: 'sd-caching',
@@ -216,7 +220,7 @@ Where it lives: at the edge (API gateway) for coarse per-client limits, and some
       id: 'sd-building-blocks',
       title: 'Reusable building blocks',
       summary: 'Components that recur across designs — recognise them so you assemble instead of invent.',
-      problemIds: ['sd-024', 'sd-025', 'sd-013'],
+      problemIds: ['sd-024', 'sd-013'],
       lessons: [
         {
           id: 'sd-id-generation',
@@ -309,5 +313,13 @@ Most interviews don't need HNSW internals. They want to see that you know **when
         },
       ],
     },
+  ],
+  references: [
+    { label: 'Hello Interview — System Design in a Hurry', url: 'https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction' },
+    { label: 'Hello Interview — Delivery Framework', url: 'https://www.hellointerview.com/learn/system-design/in-a-hurry/delivery' },
+    { label: 'The System Design Interview: What is Expected at Each Level (Evan King)', url: 'https://www.hellointerview.com/blog/the-system-design-interview-what-is-expected-at-each-level' },
+    { label: 'donnemartin/system-design-primer (GitHub)', url: 'https://github.com/donnemartin/system-design-primer' },
+    { label: 'Designing Data-Intensive Applications (Kleppmann)', url: 'https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/' },
+    { label: 'ByteByteGo', url: 'https://bytebytego.com/' },
   ],
 }
