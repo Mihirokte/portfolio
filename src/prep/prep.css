@@ -217,3 +217,7 @@ details summary { font-family: 'IBM Plex Mono', monospace; font-size: 13px; colo
 }
 
 .step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: var(--s2); border-radius: 50%; background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); font-family: 'IBM Plex Mono', monospace; font-size: 12px; vertical-align: middle; }
+
+.solution { border: 1px solid color-mix(in srgb, var(--mint) 30%, transparent); border-radius: 12px; padding: var(--s3) var(--s4); background: color-mix(in srgb, var(--purple) 14%, transparent); }
+.solution > summary { color: var(--mint); font-weight: 600; }
+.solution .md { margin-top: var(--s3); }

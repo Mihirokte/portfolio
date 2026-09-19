@@ -104,6 +104,7 @@ function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
 }
 
 function DrillView({ drill }: { drill: Drill }) {
+  const [showSolution, setShowSolution] = useState(false)
   return (
     <div className="drill-detail glass-card">
       <pre className="desc">{mdLite(drill.prompt)}</pre>
@@ -117,6 +118,16 @@ function DrillView({ drill }: { drill: Drill }) {
       )}
       <ProblemStatusBar id={drill.id} />
       <ProblemNotes id={drill.id} />
+      {drill.solution && (
+        <details
+          className="solution"
+          open={showSolution}
+          onToggle={(e) => setShowSolution(e.currentTarget.open)}
+        >
+          <summary>{showSolution ? 'hide solution' : 'show solution'}</summary>
+          {showSolution && <Markdown body={drill.solution} />}
+        </details>
+      )}
     </div>
   )
 }

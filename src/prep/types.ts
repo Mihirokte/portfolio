@@ -6,6 +6,9 @@ export interface Drill {
   prompt: string
   link: string
   notes: string
+  /** Detailed markdown walkthrough, revealed on demand. Only uses concepts
+   *  taught in the area's lessons; may reference them by name. */
+  solution?: string
 }
 
 export interface Area {
