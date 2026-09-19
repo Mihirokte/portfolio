@@ -8,6 +8,7 @@ import type { Course } from './types'
 export const systemDesign: Course = {
   key: 'sd',
   label: 'System Design',
+  problemAreaKey: 'sd',
   blurb:
     'How to walk from a vague prompt to a defensible design, plus the fundamentals every box on your diagram rests on. Built for an SDE2-level round.',
   chapters: [
@@ -15,6 +16,7 @@ export const systemDesign: Course = {
       id: 'sd-interview',
       title: 'The interview itself',
       summary: 'What the round actually measures at mid-level, and a time-boxed way to run it.',
+      problemIds: ['sd-021'],
       lessons: [
         {
           id: 'sd-what-is-measured',
@@ -83,6 +85,7 @@ If the math doesn't move a box on your diagram, don't do it.`,
       id: 'sd-fundamentals',
       title: 'Fundamentals',
       summary: 'The building blocks every design rests on — enough to explain any box you draw.',
+      problemIds: ['sd-016', 'sd-020', 'sd-017', 'sd-018', 'sd-015', 'sd-022', 'sd-023', 'sd-019'],
       lessons: [
         {
           id: 'sd-caching',
@@ -213,6 +216,7 @@ Where it lives: at the edge (API gateway) for coarse per-client limits, and some
       id: 'sd-building-blocks',
       title: 'Reusable building blocks',
       summary: 'Components that recur across designs — recognise them so you assemble instead of invent.',
+      problemIds: ['sd-024', 'sd-025', 'sd-013'],
       lessons: [
         {
           id: 'sd-id-generation',

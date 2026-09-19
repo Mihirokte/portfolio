@@ -48,12 +48,12 @@ export default function SequenceDiagram({ chart }: { chart: string }): JSX.Eleme
   const { actors, steps } = parse(chart)
   if (actors.length === 0) return <pre className="desc code">{chart}</pre>
 
-  const colW = 150
-  const padX = 20
-  const headerH = 44
-  const rowH = 52
+  const colW = 118
+  const padX = 14
+  const headerH = 38
+  const rowH = 40
   const width = padX * 2 + colW * Math.max(actors.length, 1)
-  const height = headerH + rowH * steps.length + 30
+  const height = headerH + rowH * steps.length + 24
   const lifeX = (name: string) => padX + colW * actors.indexOf(name) + colW / 2
 
   return (
