@@ -1,20 +1,20 @@
-import type { Problem, RunOutcome, TestResult } from './types'
-
 export type JudgeState = 'booting' | 'ready' | 'failed'
 
-type Pending = {
-  resolve: (o: RunOutcome) => void
-  timer: ReturnType<typeof setTimeout>
-}
+export type ValidateOutcome =
+  | { status: 'ok'; message: string; stdout: string }
+  | { status: 'invalid'; message: string }
+  | { status: 'timeout' }
+  | { status: 'error'; message: string }
 
-const BOOT_BUDGET_MS = 120_000 // first visit downloads the Python runtime (~10 MB)
+const BOOT_BUDGET_MS = 120_000
 
-/** Wraps the Pyodide worker. The execution timeout only starts AFTER the
- * runtime is booted; timeout = terminate + respawn (works even when user
- * code is stuck in an infinite loop — no SharedArrayBuffer needed). */
-export class Judge {
+/** Lightweight Python validator: compiles the code (catches syntax/indent
+ * errors) and, when an expected symbol is given, checks it's defined and
+ * callable. NO correctness judging — paste into LeetCode for that. */
+export class Validator {
   private worker: Worker | null = null
-  private pending = new Map<string, Pending>()
+  private pending = new Map<string, (o: ValidateOutcome) => void>()
+  private timers = new Map<string, ReturnType<typeof setTimeout>>()
   private seq = 0
   private ready: Promise<void> = Promise.resolve()
   private readyOk: (() => void) | null = null
@@ -27,7 +27,7 @@ export class Judge {
     this.spawn()
   }
 
-  private setState(s: JudgeState): void {
+  private setState(s: JudgeState) {
     this.state = s
     this.onState(s)
   }
@@ -38,32 +38,25 @@ export class Judge {
       this.readyOk = ok
       this.readyFail = fail
     })
-    this.ready.catch(() => {}) // avoid unhandled rejection when nobody awaits
-    this.worker = new Worker(`${import.meta.env.BASE_URL}prep/judge-worker.js`)
+    this.ready.catch(() => {})
+    this.worker = new Worker(`${import.meta.env.BASE_URL}prep/validate-worker.js`)
     this.worker.onmessage = (e: MessageEvent) => {
       const msg = e.data
-      if (msg.type === 'ready') {
-        this.setState('ready')
-        this.readyOk?.()
-        return
-      }
-      if (msg.type === 'boot_error') {
-        this.setState('failed')
-        this.readyFail?.(new Error(msg.message as string))
-        return
-      }
-      const p = this.pending.get(msg.id)
-      if (!p) return
+      if (msg.type === 'ready') return this.setState('ready'), this.readyOk?.()
+      if (msg.type === 'boot_error')
+        return this.setState('failed'), this.readyFail?.(new Error(msg.message))
+      const resolve = this.pending.get(msg.id)
+      if (!resolve) return
       this.pending.delete(msg.id)
-      clearTimeout(p.timer)
-      if (msg.type === 'result') p.resolve({ status: 'ok', results: msg.results as TestResult[] })
-      else p.resolve({ status: 'error', message: msg.message as string })
+      const timer = this.timers.get(msg.id)
+      if (timer) clearTimeout(timer)
+      this.timers.delete(msg.id)
+      resolve(msg.outcome as ValidateOutcome)
     }
   }
 
-  async run(code: string, problem: Problem, timeoutMs = 15000): Promise<RunOutcome> {
+  async validate(code: string, expectSymbol?: string, timeoutMs = 10000): Promise<ValidateOutcome> {
     this.start()
-    // Wait for the runtime itself first — booting is not the user's code.
     try {
       await Promise.race([
         this.ready,
@@ -75,30 +68,26 @@ export class Judge {
       return {
         status: 'error',
         message:
-          'The Python runtime could not load (' +
+          'Python runtime could not load (' +
           (e instanceof Error ? e.message : String(e)) +
-          '). Check your connection and reload the page.',
+          '). Check your connection and reload.',
       }
     }
     const id = String(++this.seq)
-    return new Promise<RunOutcome>((resolve) => {
+    return new Promise<ValidateOutcome>((resolve) => {
       const timer = setTimeout(() => {
         this.pending.delete(id)
-        // A stuck run means a stuck interpreter: kill the worker, respawn.
+        this.timers.delete(id)
         this.worker?.terminate()
         this.worker = null
-        for (const [pid, pp] of this.pending) {
-          clearTimeout(pp.timer)
-          pp.resolve({ status: 'error', message: 'cancelled by a timed-out run' })
-          this.pending.delete(pid)
-        }
         this.spawn()
         resolve({ status: 'timeout' })
       }, timeoutMs)
-      this.pending.set(id, { resolve, timer })
-      this.worker!.postMessage({ type: 'run', id, code, problem })
+      this.pending.set(id, resolve)
+      this.timers.set(id, timer)
+      this.worker!.postMessage({ type: 'validate', id, code, expectSymbol })
     })
   }
 }
 
-export const judge = new Judge()
+export const validator = new Validator()

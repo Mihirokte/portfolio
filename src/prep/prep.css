@@ -122,3 +122,67 @@ h1 { font-family: Orbitron, sans-serif; font-size: clamp(26px, 4vw, 40px); margi
 details summary { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--mint); cursor: pointer; margin-bottom: 8px; }
 .drill-detail { margin-top: 6px; }
 .hint { margin-top: 16px; }
+
+/* ---- topbar + tabs ---- */
+.topbar { display: flex; align-items: center; gap: 18px; padding: 4px 0 22px; flex-wrap: wrap; }
+.brand { font-family: Orbitron, sans-serif; font-size: 18px; color: var(--gold); text-decoration: none; letter-spacing: 0.08em; }
+.tabs { display: flex; gap: 8px; }
+.tab { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: color-mix(in srgb, var(--cream) 65%, transparent); text-decoration: none; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; }
+.tab.on { color: var(--space); background: var(--mint); }
+.tab:not(.on):hover { border-color: color-mix(in srgb, var(--cream) 25%, transparent); }
+.home-link { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--mint); text-decoration: none; }
+
+/* ---- home split ---- */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.big-card h2 { font-family: Orbitron, sans-serif; margin: 0 0 6px; }
+.big-card { transition: border-color 0.15s; }
+.big-card:hover { border-color: var(--gold); }
+.big-card .bar { margin: 12px 0 8px; }
+.data-row { margin-top: 8px; }
+.blurb { margin: 6px 0 12px; }
+.soon { opacity: 0.7; }
+
+/* ---- study: chapters + lessons ---- */
+.chapter { margin: 26px 0; }
+.chapter-head { display: flex; align-items: baseline; justify-content: space-between; }
+.chapter-head h2 { font-family: Orbitron, sans-serif; font-size: 20px; margin: 0; }
+.lesson-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.lesson-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; }
+.lesson-row:hover { border-color: var(--gold); }
+
+.lesson-page { max-width: 760px; }
+.lesson-notes { margin-top: 26px; }
+.lesson-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.cta.done { border-color: var(--mint); color: var(--mint); }
+
+/* ---- markdown ---- */
+.md { line-height: 1.7; font-size: 15.5px; color: color-mix(in srgb, var(--cream) 90%, transparent); }
+.md h2 { font-family: Orbitron, sans-serif; font-size: 19px; margin: 26px 0 10px; }
+.md h3 { font-size: 16px; margin: 20px 0 8px; }
+.md p { margin: 12px 0; }
+.md ul, .md ol { padding-left: 22px; }
+.md li { margin: 6px 0; }
+.md strong { color: var(--cream); }
+.md a { color: var(--mint); }
+.inline-code { font-family: 'IBM Plex Mono', monospace; font-size: 0.88em; background: color-mix(in srgb, var(--purple) 40%, transparent); padding: 1px 6px; border-radius: 5px; color: var(--gold); }
+.md-pre { background: color-mix(in srgb, var(--purple) 22%, transparent); border: 1px solid color-mix(in srgb, var(--cream) 12%, transparent); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: 13px; }
+.md table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14px; display: block; overflow-x: auto; }
+.md th, .md td { border: 1px solid color-mix(in srgb, var(--cream) 14%, transparent); padding: 8px 12px; text-align: left; }
+.md th { color: var(--mint); font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
+.mermaid-diagram { margin: 18px 0; overflow-x: auto; text-align: center; }
+.mermaid-diagram svg { max-width: 100%; height: auto; }
+
+/* ---- mobile ---- */
+@media (max-width: 720px) {
+  .prep-root { padding: 20px 14px 72px; }
+  h1 { font-size: 26px; }
+  .split { grid-template-columns: 1fr; }
+  .area-grid { grid-template-columns: 1fr; }
+  .topbar { gap: 12px; row-gap: 8px; }
+  .home-link { margin-left: 0; }
+  .topic { display: none; }
+  .drill-row { flex-wrap: wrap; }
+  .md table { font-size: 13px; }
+  .editor-host .cm-editor { min-height: 240px; }
+}
+.seqdiagram { margin: 18px 0; overflow-x: auto; background: color-mix(in srgb, var(--purple) 16%, transparent); border: 1px solid color-mix(in srgb, var(--cream) 10%, transparent); border-radius: 12px; padding: 10px; }
