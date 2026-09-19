@@ -361,6 +361,62 @@ Strategies, with a practical split:
         },
       ],
     },
+    {
+      id: 'arch-messaging',
+      title: 'Messaging & event flow',
+      summary: 'How services talk asynchronously — and what goes wrong when they do.',
+      lessons: [
+        {
+          id: 'arch-queues-pubsub',
+          title: 'Message queues vs pub/sub',
+          minutes: 5,
+          body: `Both decouple a sender from a receiver so work happens asynchronously, but they differ in *who gets the message*.
+
+A **message queue** (point-to-point) delivers each message to exactly **one** consumer. Many workers can read from the same queue, but a given message is processed once — this is **work distribution**. Use it to spread a backlog of tasks (send email, resize image) across a worker pool. SQS, RabbitMQ.
+
+**Pub/sub** (publish-subscribe) delivers each message to **every** subscriber. The publisher doesn't know who's listening; N independent consumers each get their own copy. Use it for **event fan-out** — one "order placed" event feeds billing, inventory, and analytics, each reacting independently. Kafka topics, SNS, Google Pub/Sub.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant P as Publisher
+    participant T as Topic
+    participant Billing
+    participant Inventory
+    participant Analytics
+    P->>T: "order placed"
+    T->>Billing: event copy
+    T->>Inventory: event copy
+    T->>Analytics: event copy
+\`\`\`
+
+The interview distinction: "one consumer does this work" → queue; "many systems need to know this happened" → pub/sub. Kafka blurs the line — it's a durable log where **consumer groups** give you queue semantics (one group = one logical consumer) while multiple groups give you pub/sub.`,
+        },
+        {
+          id: 'arch-backpressure-dlq',
+          title: 'Backpressure & dead letter queues',
+          minutes: 4,
+          body: `Async messaging introduces two failure modes you must answer for.
+
+**Backpressure** — what happens when producers outpace consumers? Messages pile up. A little buffering is the *point* of a queue (it absorbs bursts), but unbounded growth means rising latency and eventual memory/disk exhaustion. Handling it: let the queue buffer bursts, **scale consumers** when depth grows (autoscale on queue length), and if the source is synchronous, **shed load** — reject or slow producers rather than fall over. The anti-pattern is pretending the queue is infinite.
+
+**Dead letter queue (DLQ)** — what happens to a message that keeps failing? A consumer that can't process a message (bad data, downstream is down) shouldn't retry it forever and block the queue, nor drop it silently. After N failed attempts the message is moved to a **dead letter queue** — a side queue for poison messages.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Q as Main queue
+    participant W as Worker
+    participant DLQ as Dead letter queue
+    Q->>W: message (attempt 1)
+    W-->>Q: fail, requeue
+    Q->>W: message (attempt 2, 3…)
+    W-->>DLQ: still failing → move to DLQ
+    Note over DLQ: inspect, fix, replay later
+\`\`\`
+
+The DLQ turns "a bad message silently wedges the pipeline" into "a bad message is set aside for a human to inspect and replay" — which is why it's a standard part of any serious queue design. Pair it with idempotent consumers, since at-least-once delivery means the same message can arrive twice.`,
+        },
+      ],
+    },
   ],
   references: [
     { label: 'Martin Fowler — CQRS', url: 'https://martinfowler.com/bliki/CQRS.html' },

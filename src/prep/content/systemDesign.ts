@@ -313,6 +313,150 @@ Most interviews don't need HNSW internals. They want to see that you know **when
         },
       ],
     },
+    {
+      id: 'sd-request-path',
+      title: 'Networking & the request path',
+      summary: 'Everything a request passes through between the user and your service.',
+      lessons: [
+        {
+          id: 'sd-load-balancing',
+          title: 'Load balancers & reverse proxies',
+          minutes: 5,
+          body: `A **reverse proxy** sits in front of your servers and forwards client requests to them. The client only ever talks to the proxy. That one indirection buys a lot: TLS termination, caching, compression, request routing, and hiding your internal topology. Nginx and Envoy are the common ones.
+
+A **load balancer** is a reverse proxy whose main job is spreading traffic across many identical servers so no one is overwhelmed. Two layers:
+
+- **L4** (transport) — routes by IP/port without looking at the request. Fast, protocol-agnostic.
+- **L7** (application) — reads the HTTP request and can route by path, header, or cookie (e.g. \`/api\` to one pool, \`/img\` to another). More capable, slightly more work per request.
+
+Balancing algorithms worth naming: **round-robin** (simple), **least-connections** (favours idle servers — good for uneven request costs), and **consistent hashing** (sticks a given key to the same server — important for caches, covered later).
+
+The interview point: a load balancer also does **health checks** and stops sending traffic to a server that fails them — that's how it gives you availability, not just distribution.`,
+        },
+        {
+          id: 'sd-gateway-discovery',
+          title: 'API gateways & service discovery',
+          minutes: 4,
+          body: `An **API gateway** is an L7 reverse proxy specialised for API traffic. It's the single front door to a set of services and centralises the cross-cutting work you don't want in every service: authentication, rate limiting, request routing, API-key checks, and request/response shaping. In a microservices system, the gateway is what the outside world hits; it fans requests out to internal services.
+
+Don't confuse it with a **load balancer**: the LB spreads traffic across copies of *one* service; the gateway routes across *different* services and enforces policy. They're often layered — gateway behind an LB.
+
+**Service discovery** solves a related problem: in a dynamic system, service instances come and go (autoscaling, deploys, crashes) and their IPs change. Instead of hard-coding addresses, instances **register** themselves in a registry (Consul, etcd, or your platform's built-in DNS), and callers **look up** healthy instances by name.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Svc as New instance
+    participant Reg as Registry
+    participant Caller
+    Svc->>Reg: register "orders" @ 10.0.1.7 (healthy)
+    Caller->>Reg: where is "orders"?
+    Reg-->>Caller: 10.0.1.7, 10.0.1.9
+    Caller->>Svc: request
+\`\`\`
+
+Kubernetes bundles this in: a Service name resolves via cluster DNS to healthy pods, so app code just calls \`http://orders\`.`,
+        },
+        {
+          id: 'sd-cdn-dns',
+          title: 'CDNs, edge caching & DNS',
+          minutes: 4,
+          body: `A **CDN** (Content Delivery Network) is a globally distributed set of caches. You push static assets — images, video, JS/CSS, sometimes cached API responses — to it, and users are served from a **point of presence** physically near them instead of your origin. That cuts latency (fewer, shorter network hops) and offloads huge read traffic from your servers. **Edge caching** is the general idea: cache as close to the user as possible.
+
+The cost is the same as any cache: **invalidation**. When you change an asset, edges may still serve the old copy until its TTL expires — the standard fix is content-hashed filenames (\`app.9f3a.js\`) so a new version is a new URL.
+
+**DNS** is the internet's lookup layer: it turns a name (\`api.example.com\`) into an IP. It matters in system design for two reasons: it's the *first* hop of every request (a slow or failed DNS resolution stalls everything), and it's a coarse routing tool — **geo-DNS** can return different IPs by region to send users to the nearest data centre, and DNS-level failover can redirect traffic away from a dead region. TTLs on DNS records trade propagation speed against lookup load.`,
+        },
+        {
+          id: 'sd-protocols',
+          title: 'TCP/UDP, HTTP/2 & 3, gRPC, webhooks',
+          minutes: 5,
+          body: `**TCP vs UDP** — TCP is reliable, ordered, connection-oriented (handshake, retransmits, congestion control): the default for anything that must arrive intact. UDP is fire-and-forget: no handshake, no ordering, no retransmit — you accept loss for lower latency. Use UDP for real-time media, gaming, DNS queries; TCP for basically everything else.
+
+**HTTP versions** — HTTP/1.1 opens roughly one request per connection and suffers head-of-line blocking. **HTTP/2** multiplexes many streams over one TCP connection (big win for many small assets). **HTTP/3** runs over **QUIC** (built on UDP) and removes TCP's head-of-line blocking entirely, so a single lost packet doesn't stall unrelated streams — noticeably better on flaky mobile networks.
+
+**gRPC** — a high-performance RPC framework over HTTP/2 using Protocol Buffers (compact binary, schema-defined). It's the usual choice for **internal service-to-service** calls: fast, strongly typed, supports streaming. Less suited to public browser-facing APIs (REST/JSON is friendlier there).
+
+**Webhooks** — the inverse of polling. Instead of you repeatedly asking "any updates?", the other system **calls you** at a URL you registered when an event happens (payment succeeded, PR merged). Cheaper and near-real-time. The catches: you must verify the caller (signatures), and delivery is at-least-once, so your handler must be **idempotent** and you should return quickly (do heavy work async).`,
+        },
+      ],
+    },
+    {
+      id: 'sd-data-at-scale',
+      title: 'The data layer at scale',
+      summary: 'What breaks in the database first, and the moves that keep reads and writes fast.',
+      lessons: [
+        {
+          id: 'sd-indexing',
+          title: 'Indexing, query optimization & N+1',
+          minutes: 5,
+          body: `An **index** is a secondary data structure (usually a B-tree) that lets the database find rows without scanning the whole table. A query filtering on an unindexed column does a **full table scan** — fine at 1,000 rows, fatal at 100M. The interview reflex: any column you filter, join, or sort on frequently probably needs an index.
+
+Indexes aren't free — each one slows writes (every insert/update must maintain it) and uses space, so you index deliberately, not everywhere. A **composite index** on \`(a, b)\` also serves queries on \`a\` alone (leftmost-prefix rule) but not \`b\` alone.
+
+**Query optimization** starts with reading the query plan (\`EXPLAIN\`): is it using the index or scanning? Common wins: add the missing index, select only needed columns, avoid functions on indexed columns (they defeat the index), paginate with a cursor instead of a huge \`OFFSET\`.
+
+The **N+1 query** problem is the one that bites everyone: you fetch N parent rows, then fire one more query *per row* to load its children — 1 + N round trips.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant App
+    participant DB
+    App->>DB: SELECT * FROM posts (N rows)
+    DB-->>App: N posts
+    App->>DB: SELECT author WHERE post=1
+    App->>DB: SELECT author WHERE post=2
+    Note over App,DB: …N more round trips
+\`\`\`
+
+Fix it with a **join** or a single batched \`WHERE id IN (…)\` — turning N+1 queries into 1 or 2. ORMs cause this silently; the fix is eager-loading.`,
+        },
+        {
+          id: 'sd-connection-replicas',
+          title: 'Connection pooling & read replicas',
+          minutes: 4,
+          body: `Opening a database connection is expensive (TCP + auth + session setup), and databases cap how many can be open at once. A **connection pool** keeps a set of open connections and hands them out to requests, returning them when done. Without it, a traffic spike opens thousands of connections and the database falls over. The pool size is a real tuning knob: too small and requests queue; too large and you exhaust the DB's limit.
+
+**Read replicas** attack a different problem: read-heavy load. You keep one **primary** that takes all writes, and stream its changes to one or more **replicas** that serve reads. Reads scale horizontally by adding replicas; the primary is freed up for writes.
+
+The catch is **replication lag** — a replica may be milliseconds-to-seconds behind, so a user who just wrote and immediately reads from a replica might not see their own change ("read-your-writes" violation). Fixes: route that user's reads to the primary briefly, or read from the primary for read-after-write paths. Name this trade-off when you propose replicas — it's the follow-up the interviewer is waiting for.`,
+        },
+        {
+          id: 'sd-locking',
+          title: 'Concurrency control: optimistic, pessimistic & distributed locks',
+          minutes: 5,
+          body: `When two requests touch the same row at once, you need a concurrency-control strategy.
+
+**Pessimistic locking** — lock the row before you touch it (\`SELECT … FOR UPDATE\`); others wait. Correct and simple, but locks hurt throughput and risk **deadlocks** if two transactions grab locks in different orders. Use when contention is high and conflicts are likely (e.g. decrementing scarce inventory).
+
+**Optimistic locking** — don't lock; assume no conflict. Read a version number with the row, and on write check the version hasn't changed (\`UPDATE … WHERE version = 7\`). If it did, someone else won — you retry. Great when conflicts are *rare*; you pay nothing in the common case.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant A as Request A
+    participant B as Request B
+    participant DB
+    A->>DB: read row (version 7)
+    B->>DB: read row (version 7)
+    A->>DB: UPDATE … WHERE version=7  → ok, now 8
+    B->>DB: UPDATE … WHERE version=7  → 0 rows! retry
+\`\`\`
+
+**Distributed locks** extend this across machines when the resource isn't a single database row (e.g. "only one worker runs this job"). Usually a key in Redis with a TTL (so a crashed holder doesn't lock forever). They're genuinely hard to get right — clock skew and lost locks cause subtle bugs — so the strong interview answer is often "avoid needing one: make the operation idempotent or partition the work so each key has a single owner."`,
+        },
+        {
+          id: 'sd-latency-multiregion',
+          title: 'Latency, tail latency & multi-region',
+          minutes: 4,
+          body: `**Latency** is time per request; **throughput** is requests per second. They're different axes — a system can be high-throughput and high-latency (a batch pipeline) or low-latency and low-throughput. Design targets should name both.
+
+The number that matters in practice is not the average but the **tail**: **p99 latency** means 99% of requests are faster than this, 1% are slower. Averages hide pain — if 1% of requests take 5 seconds, plenty of users feel it, especially since one page often makes many backend calls and waits for the slowest. Optimising the tail (p99, p999) is usually where reliability work goes. A related trap: **fan-out** amplifies tail latency — call 10 services in parallel and your latency is the *slowest* of the 10, so p99s compound.
+
+**Clock skew** — machine clocks drift apart, so "wall-clock time" can't be trusted to order events across servers. This is why distributed systems lean on logical ordering (sequence numbers, vector clocks) rather than timestamps for correctness.
+
+**Multi-region** deployment puts your system in several geographic regions for lower user latency and survival of a whole-region outage. It's a large step up in complexity — cross-region data replication, consistency, and failover — and at SDE2 level you're expected to know *when* it's warranted (global users, strict availability SLAs) and that it's not free, not to design the whole thing unprompted.`,
+        },
+      ],
+    },
   ],
   references: [
     { label: 'Hello Interview — System Design in a Hurry', url: 'https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction' },
