@@ -91,20 +91,6 @@ Objects you'll name in an interview:
 
 Two disciplines separate mature IaC from a mess: prefer **immutable infrastructure** (replace servers rather than mutating them in place, so drift can't accumulate) and never make **out-of-band manual changes** — a console edit that Terraform doesn't know about causes confusing "drift" the next plan tries to undo.`,
         },
-        {
-          id: 'ops-build-deps',
-          title: 'Build caching and dependency hell',
-          minutes: 4,
-          body: `Two everyday drags on delivery, and how teams tame them.
-
-**Build caching.** Rebuilding everything from scratch on every commit is slow and wasteful. Build systems and CI cache intermediate results keyed by their inputs — if the inputs to a step (source files, dependencies, compiler flags) haven't changed, reuse the previous output. Docker does this with layers: order your \`Dockerfile\` so slow, rarely-changing steps (installing dependencies) come *before* fast, frequently-changing ones (copying your source), and the dependency layer stays cached across builds. The failure mode is a **cache key that's too loose** (you reuse a stale result and ship a bug) or **too tight** (nothing ever hits, and caching buys you nothing).
-
-**Dependency hell.** Your app depends on libraries; those libraries depend on other libraries, and two of them may demand incompatible versions of a third — a conflict with no clean resolution. Defences:
-
-- **Lockfiles** (\`package-lock.json\`, \`poetry.lock\`, \`Cargo.lock\`) pin the *exact* resolved version of every transitive dependency, so every build and every machine installs the identical tree. This is what makes builds reproducible.
-- **Pin versions deliberately** rather than floating on "latest," so an upstream release can't silently change your build.
-- **Minimize the dependency surface** — every dependency is code you now operate, a supply-chain risk, and a future upgrade.`,
-        },
       ],
     },
     {
@@ -353,21 +339,6 @@ Common shapes, increasing in cost and complexity:
 - **Active-active** — multiple regions serve live traffic simultaneously. Best latency and utilization, but now writes can happen in two places at once, forcing you to confront conflict resolution and cross-region replication lag head-on.
 
 The physics you can't escape: the speed of light makes a synchronous, strongly-consistent write across continents slow (a round trip of ~100 ms+). So multi-region systems usually accept **eventual consistency** for most data and reserve synchronous cross-region coordination for the few things that truly need it. Data residency and regulatory rules (where user data is legally allowed to live) often drive the design as much as performance does.`,
-        },
-        {
-          id: 'ops-chaos',
-          title: 'Chaos engineering',
-          minutes: 4,
-          body: `You don't actually know your system is resilient until failure happens. Chaos engineering flips the script: instead of waiting for failure at 3 a.m., you **inject it deliberately**, during business hours, with people watching — to find weaknesses before they find you.
-
-The method is scientific, not reckless:
-
-1. **Form a hypothesis** about steady-state behaviour: "if one instance dies, error rate stays flat because the load balancer reroutes."
-2. **Inject a real failure** into a controlled scope — kill an instance, add network latency, make a dependency time out.
-3. **Observe** whether the hypothesis held.
-4. If it didn't, you found a real weakness *safely* — fix it.
-
-The disciplines that keep it safe: start in a **small blast radius** (one instance, a fraction of traffic, ideally staging first), have a **stop button** to abort instantly, and only run in production once you trust your safeguards. The famous example is Netflix's Chaos Monkey, which randomly terminates instances in production so that surviving a lost instance becomes routine rather than an emergency. The deeper payoff is cultural: teams that practice failure build systems that expect it.`,
         },
         {
           id: 'ops-cost',

@@ -217,103 +217,6 @@ Where it lives: at the edge (API gateway) for coarse per-client limits, and some
       ],
     },
     {
-      id: 'sd-building-blocks',
-      title: 'Reusable building blocks',
-      summary: 'Components that recur across designs — recognise them so you assemble instead of invent.',
-      problemIds: ['sd-024', 'sd-013'],
-      lessons: [
-        {
-          id: 'sd-id-generation',
-          title: 'Unique ID generation',
-          minutes: 3,
-          body: `You need unique ids constantly (tweets, orders, messages) and "just use auto-increment" breaks once you shard — two shards both hand out id 1001.
-
-Options:
-
-- **UUID** — 128-bit, generated anywhere with no coordination. Downside: random, so it hurts database index locality and is bulky.
-- **Snowflake (Twitter)** — the standard interview answer. A 64-bit int packed as \`timestamp | machine-id | per-ms sequence\`. No coordination needed, roughly **time-sortable** (newer ids are larger — great for feeds), compact. Each machine only needs a unique machine id.
-- **Ticket server / DB range allocation** — a central service hands out blocks of ids to each node; nodes burn through their block locally. Simple, but the allocator is a dependency.
-
-The winning move is usually Snowflake, and the reason to say is "time-sortable + no coordination," which is what makes it fit feeds and logs.`,
-        },
-        {
-          id: 'sd-fanout',
-          title: 'Feed fan-out: push vs pull',
-          minutes: 5,
-          body: `The canonical design tension behind news feeds, timelines, and notifications. When someone posts, how do their followers see it?
-
-**Fan-out on write (push):** when you post, immediately write the post id into every follower's precomputed feed. Reads are then trivial — just read your own feed list.
-
-\`\`\`mermaid
-sequenceDiagram
-    participant Poster
-    participant Service
-    participant F1 as Follower feeds
-    Poster->>Service: new post
-    Service->>F1: insert post id into each follower's feed
-    Note over F1: read is cheap later
-\`\`\`
-
-Great for read-heavy timelines — until a celebrity with 50M followers posts, and one write becomes 50M writes (the **hot-key / fan-out storm** problem).
-
-**Fan-out on read (pull):** store the post once. When a follower opens their feed, gather recent posts from everyone they follow and merge. Cheap writes, expensive reads.
-
-**The real answer is hybrid:** push for normal users (cheap fan-out, fast reads), pull for the handful of celebrities (avoid the storm), and merge the two at read time. Naming this hybrid — and *why* — is what separates a mid-level answer from a strong one.`,
-        },
-        {
-          id: 'sd-realtime',
-          title: 'Real-time delivery',
-          minutes: 4,
-          body: `When the server must push to the client (chat, presence, live scores, collaborative editing), polling wastes requests. Options, weakest to strongest:
-
-- **Short polling** — client asks every N seconds. Simple, laggy, wasteful.
-- **Long polling** — client asks, server holds the request open until there's data. Better, still HTTP-request-shaped.
-- **WebSockets** — a persistent bidirectional connection. The standard answer for chat and live updates.
-- **Server-Sent Events (SSE)** — one-way server→client stream over HTTP. Lighter than WebSockets when you don't need client→server on the same channel (good for live feeds/notifications).
-
-The scaling wrinkle interviewers probe: **connections are stateful**. A user's WebSocket lives on one specific server, so to deliver a message you must route it to the right server. That needs a **connection registry** (which user is on which server, e.g. in Redis) and often a pub/sub layer so any server can publish to the server holding the target connection.`,
-        },
-        {
-          id: 'sd-search',
-          title: 'Search and the inverted index',
-          minutes: 3,
-          body: `"Let users search posts by keyword" quietly means full-text search, and a \`LIKE '%term%'\` scan won't scale.
-
-The core structure is an **inverted index**: instead of doc → words, you store word → list of docs containing it. A search then intersects the doc lists for the query terms. This is what Elasticsearch / OpenSearch (built on Lucene) give you, plus ranking, tokenisation, and fuzzy matching.
-
-The architectural point for an interview: search is almost always a **separate system fed asynchronously** from your primary store. You write to Postgres/DynamoDB, then stream changes (via a queue or change-data-capture) into the search index. Don't try to make your primary database also be your search engine — that couples two very different workloads.`,
-        },
-        {
-          id: 'sd-vector-db',
-          title: 'Vector databases (the 2025–26 addition)',
-          minutes: 4,
-          body: `The most consistently cited *new* topic in 2025–26 system design rounds, driven by embeddings-based search and LLM retrieval-augmented generation (RAG).
-
-A **vector database** stores high-dimensional embeddings (arrays of floats that capture meaning) and answers **"find the k most similar vectors to this one"** fast. Similarity is cosine/dot-product distance, and exact nearest-neighbour is too slow at scale, so these DBs use **approximate nearest neighbour (ANN)** indexes like HNSW.
-
-Where it fits — semantic search and RAG:
-
-\`\`\`mermaid
-sequenceDiagram
-    participant User
-    participant App
-    participant Embed as Embedding model
-    participant VDB as Vector DB
-    participant LLM
-    User->>App: question
-    App->>Embed: embed(question)
-    Embed-->>App: query vector
-    App->>VDB: top-k similar chunks
-    VDB-->>App: relevant docs
-    App->>LLM: question + retrieved docs
-    LLM-->>User: grounded answer
-\`\`\`
-
-Most interviews don't need HNSW internals. They want to see that you know **when** to reach for one (semantic similarity, not keyword match) and **how it slots in** (offline: chunk + embed + index your corpus; online: embed the query, retrieve top-k, feed an LLM). Options named in practice: Pinecone, Weaviate, pgvector (Postgres extension — a strong "don't add infra yet" answer).`,
-        },
-      ],
-    },
-    {
       id: 'sd-request-path',
       title: 'Networking & the request path',
       summary: 'Everything a request passes through between the user and your service.',
@@ -454,6 +357,93 @@ The number that matters in practice is not the average but the **tail**: **p99 l
 **Clock skew** — machine clocks drift apart, so "wall-clock time" can't be trusted to order events across servers. This is why distributed systems lean on logical ordering (sequence numbers, vector clocks) rather than timestamps for correctness.
 
 **Multi-region** deployment puts your system in several geographic regions for lower user latency and survival of a whole-region outage. It's a large step up in complexity — cross-region data replication, consistency, and failover — and at SDE2 level you're expected to know *when* it's warranted (global users, strict availability SLAs) and that it's not free, not to design the whole thing unprompted.`,
+        },
+      ],
+    },
+    {
+      id: 'sd-building-blocks',
+      title: 'Reusable building blocks',
+      summary: 'Components that recur across designs — recognise them so you assemble instead of invent.',
+      problemIds: ['sd-024', 'sd-013'],
+      lessons: [
+        {
+          id: 'sd-id-generation',
+          title: 'Unique ID generation',
+          minutes: 3,
+          body: `You need unique ids constantly (tweets, orders, messages) and "just use auto-increment" breaks once you shard — two shards both hand out id 1001.
+
+Options:
+
+- **UUID** — 128-bit, generated anywhere with no coordination. Downside: random, so it hurts database index locality and is bulky.
+- **Snowflake (Twitter)** — the standard interview answer. A 64-bit int packed as \`timestamp | machine-id | per-ms sequence\`. No coordination needed, roughly **time-sortable** (newer ids are larger — great for feeds), compact. Each machine only needs a unique machine id.
+- **Ticket server / DB range allocation** — a central service hands out blocks of ids to each node; nodes burn through their block locally. Simple, but the allocator is a dependency.
+
+The winning move is usually Snowflake, and the reason to say is "time-sortable + no coordination," which is what makes it fit feeds and logs.`,
+        },
+        {
+          id: 'sd-fanout',
+          title: 'Feed fan-out: push vs pull',
+          minutes: 5,
+          body: `The canonical design tension behind news feeds, timelines, and notifications. When someone posts, how do their followers see it?
+
+**Fan-out on write (push):** when you post, immediately write the post id into every follower's precomputed feed. Reads are then trivial — just read your own feed list.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Poster
+    participant Service
+    participant F1 as Follower feeds
+    Poster->>Service: new post
+    Service->>F1: insert post id into each follower's feed
+    Note over F1: read is cheap later
+\`\`\`
+
+Great for read-heavy timelines — until a celebrity with 50M followers posts, and one write becomes 50M writes (the **hot-key / fan-out storm** problem).
+
+**Fan-out on read (pull):** store the post once. When a follower opens their feed, gather recent posts from everyone they follow and merge. Cheap writes, expensive reads.
+
+**The real answer is hybrid:** push for normal users (cheap fan-out, fast reads), pull for the handful of celebrities (avoid the storm), and merge the two at read time. Naming this hybrid — and *why* — is what separates a mid-level answer from a strong one.`,
+        },
+        {
+          id: 'sd-realtime',
+          title: 'Real-time delivery',
+          minutes: 4,
+          body: `When the server must push to the client (chat, presence, live scores, collaborative editing), polling wastes requests. Options, weakest to strongest:
+
+- **Short polling** — client asks every N seconds. Simple, laggy, wasteful.
+- **Long polling** — client asks, server holds the request open until there's data. Better, still HTTP-request-shaped.
+- **WebSockets** — a persistent bidirectional connection. The standard answer for chat and live updates.
+- **Server-Sent Events (SSE)** — one-way server→client stream over HTTP. Lighter than WebSockets when you don't need client→server on the same channel (good for live feeds/notifications).
+
+The scaling wrinkle interviewers probe: **connections are stateful**. A user's WebSocket lives on one specific server, so to deliver a message you must route it to the right server. That needs a **connection registry** (which user is on which server, e.g. in Redis) and often a pub/sub layer so any server can publish to the server holding the target connection.`,
+        },
+        {
+          id: 'sd-vector-db',
+          title: 'Vector databases (the 2025–26 addition)',
+          minutes: 4,
+          body: `The most consistently cited *new* topic in 2025–26 system design rounds, driven by embeddings-based search and LLM retrieval-augmented generation (RAG).
+
+A **vector database** stores high-dimensional embeddings (arrays of floats that capture meaning) and answers **"find the k most similar vectors to this one"** fast. Similarity is cosine/dot-product distance, and exact nearest-neighbour is too slow at scale, so these DBs use **approximate nearest neighbour (ANN)** indexes like HNSW.
+
+Where it fits — semantic search and RAG:
+
+\`\`\`mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant Embed as Embedding model
+    participant VDB as Vector DB
+    participant LLM
+    User->>App: question
+    App->>Embed: embed(question)
+    Embed-->>App: query vector
+    App->>VDB: top-k similar chunks
+    VDB-->>App: relevant docs
+    App->>LLM: question + retrieved docs
+    LLM-->>User: grounded answer
+\`\`\`
+
+Most interviews don't need HNSW internals. They want to see that you know **when** to reach for one (semantic similarity, not keyword match) and **how it slots in** (offline: chunk + embed + index your corpus; online: embed the query, retrieve top-k, feed an LLM). Options named in practice: Pinecone, Weaviate, pgvector (Postgres extension — a strong "don't add infra yet" answer).`,
         },
       ],
     },

@@ -40,12 +40,15 @@ export default function Home() {
       </p>
 
       <div className="area-grid">
-        {HOME_AREAS.map((a) => {
+        {HOME_AREAS.map((a, i) => {
           const p = areaProgress(a.key, a.kind)
           return (
             <a key={a.key} className="glass-card area-card" href={a.href}>
               <div className="card-head">
-                <h3>{a.label}</h3>
+                <h3>
+                  <span className="step-num">{i + 1}</span>
+                  {a.label}
+                </h3>
                 <span className="meta">
                   {a.kind === 'problems' ? 'problems' : 'study'} · {p.label}
                 </span>

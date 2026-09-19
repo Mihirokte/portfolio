@@ -215,3 +215,5 @@ details summary { font-family: 'IBM Plex Mono', monospace; font-size: 13px; colo
   .editor-host .cm-editor { min-height: 240px; }
   .seqdiagram { max-width: 100%; }
 }
+
+.step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: var(--s2); border-radius: 50%; background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); font-family: 'IBM Plex Mono', monospace; font-size: 12px; vertical-align: middle; }

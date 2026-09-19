@@ -170,24 +170,6 @@ Two things people conflate with encryption but shouldn't:
 The full posture is data encrypted in transit *and* at rest, keys managed in a KMS with rotation, and passwords hashed with a purpose-built slow function.`,
         },
         {
-          id: 'sec-dns',
-          title: 'DNS security basics',
-          minutes: 4,
-          body: `DNS translates names (\`api.example.com\`) to addresses. It was designed without security, which creates two classes of risk worth knowing.
-
-**Attacks on resolution:**
-
-- **DNS spoofing / cache poisoning** — an attacker feeds a resolver a forged answer so \`bank.com\` resolves to their server. **DNSSEC** defends against this by cryptographically *signing* DNS records, so a resolver can verify an answer really came from the zone's owner. DNSSEC provides authenticity and integrity — but not confidentiality.
-- **Eavesdropping on queries** — classic DNS is plaintext, so anyone on the path sees every domain you look up. **DNS over HTTPS (DoH)** and **DNS over TLS (DoT)** encrypt the query itself, closing that leak.
-
-**DNS as an attack surface for the domain owner:**
-
-- **Subdomain takeover** — a DNS record still points at a decommissioned service (an unclaimed cloud bucket or app), and an attacker claims that service to serve content from your subdomain. Defense: remove dangling records when you tear down a service.
-- **Domain / registrar hijacking** — if an attacker controls your DNS, they control where your traffic goes and can even obtain valid TLS certs. Protect registrar accounts with strong auth and registrar lock.
-
-For an interview, the crisp summary: DNSSEC = *authenticity* of answers, DoH/DoT = *privacy* of queries, and hygiene (no dangling records, locked registrar) closes the ownership-side holes.`,
-        },
-        {
           id: 'sec-waf-ddos',
           title: 'WAF and DDoS protection',
           minutes: 4,

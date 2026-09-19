@@ -162,16 +162,6 @@ Fowler's example: at a utility company, "meter" meant subtly different things in
 **How to spot one:** look for where the *language changes*. If the "Customer" the sales team means (a lead, a deal stage) is a fundamentally different concept from the "Customer" support means (a ticket history, an entitlement), you have found a context boundary — even if today's code has one \`Customer\` class serving both.`,
         },
         {
-          id: 'arch-ubiquitous-language',
-          title: 'Ubiquitous language',
-          minutes: 3,
-          body: `The shared, rigorous vocabulary built up between developers and domain experts, used consistently in conversation, code, and documentation within one bounded context. Fowler, quoting Evans: it is "the practice of building up a common, rigorous language between developers and users."
-
-**Practical heuristic:** if your class and method names don't match the words the business side actually uses in meetings, you have an invisible translation layer that will silently rot. Every conversation requires mentally re-mapping terms, and bugs hide in the mismatch.
-
-A fast diagnostic you can run in any requirements conversation: count the terms that appear in the ticket but not in the codebase, or vice versa. A large gap is a sign the model has drifted from the domain — and it is exactly the kind of drift that makes a codebase feel harder to change than it should be.`,
-        },
-        {
           id: 'arch-aggregates',
           title: 'Aggregates and the sizing mistake',
           minutes: 4,
@@ -182,19 +172,6 @@ A fast diagnostic you can run in any requirements conversation: count the terms 
 **The corrective heuristic:** make aggregates as small as possible while still fully enforcing their invariant. If two pieces of data don't need to be transactionally consistent with each other *right now*, they probably don't belong in the same aggregate — reference the other aggregate by ID and accept eventual consistency between them.
 
 This is the same instinct as boundary-drawing one level down: keep together only what must change together atomically.`,
-        },
-        {
-          id: 'arch-context-mapping',
-          title: 'Context mapping',
-          minutes: 3,
-          body: `Once you have multiple bounded contexts, you need explicit relationships between them. The standard strategic-design patterns:
-
-- **Shared Kernel** — two teams explicitly share a small, jointly-owned piece of model. Rare in practice; needs tight coordination.
-- **Customer-Supplier** — one context's team (supplier) provides for another's needs (customer), but the customer doesn't dictate the supplier's model wholesale.
-- **Conformist** — the downstream context simply conforms to the upstream model as-is. Common when you have no influence over an upstream or vendor API.
-- **Anticorruption Layer (ACL)** — the one most engineers reach for pragmatically. You build a translation layer that converts an external or legacy model into your own clean model at the boundary, so the external system's mess doesn't leak into your domain.
-
-Evans's related **bubble context** technique uses an explicit bounded context plus an ACL to graft new, clean functionality onto a legacy system incrementally, instead of a big-bang rewrite. When someone hands you "integrate with the legacy billing system without letting its shape infect our new code," the ACL is the answer.`,
         },
         {
           id: 'arch-boundary-heuristics',
