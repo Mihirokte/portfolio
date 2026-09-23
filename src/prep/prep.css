@@ -155,11 +155,25 @@
   font-family: var(--font-mono);
   font-size: 13px;
 }
+/* text must never touch the editor frame */
+.cm-content {
+  padding: 1rem 0.75rem !important;
+}
+.cm-gutters {
+  padding-block: 1rem;
+}
+.cm-line {
+  padding-inline: 0.5rem !important;
+}
+.cm-scroller {
+  line-height: 1.6;
+}
 .cm-editor.cm-focused {
   outline: none;
 }
 .cm-gutters {
   @apply bg-secondary text-muted-foreground border-border;
+  padding-block: 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

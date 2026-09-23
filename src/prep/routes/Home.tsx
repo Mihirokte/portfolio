@@ -36,7 +36,7 @@ export default function Home() {
             <a
               key={a.key}
               href={a.href}
-              className="grid grid-cols-[2.5rem_minmax(0,1fr)_6rem] items-baseline gap-6 py-6 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary group"
+              className="grid grid-cols-[2.5rem_minmax(0,1fr)_6rem] items-baseline gap-6 px-4 py-7 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary group"
             >
               <span className="num text-sm text-muted-foreground" aria-hidden="true">
                 {a.kind === 'companies' ? '' : String(i + 1).padStart(2, '0')}

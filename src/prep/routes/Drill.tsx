@@ -52,7 +52,7 @@ function ProblemView({ problem }: { problem: Problem }) {
                 Reference solution
               </AccordionTrigger>
               <AccordionContent>
-                <pre className="overflow-x-auto bg-secondary p-4 font-mono text-[0.8125rem] leading-relaxed">
+                <pre className="overflow-x-auto bg-secondary px-5 py-4 font-mono text-[0.8125rem] leading-relaxed">
                   {problem.reference_solution}
                 </pre>
               </AccordionContent>
@@ -80,7 +80,7 @@ function ProblemView({ problem }: { problem: Problem }) {
           </Button>
         </div>
         {outcome && (
-          <div className={`p-4 bg-secondary border-l-2 text-[0.9375rem] ${outcome.status === 'ok' ? 'border-brand' : 'border-foreground'}`}>
+          <div className={`px-5 py-4 bg-secondary border-l-2 text-[0.9375rem] ${outcome.status === 'ok' ? 'border-brand' : 'border-foreground'}`}>
             {outcome.status === 'ok' ? outcome.message : outcome.status === 'timeout' ? 'Timed out — runtime restarted.' : outcome.message}
           </div>
         )}
@@ -92,7 +92,7 @@ function ProblemView({ problem }: { problem: Problem }) {
 function DrillView({ drill }: { drill: Drill }) {
   return (
     <div className="max-w-[66ch] [&>*+*]:mt-6">
-      <p className="whitespace-pre-wrap bg-secondary p-4 leading-relaxed">{drill.prompt}</p>
+      <p className="whitespace-pre-wrap bg-secondary px-6 py-5 leading-relaxed">{drill.prompt}</p>
       {drill.link && (
         <a href={drill.link} target="_blank" rel="noopener" className="block text-sm text-brand underline">
           Reference

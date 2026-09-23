@@ -21,21 +21,21 @@ export default function Markdown({ body }: { body: string }) {
             <a href={href} target="_blank" rel="noopener" className="text-brand underline">{children}</a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="my-6 pl-4 border-l border-brand text-muted-foreground">{children}</blockquote>
+            <blockquote className="my-6 py-2 pl-5 border-l border-brand text-muted-foreground">{children}</blockquote>
           ),
           table: ({ children }) => (
             <div className="my-6 overflow-x-auto"><table className="w-full border-collapse text-[0.9375rem]">{children}</table></div>
           ),
           th: ({ children }) => (
-            <th className="border-b border-foreground px-3 py-2 text-left text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">{children}</th>
+            <th className="border-b border-foreground px-4 py-3 text-left text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">{children}</th>
           ),
-          td: ({ children }) => <td className="border-b border-border px-3 py-2 text-left">{children}</td>,
+          td: ({ children }) => <td className="border-b border-border px-4 py-3 text-left">{children}</td>,
           code({ className, children, ...props }) {
             const text = String(children).replace(/\n$/, '')
             if (className === 'language-mermaid') return <SequenceDiagram chart={text} />
-            if (!className) return <code className="font-mono text-[0.875em] bg-secondary px-1.5 py-0.5">{children}</code>
+            if (!className) return <code className="font-mono text-[0.875em] bg-secondary px-2 py-1">{children}</code>
             return (
-              <pre className="my-6 overflow-x-auto bg-secondary border-l border-border p-4 font-mono text-[0.8125rem] leading-relaxed">
+              <pre className="my-6 overflow-x-auto bg-secondary border-l border-border px-5 py-4 font-mono text-[0.8125rem] leading-relaxed">
                 <code {...props}>{children}</code>
               </pre>
             )

@@ -62,7 +62,7 @@ export function ProblemStatusBar({ id }: { id: string }) {
       aria-label="Your status on this problem"
     >
       {PSTATUS.map((s) => (
-        <ToggleGroupItem key={s} value={s} className="min-h-11 px-4 text-sm capitalize">
+        <ToggleGroupItem key={s} value={s} className="min-h-11 px-5 text-sm capitalize">
           {s}
         </ToggleGroupItem>
       ))}
@@ -82,7 +82,7 @@ export function ProblemNotes({ id }: { id: string }) {
         id={`notes-${id}`}
         placeholder="Notes…"
         defaultValue={notes ?? ''}
-        className="min-h-26 resize-y"
+        className="min-h-28 resize-y px-4 py-3"
         onBlur={(e) => dispatch(setProblemNotes({ id, notes: e.target.value }))}
       />
     </>
@@ -100,7 +100,7 @@ export function LessonNotes({ id, initial }: { id: string; initial?: string }) {
         id={`lnotes-${id}`}
         placeholder="Notes…"
         defaultValue={initial ?? ''}
-        className="min-h-26 resize-y"
+        className="min-h-28 resize-y px-4 py-3"
         onBlur={(e) => dispatch(setLessonNotes({ id, notes: e.target.value }))}
       />
     </>
@@ -109,7 +109,7 @@ export function LessonNotes({ id, initial }: { id: string; initial?: string }) {
 
 // ---- rows ----
 const ROW =
-  'flex items-center gap-4 min-h-13 py-3 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary'
+  'flex items-center gap-4 min-h-14 px-4 py-4 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary'
 
 export function ProblemRow({ drill }: { drill: Drill }) {
   const status = useAppSelector((s) => s.progress.problems[drill.id]?.status ?? 'none')

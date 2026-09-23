@@ -26,7 +26,7 @@ export default function App() {
     if (m) { view = r.render(m); break }
   }
   return (
-    <div className="mx-auto max-w-[1140px] px-6 pt-8 pb-24">
+    <div className="mx-auto max-w-[1140px] px-5 sm:px-10 pt-10 pb-28">
       <TopBar />
       {view}
       <CommandPalette />

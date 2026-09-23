@@ -16,7 +16,7 @@ export function CompanyIndex() {
           <a
             key={c.key}
             href={`#/company/${c.key}`}
-            className="flex items-center gap-4 min-h-13 py-3 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary group"
+            className="flex items-center gap-4 min-h-14 px-4 py-4 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary group"
           >
             <span className="flex-1 transition-colors group-hover:text-brand">{c.name}</span>
             <span className="num text-sm text-muted-foreground">{countQuestions(c)}</span>
@@ -38,7 +38,7 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
       <h1>{c.name}</h1>
       <p className="mt-4 max-w-[66ch] text-muted-foreground">{c.descriptor}</p>
 
-      <dl className="grid grid-cols-3 gap-6 my-8 py-6 border-y border-border">
+      <dl className="grid grid-cols-3 gap-6 my-8 px-4 py-7 border-y border-border">
         {[
           ['Questions', qCount],
           ['Prep topics', c.lldPrep.length],
@@ -58,7 +58,7 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="questions">
+        <TabsContent value="questions" className="pt-4">
           <Accordion type="multiple" defaultValue={[c.questions[0]?.round ?? '']}>
             {c.questions.map((g) => (
               <AccordionItem key={g.round} value={g.round}>
@@ -78,10 +78,10 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
           </Accordion>
         </TabsContent>
 
-        <TabsContent value="prep">
+        <TabsContent value="prep" className="pt-4">
           <div className="grid sm:grid-cols-2 gap-x-8">
             {c.lldPrep.map((p) => (
-              <article key={p.topic} className="py-6 border-t border-border">
+              <article key={p.topic} className="px-4 py-7 border-t border-border">
                 <h2 className="text-base font-medium tracking-normal mb-2">{p.topic}</h2>
                 <p className="text-[0.9375rem] text-muted-foreground">{p.why}</p>
               </article>
@@ -89,7 +89,7 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="notes">
+        <TabsContent value="notes" className="pt-6 px-1">
           <ul className="pl-6 list-disc marker:text-muted-foreground max-w-[66ch]">
             {c.specialNotes.map((n) => (
               <li key={n} className="mb-3 leading-relaxed">{n}</li>
