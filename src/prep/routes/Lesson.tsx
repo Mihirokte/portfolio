@@ -3,7 +3,9 @@ import { useAppDispatch, useAppSelector } from '../store'
 import { setLessonStatus } from '../store/progressSlice'
 import Markdown from '../components/Markdown'
 import { LessonNotes } from '../components/ui'
-import { NotFound } from '../components/nav'
+import { NotFound, BackLink } from '../components/nav'
+import { Button } from '../ui/button'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 
 export function LessonPage({ courseKey, lessonId }: { courseKey: string; lessonId: string }) {
   const found = findLesson(courseKey, lessonId)
@@ -19,41 +21,49 @@ export function LessonPage({ courseKey, lessonId }: { courseKey: string; lessonI
   const read = entry?.status === 'read'
 
   return (
-    <div className="page lesson-page">
-      <a className="crumb" href={`#/study/${course.key}`}>
+    <div className="max-w-[66ch]">
+      <BackLink href={`#/study/${course.key}`}>
         {course.label} — {chapter.title}
-      </a>
+      </BackLink>
       <h1>{lesson.title}</h1>
-      <Markdown body={lesson.body} />
+      <div className="mt-8">
+        <Markdown body={lesson.body} />
+      </div>
 
       {lesson.deeper && (
-        <details className="deeper">
-          <summary>Go deeper — mechanism, numbers and follow-ups</summary>
-          <Markdown body={lesson.deeper} />
-        </details>
+        <Accordion type="single" collapsible className="mt-10 border-t border-foreground">
+          <AccordionItem value="deeper" className="border-b-0">
+            <AccordionTrigger className="text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-brand hover:no-underline">
+              Go deeper
+            </AccordionTrigger>
+            <AccordionContent>
+              <Markdown body={lesson.deeper} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
 
-      <div className="lesson-notes">
+      <div className="mt-16">
         <LessonNotes id={lessonId} initial={entry?.notes} />
       </div>
 
-      <div className="lesson-foot">
-        <button
-          className={`cta ${read ? 'done' : ''}`}
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-border">
+        <Button
+          variant={read ? 'outline' : 'default'}
           onClick={() => dispatch(setLessonStatus({ id: lessonId, status: read ? 'unread' : 'read' }))}
         >
-          {read ? 'Marked read — undo' : 'Mark as read'}
-        </button>
-        <div className="lesson-nav">
+          {read ? 'Marked read' : 'Mark as read'}
+        </Button>
+        <div className="flex gap-2">
           {prev && (
-            <a className="chip" href={`#/study/${course.key}/${prev}`}>
-              Previous
-            </a>
+            <Button variant="ghost" asChild>
+              <a href={`#/study/${course.key}/${prev}`}>Previous</a>
+            </Button>
           )}
           {next && (
-            <a className="chip" href={`#/study/${course.key}/${next}`}>
-              Next
-            </a>
+            <Button variant="ghost" asChild>
+              <a href={`#/study/${course.key}/${next}`}>Next</a>
+            </Button>
           )}
         </div>
       </div>

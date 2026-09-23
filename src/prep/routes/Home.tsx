@@ -7,6 +7,7 @@ import { exportProgress, readProgressFile } from '../storage'
 import { importAll } from '../store/progressSlice'
 import { useAppDispatch, useAppSelector } from '../store'
 import { Bar } from '../components/ui'
+import { Button } from '../ui/button'
 
 export default function Home() {
   const progress = useAppSelector((s) => s.progress)
@@ -18,34 +19,31 @@ export default function Home() {
     if (kind === 'problems') {
       const drills = AREAS.find((a) => a.key === key)?.drills ?? []
       const solved = drills.filter((d) => progress.problems[d.id]?.status === 'solved').length
-      return {
-        count: `${solved}/${drills.length}`,
-        pct: drills.length ? Math.round((solved / drills.length) * 100) : 0,
-      }
+      return { count: `${solved}/${drills.length}`, pct: drills.length ? Math.round((solved / drills.length) * 100) : 0 }
     }
     const course = findCourse(key)
     const total = course?.chapters.reduce((m, ch) => m + ch.lessons.length, 0) ?? 0
-    const read =
-      course?.chapters.reduce(
-        (m, ch) => m + ch.lessons.filter((l) => progress.lessons[l.id]?.status === 'read').length,
-        0,
-      ) ?? 0
+    const read = course?.chapters.reduce((m, ch) => m + ch.lessons.filter((l) => progress.lessons[l.id]?.status === 'read').length, 0) ?? 0
     return { count: `${read}/${total}`, pct: total ? Math.round((read / total) * 100) : 0 }
   }
 
   return (
-    <div className="page">
-      <nav className="index" aria-label="Areas">
+    <div className="max-w-3xl">
+      <nav className="border-t border-border" aria-label="Areas">
         {HOME_AREAS.map((a, i) => {
           const s = stat(a.key, a.kind)
           return (
-            <a key={a.key} className="index-row" href={a.href}>
-              <span className="index-num" aria-hidden="true">
+            <a
+              key={a.key}
+              href={a.href}
+              className="grid grid-cols-[2.5rem_minmax(0,1fr)_6rem] items-baseline gap-6 py-6 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary group"
+            >
+              <span className="num text-sm text-muted-foreground" aria-hidden="true">
                 {a.kind === 'companies' ? '' : String(i + 1).padStart(2, '0')}
               </span>
-              <h2>{a.label}</h2>
-              <span className="index-stat">
-                <span className="count">{s.count}</span>
+              <h2 className="transition-colors group-hover:text-brand">{a.label}</h2>
+              <span className="text-right">
+                <span className="num block text-[0.9375rem]">{s.count}</span>
                 {s.pct >= 0 && <Bar value={s.pct} label={`${a.label} progress`} />}
               </span>
             </a>
@@ -53,13 +51,9 @@ export default function Home() {
         })}
       </nav>
 
-      <div className="data-row">
-        <button className="cta" data-variant="quiet" onClick={() => exportProgress(progress)}>
-          Export
-        </button>
-        <button className="cta" data-variant="quiet" onClick={() => fileRef.current?.click()}>
-          Import
-        </button>
+      <div className="flex flex-wrap gap-2 mt-16 pt-6 border-t border-border">
+        <Button variant="outline" onClick={() => exportProgress(progress)}>Export</Button>
+        <Button variant="outline" onClick={() => fileRef.current?.click()}>Import</Button>
         <input
           ref={fileRef}
           type="file"

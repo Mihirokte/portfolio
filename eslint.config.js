@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'docs', 'dist-prep']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -19,5 +19,11 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+  },
+  {
+    // Vendored shadcn/ui primitives: they intentionally co-export cva variants
+    // alongside components, which the react-refresh rule flags.
+    files: ['src/prep/ui/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

@@ -8,12 +8,11 @@ import { setProblemCode } from '../store/progressSlice'
 import Editor from '../components/Editor'
 import Markdown from '../components/Markdown'
 import { ProblemNotes, ProblemStatusBar } from '../components/ui'
-import { NotFound } from '../components/nav'
+import { NotFound, BackLink } from '../components/nav'
+import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import type { Drill, Problem } from '../types'
-
-function mdLite(t: string) {
-  return t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1')
-}
 
 function ProblemView({ problem }: { problem: Problem }) {
   const dispatch = useAppDispatch()
@@ -22,7 +21,6 @@ function ProblemView({ problem }: { problem: Problem }) {
   const [state, setState] = useState<JudgeState>(validator.state)
   const [outcome, setOutcome] = useState<ValidateOutcome | null>(null)
   const [busy, setBusy] = useState(false)
-  const [showSolution, setShowSolution] = useState(false)
 
   useEffect(() => {
     validator.onState = setState
@@ -34,64 +32,56 @@ function ProblemView({ problem }: { problem: Problem }) {
     setBusy(true)
     setOutcome(null)
     dispatch(setProblemCode({ id: problem.id, code }))
-    const res = await validator.validate(code, problem.signature?.name)
-    setOutcome(res)
+    setOutcome(await validator.validate(code, problem.signature?.name))
     setBusy(false)
   }
 
   return (
-    <div className="problem-cols">
-      <div className="problem-desc">
+    <div className="grid lg:grid-cols-[5fr_7fr] gap-10 items-start">
+      <div className="[&>*+*]:mt-6">
         <Markdown body={problem.description_md} />
-        <p>
-          <a className="ext" href={problem.link} target="_blank" rel="noopener">
-            open on LeetCode ↗
-          </a>
-        </p>
+        <a href={problem.link} target="_blank" rel="noopener" className="block text-sm text-brand underline">
+          Open on LeetCode
+        </a>
         <ProblemStatusBar id={problem.id} />
         <ProblemNotes id={problem.id} />
         {problem.reference_solution && (
-          <details open={showSolution} onToggle={(e) => setShowSolution(e.currentTarget.open)}>
-            <summary>reference solution</summary>
-            {showSolution && <pre className="desc code">{problem.reference_solution}</pre>}
-          </details>
+          <Accordion type="single" collapsible className="border-t border-border">
+            <AccordionItem value="sol" className="border-b-0">
+              <AccordionTrigger className="text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-brand hover:no-underline">
+                Reference solution
+              </AccordionTrigger>
+              <AccordionContent>
+                <pre className="overflow-x-auto bg-secondary p-4 font-mono text-[0.8125rem] leading-relaxed">
+                  {problem.reference_solution}
+                </pre>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
       </div>
-      <div className="problem-code">
-        <Editor key={problem.id} initial={code} onChange={setCode} />
-        <div className="run-row">
-          <button className="cta run" onClick={check} disabled={busy || state !== 'ready'}>
-            {busy
-              ? 'Checking…'
-              : state === 'booting'
-                ? 'Loading Python…'
-                : state === 'failed'
-                  ? 'Python failed to load'
-                  : 'Check syntax'}
-          </button>
-          <button
-            className="chip"
+      <div>
+        <div className="border border-input">
+          <Editor key={problem.id} initial={code} onChange={setCode} />
+        </div>
+        <div className="flex flex-wrap gap-2 my-4">
+          <Button onClick={check} disabled={busy || state !== 'ready'}>
+            {busy ? 'Checking…' : state === 'booting' ? 'Loading Python…' : state === 'failed' ? 'Python failed' : 'Check syntax'}
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => {
               setCode(problem.starter_code)
               setOutcome(null)
               dispatch(setProblemCode({ id: problem.id, code: problem.starter_code }))
             }}
           >
-            Reset code
-          </button>
+            Reset
+          </Button>
         </div>
-        {outcome?.status === 'ok' && <div className="verdict good">✓ {outcome.message}</div>}
-        {outcome?.status === 'invalid' && (
-          <div className="verdict bad">
-            <pre className="desc code">{outcome.message}</pre>
-          </div>
-        )}
-        {outcome?.status === 'timeout' && (
-          <div className="verdict bad">Check timed out — runtime restarted, try again.</div>
-        )}
-        {outcome?.status === 'error' && (
-          <div className="verdict bad">
-            <pre className="desc code">{outcome.message}</pre>
+        {outcome && (
+          <div className={`p-4 bg-secondary border-l-2 text-[0.9375rem] ${outcome.status === 'ok' ? 'border-brand' : 'border-foreground'}`}>
+            {outcome.status === 'ok' ? outcome.message : outcome.status === 'timeout' ? 'Timed out — runtime restarted.' : outcome.message}
           </div>
         )}
       </div>
@@ -100,29 +90,27 @@ function ProblemView({ problem }: { problem: Problem }) {
 }
 
 function DrillView({ drill }: { drill: Drill }) {
-  const [showSolution, setShowSolution] = useState(false)
   return (
-    <div className="drill-detail">
-      <pre className="desc">{mdLite(drill.prompt)}</pre>
-      {drill.notes && <p className="meta">{drill.notes}</p>}
+    <div className="max-w-[66ch] [&>*+*]:mt-6">
+      <p className="whitespace-pre-wrap bg-secondary p-4 leading-relaxed">{drill.prompt}</p>
       {drill.link && (
-        <p>
-          <a className="ext" href={drill.link} target="_blank" rel="noopener">
-            reference ↗
-          </a>
-        </p>
+        <a href={drill.link} target="_blank" rel="noopener" className="block text-sm text-brand underline">
+          Reference
+        </a>
       )}
       <ProblemStatusBar id={drill.id} />
       <ProblemNotes id={drill.id} />
       {drill.solution && (
-        <details
-          className="solution"
-          open={showSolution}
-          onToggle={(e) => setShowSolution(e.currentTarget.open)}
-        >
-          <summary>{showSolution ? 'hide solution' : 'show solution'}</summary>
-          {showSolution && <Markdown body={drill.solution} />}
-        </details>
+        <Accordion type="single" collapsible className="border-t border-foreground">
+          <AccordionItem value="sol" className="border-b-0">
+            <AccordionTrigger className="text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-brand hover:no-underline">
+              Show solution
+            </AccordionTrigger>
+            <AccordionContent>
+              <Markdown body={drill.solution} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
     </div>
   )
@@ -136,16 +124,13 @@ export function DrillPage({ id }: { id: string }) {
   }, [id])
   if (!drill) return <NotFound />
   const problem = PACKS[id]
-  // DSA drills return to the DSA list; study-course drills return to the course page.
-  const back = areaKey === 'dsa' ? { href: '#/dsa', label: 'DSA' } : areaKey ? { href: `#/study/${areaKey}`, label: 'course' } : { href: '#/', label: 'home' }
+  const back = areaKey === 'dsa' ? { href: '#/dsa', label: 'DSA' } : areaKey ? { href: `#/study/${areaKey}`, label: 'Course' } : { href: '#/', label: 'Home' }
   return (
-    <div className="page wide">
-      <a className="crumb" href={back.href}>
-        {back.label}
-      </a>
-      <div className="drill-title-row">
+    <div>
+      <BackLink href={back.href}>{back.label}</BackLink>
+      <div className="flex flex-wrap items-baseline gap-4 mb-8">
         <h1>{drill.title}</h1>
-        <span className={`pill ${drill.difficulty.toLowerCase()}`}>{drill.difficulty}</span>
+        <Badge variant="outline" className="uppercase text-[0.6875rem]">{drill.difficulty}</Badge>
       </div>
       {problem ? <ProblemView problem={problem} /> : <DrillView drill={drill} />}
     </div>

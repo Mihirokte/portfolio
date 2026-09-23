@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { AREAS } from '../data/drills'
 import { useAppSelector } from '../store'
 import { ProblemRow } from '../components/ui'
-import { NotFound } from '../components/nav'
+import { NotFound, BackLink } from '../components/nav'
+import { Input } from '../ui/input'
 
-// DSA is drill-only. This is its problem list, reached from the home grid.
+const SELECT =
+  'h-11 px-3 text-sm bg-transparent border border-input text-foreground focus-visible:outline-2 focus-visible:outline-ring'
+
 export function DsaList() {
   const area = AREAS.find((a) => a.key === 'dsa')
   const problems = useAppSelector((s) => s.progress.problems)
@@ -25,45 +28,32 @@ export function DsaList() {
   })
 
   return (
-    <div className="page">
-      <a className="crumb" href="#/">
-        Home
-      </a>
+    <div className="max-w-3xl">
+      <BackLink href="#/">Home</BackLink>
       <h1>DSA</h1>
-      <div className="filters">
-        <input
-          className="search"
-          placeholder="search title or topic…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <select value={topic} onChange={(e) => setTopic(e.target.value)}>
-          <option value="all">any topic</option>
-          {topics.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
+      <div className="flex flex-wrap gap-2 mt-8 mb-6">
+        <Input className="flex-1 min-w-50 h-11" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search problems" />
+        <select className={SELECT} value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Topic">
+          <option value="all">Any topic</option>
+          {topics.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
-        <select value={diff} onChange={(e) => setDiff(e.target.value)}>
-          <option value="all">any difficulty</option>
-          <option value="easy">easy</option>
-          <option value="medium">medium</option>
-          <option value="hard">hard</option>
+        <select className={SELECT} value={diff} onChange={(e) => setDiff(e.target.value)} aria-label="Difficulty">
+          <option value="all">Any difficulty</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
         </select>
-        <select value={st} onChange={(e) => setSt(e.target.value)}>
-          <option value="all">any status</option>
-          <option value="none">untouched</option>
-          <option value="attempted">attempted</option>
-          <option value="solved">solved</option>
-          <option value="revisit">revisit</option>
+        <select className={SELECT} value={st} onChange={(e) => setSt(e.target.value)} aria-label="Status">
+          <option value="all">Any status</option>
+          <option value="none">Untouched</option>
+          <option value="attempted">Attempted</option>
+          <option value="solved">Solved</option>
+          <option value="revisit">Revisit</option>
         </select>
       </div>
-      <div className="list">
-        {drills.map((d) => (
-          <ProblemRow key={d.id} drill={d} />
-        ))}
-        {drills.length === 0 && <p className="meta">nothing matches.</p>}
+      <div className="border-t border-border">
+        {drills.map((d) => <ProblemRow key={d.id} drill={d} />)}
+        {drills.length === 0 && <p className="py-6 text-sm text-muted-foreground">No match.</p>}
       </div>
     </div>
   )

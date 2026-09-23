@@ -7,26 +7,18 @@ import {
 } from '../store/progressSlice'
 import { isRunnable } from '../selectors'
 import type { Drill } from '../types'
+import { Badge } from '../ui/badge'
+import { Progress } from '../ui/progress'
+import { Textarea } from '../ui/textarea'
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { cn } from '../lib/utils'
 
-// ---- progress bar ----
+// ---- progress ----
 export function Bar({ value, label }: { value: number; label?: string }) {
-  return (
-    <div
-      className="bar"
-      role="progressbar"
-      aria-label={label ?? 'progress'}
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <div className="bar-fill" style={{ width: `${value}%` }} />
-    </div>
-  )
+  return <Progress value={value} aria-label={label ?? 'progress'} className="h-0.5 mt-2" />
 }
 
-// ---- status indicator ----
-// The coloured dot is decorative; the status is also carried as text (visually
-// hidden in dense rows) so meaning never depends on colour alone.
+// ---- status indicator: shape + text, never colour alone ----
 const STATUS_TEXT: Record<string, string> = {
   none: 'not started',
   attempted: 'attempted',
@@ -36,38 +28,45 @@ const STATUS_TEXT: Record<string, string> = {
   unread: 'not read',
 }
 
-function StatusDot({ status }: { status: string }) {
+export function StatusDot({ status }: { status: string }) {
   return (
     <>
-      <span className={`dot ${status}`} aria-hidden="true" />
+      <span
+        aria-hidden="true"
+        className={cn(
+          'size-2 shrink-0 border-[1.5px] border-muted-foreground',
+          status === 'attempted' && 'bg-muted-foreground',
+          (status === 'solved' || status === 'read') && 'rounded-full bg-brand border-brand',
+          status === 'revisit' && 'border-[3px] border-brand bg-transparent',
+        )}
+      />
       <span className="sr-only">{STATUS_TEXT[status] ?? status}</span>
     </>
   )
 }
 
-// ---- problem status chips ----
-const PSTATUS: { key: ProblemStatus; label: string }[] = [
-  { key: 'attempted', label: 'attempted' },
-  { key: 'solved', label: 'solved' },
-  { key: 'revisit', label: 'revisit' },
-]
+// ---- problem status toggle group ----
+const PSTATUS: ProblemStatus[] = ['attempted', 'solved', 'revisit']
 
 export function ProblemStatusBar({ id }: { id: string }) {
   const cur = useAppSelector((s) => s.progress.problems[id]?.status ?? 'none')
   const dispatch = useAppDispatch()
   return (
-    <div className="chips" role="group" aria-label="Mark your status on this problem">
+    <ToggleGroup
+      type="single"
+      value={cur === 'none' ? '' : cur}
+      onValueChange={(v) =>
+        dispatch(setProblemStatus({ id, status: (v || 'none') as ProblemStatus }))
+      }
+      variant="outline"
+      aria-label="Your status on this problem"
+    >
       {PSTATUS.map((s) => (
-        <button
-          key={s.key}
-          className={`chip ${cur === s.key ? 'on' : ''}`}
-          aria-pressed={cur === s.key}
-          onClick={() => dispatch(setProblemStatus({ id, status: cur === s.key ? 'none' : s.key }))}
-        >
-          {s.label}
-        </button>
+        <ToggleGroupItem key={s} value={s} className="min-h-11 px-4 text-sm capitalize">
+          {s}
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }
 
@@ -79,11 +78,11 @@ export function ProblemNotes({ id }: { id: string }) {
       <label className="sr-only" htmlFor={`notes-${id}`}>
         Your notes on this problem
       </label>
-      <textarea
+      <Textarea
         id={`notes-${id}`}
-        className="notes"
-        placeholder="notes to future you…"
+        placeholder="Notes…"
         defaultValue={notes ?? ''}
+        className="min-h-26 resize-y"
         onBlur={(e) => dispatch(setProblemNotes({ id, notes: e.target.value }))}
       />
     </>
@@ -97,34 +96,40 @@ export function LessonNotes({ id, initial }: { id: string; initial?: string }) {
       <label className="sr-only" htmlFor={`lnotes-${id}`}>
         Your notes on this lesson
       </label>
-      <textarea
+      <Textarea
         id={`lnotes-${id}`}
-        className="notes"
-        placeholder="your notes on this lesson…"
+        placeholder="Notes…"
         defaultValue={initial ?? ''}
+        className="min-h-26 resize-y"
         onBlur={(e) => dispatch(setLessonNotes({ id, notes: e.target.value }))}
       />
     </>
   )
 }
 
-// ---- a single problem row in a list ----
+// ---- rows ----
+const ROW =
+  'flex items-center gap-4 min-h-13 py-3 border-b border-border no-underline text-foreground transition-colors hover:bg-secondary'
+
 export function ProblemRow({ drill }: { drill: Drill }) {
   const status = useAppSelector((s) => s.progress.problems[drill.id]?.status ?? 'none')
   return (
-    <a className="list-row" href={`#/drill/${drill.id}`}>
+    <a className={ROW} href={`#/drill/${drill.id}`}>
       <StatusDot status={status} />
-      <span className="row-title">{drill.title}</span>
+      <span className="flex-1">{drill.title}</span>
       {isRunnable(drill.id) && (
-        <span className="runnable">editor</span>
+        <span className="text-[0.6875rem] uppercase tracking-wider text-brand">editor</span>
       )}
-      <span className={`pill ${drill.difficulty.toLowerCase()}`}>{drill.difficulty}</span>
-      <span className="meta topic">{drill.topic}</span>
+      <Badge variant="outline" className="uppercase text-[0.6875rem]">
+        {drill.difficulty}
+      </Badge>
+      <span className="hidden sm:block w-36 text-right text-sm text-muted-foreground">
+        {drill.topic}
+      </span>
     </a>
   )
 }
 
-// ---- a single lesson row in a list ----
 export function LessonRow({
   courseKey,
   lessonId,
@@ -138,10 +143,10 @@ export function LessonRow({
 }) {
   const read = useAppSelector((s) => s.progress.lessons[lessonId]?.status === 'read')
   return (
-    <a className="list-row" href={`#/study/${courseKey}/${lessonId}`}>
+    <a className={ROW} href={`#/study/${courseKey}/${lessonId}`}>
       <StatusDot status={read ? 'read' : 'unread'} />
-      <span className="row-title">{title}</span>
-      <span className="meta">{minutes} min</span>
+      <span className="flex-1">{title}</span>
+      <span className="num text-sm text-muted-foreground">{minutes} min</span>
     </a>
   )
 }

@@ -2,7 +2,9 @@ import { findCourse } from '../content'
 import { courseProblemLayout } from '../selectors'
 import { useAppSelector } from '../store'
 import { LessonRow, ProblemRow } from '../components/ui'
-import { NotFound } from '../components/nav'
+import { NotFound, BackLink } from '../components/nav'
+
+const LABEL = 'mt-10 mb-3 text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-muted-foreground'
 
 export function CoursePage({ courseKey }: { courseKey: string }) {
   const course = findCourse(courseKey)
@@ -11,41 +13,31 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
   const { perChapter, leftovers } = courseProblemLayout(course)
 
   return (
-    <div className="page">
-      <a className="crumb" href="#/">
-        Home
-      </a>
+    <div className="max-w-3xl">
+      <BackLink href="#/">Home</BackLink>
       <h1>{course.label}</h1>
 
       {course.chapters.map((ch) => {
         const read = ch.lessons.filter((l) => lessons[l.id]?.status === 'read').length
         const probs = perChapter[ch.id] ?? []
         return (
-          <section key={ch.id} className="chapter">
-            <div className="chapter-head">
+          <section key={ch.id} className="mt-16">
+            <div className="flex items-baseline justify-between gap-4 pb-2 border-b border-foreground">
               <h2>{ch.title}</h2>
-              <span className="meta">
-                {read}/{ch.lessons.length} read
+              <span className="num text-sm text-muted-foreground">
+                {read}/{ch.lessons.length}
               </span>
             </div>
-
-            <p className="section-label">Learn</p>
-            <div className="list">
+            <p className={LABEL}>Learn</p>
+            <div className="border-t border-border">
               {ch.lessons.map((l) => (
-                <LessonRow
-                  key={l.id}
-                  courseKey={course.key}
-                  lessonId={l.id}
-                  title={l.title}
-                  minutes={l.minutes}
-                />
+                <LessonRow key={l.id} courseKey={course.key} lessonId={l.id} title={l.title} minutes={l.minutes} />
               ))}
             </div>
-
             {probs.length > 0 && (
               <>
-                <p className="section-label">Practice</p>
-                <div className="list">
+                <p className={LABEL}>Practice</p>
+                <div className="border-t border-border">
                   {probs.map((d) => (
                     <ProblemRow key={d.id} drill={d} />
                   ))}
@@ -57,14 +49,12 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
       })}
 
       {leftovers.length > 0 && (
-        <section className="chapter leftover">
-          <div className="chapter-head">
-            <h2>More problems</h2>
-          </div>
+        <section className="mt-24 pt-6 border-t border-foreground">
+          <h2>More problems</h2>
           {leftovers.map((g) => (
-            <div key={g.topic} className="leftover-group">
-              <p className="section-label">{g.topic}</p>
-              <div className="list">
+            <div key={g.topic}>
+              <p className={LABEL}>{g.topic}</p>
+              <div className="border-t border-border">
                 {g.drills.map((d) => (
                   <ProblemRow key={d.id} drill={d} />
                 ))}
@@ -75,15 +65,13 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
       )}
 
       {course.references && course.references.length > 0 && (
-        <section className="chapter references">
-          <div className="chapter-head">
-            <h2>References</h2>
-          </div>
-          <ul className="ref-list">
+        <section className="mt-24 pt-6 border-t border-foreground">
+          <h2>References</h2>
+          <ul className="mt-4 pl-6 flex flex-col gap-2">
             {course.references.map((r) => (
               <li key={r.url}>
-                <a className="ext" href={r.url} target="_blank" rel="noopener">
-                  {r.label} ↗
+                <a href={r.url} target="_blank" rel="noopener" className="text-sm text-brand underline">
+                  {r.label}
                 </a>
               </li>
             ))}
