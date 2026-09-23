@@ -15,7 +15,7 @@ function mdLite(t: string) {
   return t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1')
 }
 
-function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
+function ProblemView({ problem }: { problem: Problem }) {
   const dispatch = useAppDispatch()
   const savedCode = useAppSelector((s) => s.progress.problems[problem.id]?.code)
   const [code, setCode] = useState(() => savedCode ?? problem.starter_code)
@@ -94,10 +94,6 @@ function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
             <pre className="desc code">{outcome.message}</pre>
           </div>
         )}
-        <p className="meta hint">
-          topic: {drill.topic} · this checks that your code compiles, not that it's correct — run it
-          on LeetCode to judge.
-        </p>
       </div>
     </div>
   )
@@ -151,7 +147,7 @@ export function DrillPage({ id }: { id: string }) {
         <h1>{drill.title}</h1>
         <span className={`pill ${drill.difficulty.toLowerCase()}`}>{drill.difficulty}</span>
       </div>
-      {problem ? <ProblemView problem={problem} drill={drill} /> : <DrillView drill={drill} />}
+      {problem ? <ProblemView problem={problem} /> : <DrillView drill={drill} />}
     </div>
   )
 }

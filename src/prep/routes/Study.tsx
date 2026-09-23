@@ -1,4 +1,3 @@
-import { AREAS } from '../data/drills'
 import { findCourse } from '../content'
 import { courseProblemLayout } from '../selectors'
 import { useAppSelector } from '../store'
@@ -10,7 +9,6 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
   const lessons = useAppSelector((s) => s.progress.lessons)
   if (!course) return <NotFound />
   const { perChapter, leftovers } = courseProblemLayout(course)
-  const areaLabel = AREAS.find((a) => a.key === course.problemAreaKey)?.label
 
   return (
     <div className="page">
@@ -18,7 +16,6 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
         Home
       </a>
       <h1>{course.label}</h1>
-      <p className="sub">{course.blurb}</p>
 
       {course.chapters.map((ch) => {
         const read = ch.lessons.filter((l) => lessons[l.id]?.status === 'read').length
@@ -31,7 +28,6 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
                 {read}/{ch.lessons.length} read
               </span>
             </div>
-            <p className="meta chapter-summary">{ch.summary}</p>
 
             <p className="section-label">Learn</p>
             <div className="list">
@@ -65,10 +61,6 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
           <div className="chapter-head">
             <h2>More problems</h2>
           </div>
-          <p className="meta chapter-summary">
-            The rest of the {areaLabel ?? course.label} problem bank — broader exercises not tied to
-            a single chapter above.
-          </p>
           {leftovers.map((g) => (
             <div key={g.topic} className="leftover-group">
               <p className="section-label">{g.topic}</p>
@@ -87,7 +79,6 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
           <div className="chapter-head">
             <h2>References</h2>
           </div>
-          <p className="meta chapter-summary">Go deeper on any of this.</p>
           <ul className="ref-list">
             {course.references.map((r) => (
               <li key={r.url}>

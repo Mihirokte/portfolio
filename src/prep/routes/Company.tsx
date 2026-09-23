@@ -6,12 +6,6 @@ import type { Company } from '../content/companies/types'
 // Company Research — public-facing, neutral company interview data.
 // Rendered entirely from the COMPANIES registry; no per-company components.
 
-const COVERAGE_LABEL: Record<string, string> = {
-  good: 'well documented',
-  moderate: 'moderately documented',
-  thin: 'limited public data',
-}
-
 const countQuestions = (c: Company) => c.questions.reduce((n, g) => n + g.questions.length, 0)
 
 export function CompanyIndex() {
@@ -21,16 +15,11 @@ export function CompanyIndex() {
         Home
       </a>
       <h1>Interview processes, by company</h1>
-      <p className="sub measure">
-        What companies ask: the reported interview questions, and the topics their low-level design
-        and machine-coding rounds expect.
-      </p>
       <div className="list">
         {COMPANIES.map((c) => (
           <a key={c.key} className="list-row company-row" href={`#/company/${c.key}`}>
             <span className="row-title">{c.name}</span>
             <span className="meta">{countQuestions(c)} questions</span>
-            <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
           </a>
         ))}
       </div>
@@ -73,12 +62,6 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
         <div>
           <dt>Rounds covered</dt>
           <dd>{c.questions.length}</dd>
-        </div>
-        <div className="co-stats-cov">
-          <dt>Data</dt>
-          <dd>
-            <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
-          </dd>
         </div>
       </dl>
       {c.rolesCovered && <p className="meta roles">{c.rolesCovered}</p>}
@@ -138,7 +121,6 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
         </section>
       )}
 
-      <p className="meta updated">Last compiled {c.updated}.</p>
     </div>
   )
 }

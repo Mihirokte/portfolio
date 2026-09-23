@@ -1,5 +1,6 @@
 import { TopBar, NotFound } from './components/nav'
 import { useHashRoute } from './useHashRoute'
+import CommandPalette from './components/CommandPalette'
 import Home from './routes/Home'
 import { CoursePage } from './routes/Study'
 import { LessonPage } from './routes/Lesson'
@@ -32,6 +33,7 @@ export default function App() {
     <div className="prep-root">
       <TopBar />
       {view}
+      <CommandPalette />
     </div>
   )
 }

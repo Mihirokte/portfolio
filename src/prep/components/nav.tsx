@@ -6,8 +6,12 @@ export function TopBar() {
       <a className="brand" href="#/">
         prep
       </a>
+      <span className="kbd-hint">
+        <kbd>⌘</kbd>
+        <kbd>K</kbd>
+      </span>
       <a className="home-link" href={HOME}>
-        Back to site
+        site
       </a>
     </header>
   )
@@ -16,7 +20,7 @@ export function TopBar() {
 export function NotFound() {
   return (
     <div className="page">
-      <h1>nothing here</h1>
+      <h1>Not found</h1>
       <a className="crumb" href="#/">
         Home
       </a>

@@ -165,12 +165,13 @@ a { color: inherit; }
 .home-link:hover { color: var(--accent); }
 
 /* ====================== index rows (the page structure) ================== */
-/* Swiss index, not a card grid: hairline-ruled rows on a shared grid. */
+/* Bare Swiss index: number, name, progress. No descriptions — this is a
+   personal tool and it does not explain itself. */
 
 .index { border-top: 1px solid var(--rule); }
 .index-row {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr) 8.5rem;
+  grid-template-columns: 3rem minmax(0, 1fr) 7rem;
   gap: var(--u4);
   align-items: baseline;
   padding: var(--u4) 0;
@@ -187,17 +188,77 @@ a { color: inherit; }
   font-size: 0.8125rem;
   color: var(--ink-3);
 }
-.index-body > p { margin: var(--u2) 0 0; color: var(--ink-2); font-size: 0.9375rem; max-width: 52ch; }
 .index-stat { text-align: right; }
 .index-stat .count {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.9375rem;
-  color: var(--ink-1);
   display: block;
 }
-.index-stat .kind { font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
 .index-stat .bar { margin-top: var(--u2); }
+
+/* keyboard hint + command palette (21st.dev `Command` pattern, own tokens) */
+.kbd-hint { display: flex; gap: 3px; margin-left: auto; margin-right: var(--u4); }
+kbd {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  padding: 4px 5px;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+}
+.cmdk-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgb(var(--ink) / 0.28);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh var(--u3) var(--u3);
+  z-index: 50;
+}
+.cmdk {
+  width: 100%;
+  max-width: 34rem;
+  background: var(--paper);
+  border: 1px solid var(--ink-1);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  display: flex;
+  flex-direction: column;
+  max-height: 64vh;
+}
+.cmdk-input {
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  padding: var(--u3);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-1);
+  min-height: 52px;
+}
+.cmdk-input:focus { outline: none; }
+.cmdk-input::placeholder { color: var(--ink-3); }
+.cmdk-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+.cmdk-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--u3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--u2) var(--u3);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font-size: 0.9375rem;
+  color: var(--ink-1);
+}
+.cmdk-item.on { background: var(--ink-1); color: var(--paper); }
+.cmdk-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmdk-group { font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); flex: none; }
+.cmdk-item.on .cmdk-group { color: var(--paper); opacity: 0.7; }
+.cmdk-empty { padding: var(--u3); color: var(--ink-3); font-size: 0.9375rem; }
 
 /* thin rule-bar, not a rounded pill */
 .bar { height: 2px; background: var(--subtle); overflow: hidden; }

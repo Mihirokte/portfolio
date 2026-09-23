@@ -23,7 +23,6 @@ export function DsaList() {
     if (q && !(d.title + ' ' + d.topic).toLowerCase().includes(q.toLowerCase())) return false
     return true
   })
-  const solved = area.drills.filter((d) => problems[d.id]?.status === 'solved').length
 
   return (
     <div className="page">
@@ -31,9 +30,6 @@ export function DsaList() {
         Home
       </a>
       <h1>DSA</h1>
-      <p className="sub">
-        {solved}/{area.drills.length} solved. Write and syntax-check here, judge on LeetCode.
-      </p>
       <div className="filters">
         <input
           className="search"
