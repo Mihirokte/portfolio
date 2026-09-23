@@ -47,7 +47,9 @@ export interface Problem {
   inplace_arg?: number
   compare?: string // exact | unordered | unordered_deep | float | custom
   checker_code?: string
-  tests: TestCase[]
+  /** Legacy: the old test-based judge. The syntax validator replaced it, so
+   *  packs no longer carry tests. Kept optional for the original 5 problems. */
+  tests?: TestCase[]
 }
 
 export type Status = 'none' | 'attempted' | 'solved' | 'revisit'

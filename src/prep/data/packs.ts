@@ -1020,5 +1020,3498 @@ export const PACKS: Record<string, Problem> = {
     "source": "derived: strictly decreasing negative pushes, min updates each push and reverts on pop"
    }
   ]
+ },
+ "dsa-002": {
+  "id": "dsa-002",
+  "slug": "valid-anagram",
+  "title": "Valid Anagram",
+  "topic": "Arrays & Hashing",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/valid-anagram/",
+  "description_md": "Given two strings `s` and `t`, decide whether `t` is an anagram of `s` -- that is, whether `t` uses exactly the same letters as `s` with the same counts, just possibly reordered.\n\nReturn `True` if it is an anagram, otherwise `False`.\n\n**Example:** `s = \"anagram\"`, `t = \"nagaram\"` -> `True`; `s = \"rat\"`, `t = \"car\"` -> `False`.\n\n**Constraints:** `1 <= len(s), len(t) <= 5*10^4`; strings contain lowercase English letters.",
+  "signature": {
+   "name": "isAnagram",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "t",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def isAnagram(s, t):\n    \"\"\"\n    :type s: str\n    :type t: str\n    :rtype: bool\n    \"\"\"\n    pass",
+  "reference_solution": "def isAnagram(s, t):\n    if len(s) != len(t):\n        return False\n    from collections import Counter\n    return Counter(s) == Counter(t)"
+ },
+ "dsa-009": {
+  "id": "dsa-009",
+  "slug": "longest-consecutive-sequence",
+  "title": "Longest Consecutive Sequence",
+  "topic": "Arrays & Hashing",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/longest-consecutive-sequence/",
+  "description_md": "You are given an unsorted integer array `nums`. Find the length of the longest run of consecutive integers that appear in the array (order in the array does not matter, and duplicates count once).\n\nReturn that length as an integer. Aim for O(n) time.\n\n**Example:** `nums = [100, 4, 200, 1, 3, 2]` -> `4` (the run `1,2,3,4`).\n\n**Constraints:** `0 <= len(nums) <= 10^5`; `-10^9 <= nums[i] <= 10^9`.",
+  "signature": {
+   "name": "longestConsecutive",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def longestConsecutive(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def longestConsecutive(nums):\n    num_set = set(nums)\n    longest = 0\n    for n in num_set:\n        if n - 1 not in num_set:\n            length = 1\n            while n + length in num_set:\n                length += 1\n            longest = max(longest, length)\n    return longest"
+ },
+ "dsa-016": {
+  "id": "dsa-016",
+  "slug": "container-with-most-water",
+  "title": "Container With Most Water",
+  "topic": "Two Pointers",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/container-with-most-water/",
+  "description_md": "You are given an array `height` where each value is the height of a vertical line drawn at that index. Picking any two lines, together with the x-axis they form a container; the water it holds equals the shorter line's height times the horizontal distance between the two lines.\n\nReturn the maximum amount of water any pair of lines can hold.\n\n**Example:** `height = [1,8,6,2,5,4,8,3,7]` -> `49` (lines at index 1 and 8: min(8,7)*7).\n\n**Constraints:** `2 <= len(height) <= 10^5`; `0 <= height[i] <= 10^4`.",
+  "signature": {
+   "name": "maxArea",
+   "params": [
+    {
+     "name": "height",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def maxArea(height):\n    \"\"\"\n    :type height: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def maxArea(height):\n    left, right = 0, len(height) - 1\n    best = 0\n    while left < right:\n        area = min(height[left], height[right]) * (right - left)\n        best = max(best, area)\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    return best"
+ },
+ "dsa-023": {
+  "id": "dsa-023",
+  "slug": "sliding-window-maximum",
+  "title": "Sliding Window Maximum",
+  "topic": "Sliding Window",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/sliding-window-maximum/",
+  "description_md": "Given an integer array `nums` and an integer `k`, a window of size `k` slides from the left end to the right end, moving one position at a time. For each window position, capture the maximum value inside it.\n\nReturn the list of these maxima, in order.\n\n**Example:** `nums = [1,3,-1,-3,5,3,6,7]`, `k = 3` -> `[3,3,5,5,6,7]`.\n\n**Constraints:** `1 <= len(nums) <= 10^5`; `-10^4 <= nums[i] <= 10^4`; `1 <= k <= len(nums)`.",
+  "signature": {
+   "name": "maxSlidingWindow",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def maxSlidingWindow(nums, k):\n    \"\"\"\n    :type nums: List[int]\n    :type k: int\n    :rtype: List[int]\n    \"\"\"\n    pass",
+  "reference_solution": "def maxSlidingWindow(nums, k):\n    from collections import deque\n    dq = deque()  # holds indices, values decreasing\n    result = []\n    for i, n in enumerate(nums):\n        while dq and nums[dq[-1]] < n:\n            dq.pop()\n        dq.append(i)\n        if dq[0] <= i - k:\n            dq.popleft()\n        if i >= k - 1:\n            result.append(nums[dq[0]])\n    return result"
+ },
+ "dsa-030": {
+  "id": "dsa-030",
+  "slug": "largest-rectangle-in-histogram",
+  "title": "Largest Rectangle in Histogram",
+  "topic": "Monotonic Stack",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+  "description_md": "You are given `heights`, where each entry is the height of a bar of width 1 in a histogram, placed side by side. Find the rectangle of the largest area that can be formed using consecutive bars (its height is bounded by the shortest bar it spans).\n\nReturn that maximum area.\n\n**Example:** `heights = [2,1,5,6,2,3]` -> `10` (bars of height 5 and 6 give 5*2).\n\n**Constraints:** `1 <= len(heights) <= 10^5`; `0 <= heights[i] <= 10^4`.",
+  "signature": {
+   "name": "largestRectangleArea",
+   "params": [
+    {
+     "name": "heights",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def largestRectangleArea(heights):\n    \"\"\"\n    :type heights: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def largestRectangleArea(heights):\n    stack = []  # (start_index, height)\n    max_area = 0\n    for i, h in enumerate(heights):\n        start = i\n        while stack and stack[-1][1] > h:\n            idx, height = stack.pop()\n            max_area = max(max_area, height * (i - idx))\n            start = idx\n        stack.append((start, h))\n    n = len(heights)\n    for idx, height in stack:\n        max_area = max(max_area, height * (n - idx))\n    return max_area"
+ },
+ "dsa-036": {
+  "id": "dsa-036",
+  "slug": "search-in-rotated-sorted-array",
+  "title": "Search in Rotated Sorted Array",
+  "topic": "Binary Search",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+  "description_md": "An ascending-sorted array of distinct integers `nums` has been rotated at some unknown pivot (e.g. `[0,1,2,4,5,6,7]` might become `[4,5,6,7,0,1,2]`). Given `nums` and a `target`, find the index of `target`.\n\nReturn its index, or `-1` if it is absent. Run in O(log n).\n\n**Example:** `nums = [4,5,6,7,0,1,2]`, `target = 0` -> `4`.\n\n**Constraints:** `1 <= len(nums) <= 5000`; values distinct; `-10^4 <= nums[i], target <= 10^4`.",
+  "signature": {
+   "name": "search",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def search(nums, target):\n    \"\"\"\n    :type nums: List[int]\n    :type target: int\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def search(nums, target):\n    left, right = 0, len(nums) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[left] <= nums[mid]:\n            if nums[left] <= target < nums[mid]:\n                right = mid - 1\n            else:\n                left = mid + 1\n        else:\n            if nums[mid] < target <= nums[right]:\n                left = mid + 1\n            else:\n                right = mid - 1\n    return -1"
+ },
+ "dsa-042": {
+  "id": "dsa-042",
+  "slug": "remove-nth-node-from-end-of-list",
+  "title": "Remove Nth Node From End of List",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+  "description_md": "Given the `head` of a singly linked list and an integer `n`, remove the node that is `n`-th from the end of the list, then return the head of the resulting list.\n\nTry to do it in one pass.\n\n**Example:** `head = 1->2->3->4->5`, `n = 2` -> `1->2->3->5` (the node `4` is removed).\n\n**Constraints:** list length is in `[1, 30]`; `1 <= n <= length`; `0 <= Node.val <= 100`.",
+  "signature": {
+   "name": "removeNthFromEnd",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    },
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "def removeNthFromEnd(head, n):\n    \"\"\"\n    :type head: Optional[ListNode]\n    :type n: int\n    :rtype: Optional[ListNode]\n    \"\"\"\n    pass",
+  "reference_solution": "def removeNthFromEnd(head, n):\n    dummy = ListNode(0, head)\n    fast = slow = dummy\n    for _ in range(n):\n        fast = fast.next\n    while fast.next:\n        fast = fast.next\n        slow = slow.next\n    slow.next = slow.next.next\n    return dummy.next"
+ },
+ "dsa-048": {
+  "id": "dsa-048",
+  "slug": "merge-k-sorted-lists",
+  "title": "Merge k Sorted Lists",
+  "topic": "Heap/Top-K",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/merge-k-sorted-lists/",
+  "description_md": "You are given an array `lists` of `k` linked lists, each already sorted in ascending order. Merge them all into a single sorted linked list and return its head.\n\n**Example:** `lists = [1->4->5, 1->3->4, 2->6]` -> `1->1->2->3->4->4->5->6`.\n\n**Constraints:** `0 <= k <= 10^4`; each list is sorted ascending; total nodes across all lists `<= 10^4`; `-10^4 <= Node.val <= 10^4`.",
+  "signature": {
+   "name": "mergeKLists",
+   "params": [
+    {
+     "name": "lists",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "def mergeKLists(lists):\n    \"\"\"\n    :type lists: List[Optional[ListNode]]\n    :rtype: Optional[ListNode]\n    \"\"\"\n    pass",
+  "reference_solution": "def mergeKLists(lists):\n    import heapq\n    heap = []\n    for i, node in enumerate(lists):\n        if node:\n            heapq.heappush(heap, (node.val, i, node))\n    dummy = ListNode(0)\n    tail = dummy\n    while heap:\n        val, i, node = heapq.heappop(heap)\n        tail.next = node\n        tail = node\n        if node.next:\n            heapq.heappush(heap, (node.next.val, i, node.next))\n    return dummy.next"
+ },
+ "dsa-054": {
+  "id": "dsa-054",
+  "slug": "same-tree",
+  "title": "Same Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/same-tree/",
+  "description_md": "Given the roots `p` and `q` of two binary trees, determine whether the two trees are identical -- same shape and the same value at every corresponding node.\n\nReturn `True` if they match, otherwise `False`.\n\n**Example:** `p = [1,2,3]`, `q = [1,2,3]` -> `True`; `p = [1,2]`, `q = [1,null,2]` -> `False`.\n\n**Constraints:** number of nodes in each tree is in `[0, 100]`; `-10^4 <= Node.val <= 10^4`.",
+  "signature": {
+   "name": "isSameTree",
+   "params": [
+    {
+     "name": "p",
+     "kind": "tree"
+    },
+    {
+     "name": "q",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def isSameTree(p, q):\n    \"\"\"\n    :type p: Optional[TreeNode]\n    :type q: Optional[TreeNode]\n    :rtype: bool\n    \"\"\"\n    pass",
+  "reference_solution": "def isSameTree(p, q):\n    if not p and not q:\n        return True\n    if not p or not q or p.val != q.val:\n        return False\n    return isSameTree(p.left, q.left) and isSameTree(p.right, q.right)"
+ },
+ "dsa-060": {
+  "id": "dsa-060",
+  "slug": "validate-binary-search-tree",
+  "title": "Validate Binary Search Tree",
+  "topic": "Trees",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/validate-binary-search-tree/",
+  "description_md": "Given the `root` of a binary tree, decide whether it is a valid binary search tree: every node's value must be strictly greater than all values in its left subtree and strictly less than all values in its right subtree.\n\nReturn `True` if valid, otherwise `False`.\n\n**Example:** `root = [2,1,3]` -> `True`; `root = [5,1,4,null,null,3,6]` -> `False` (3 and 6 sit under 4 which is under 5's right).\n\n**Constraints:** number of nodes is in `[1, 10^4]`; `-2^31 <= Node.val <= 2^31 - 1`.",
+  "signature": {
+   "name": "isValidBST",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def isValidBST(root):\n    \"\"\"\n    :type root: Optional[TreeNode]\n    :rtype: bool\n    \"\"\"\n    pass",
+  "reference_solution": "def isValidBST(root):\n    def valid(node, low, high):\n        if not node:\n            return True\n        if not (low < node.val < high):\n            return False\n        return valid(node.left, low, node.val) and valid(node.right, node.val, high)\n    return valid(root, float('-inf'), float('inf'))"
+ },
+ "dsa-066": {
+  "id": "dsa-066",
+  "slug": "implement-trie-prefix-tree",
+  "title": "Implement Trie (Prefix Tree)",
+  "topic": "Tries",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+  "description_md": "Implement a prefix tree (trie) supporting: `insert(word)` to add a word, `search(word)` returning `True` only if the exact word was inserted, and `startsWith(prefix)` returning `True` if any inserted word begins with that prefix.\n\n**Example:** insert `\"apple\"`; `search(\"apple\")` -> `True`; `search(\"app\")` -> `False`; `startsWith(\"app\")` -> `True`; then insert `\"app\"`; `search(\"app\")` -> `True`.\n\n**Constraints:** words and prefixes use lowercase English letters, length `1..2000`; up to `3*10^4` calls total across the three methods.",
+  "signature": {
+   "type": "class",
+   "name": "Trie",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class Trie:\n    def __init__(self):\n        pass\n\n    def insert(self, word):\n        \"\"\"\n        :type word: str\n        :rtype: None\n        \"\"\"\n        pass\n\n    def search(self, word):\n        \"\"\"\n        :type word: str\n        :rtype: bool\n        \"\"\"\n        pass\n\n    def startsWith(self, prefix):\n        \"\"\"\n        :type prefix: str\n        :rtype: bool\n        \"\"\"\n        pass",
+  "reference_solution": "class Trie:\n    def __init__(self):\n        self.root = {}\n\n    def insert(self, word):\n        node = self.root\n        for ch in word:\n            node = node.setdefault(ch, {})\n        node['#'] = True\n\n    def search(self, word):\n        node = self.root\n        for ch in word:\n            if ch not in node:\n                return False\n            node = node[ch]\n        return '#' in node\n\n    def startsWith(self, prefix):\n        node = self.root\n        for ch in prefix:\n            if ch not in node:\n                return False\n            node = node[ch]\n        return True"
+ },
+ "dsa-072": {
+  "id": "dsa-072",
+  "slug": "kth-largest-element-in-an-array",
+  "title": "Kth Largest Element in an Array",
+  "topic": "Heap/Top-K",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+  "description_md": "Given an integer array `nums` and an integer `k`, return the `k`-th largest element by value (in sorted-descending order, not the k-th distinct element).\n\n**Example:** `nums = [3,2,1,5,6,4]`, `k = 2` -> `5`; `nums = [3,2,3,1,2,4,5,5,6]`, `k = 4` -> `4`.\n\n**Constraints:** `1 <= k <= len(nums) <= 10^5`; `-10^4 <= nums[i] <= 10^4`.",
+  "signature": {
+   "name": "findKthLargest",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def findKthLargest(nums, k):\n    \"\"\"\n    :type nums: List[int]\n    :type k: int\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def findKthLargest(nums, k):\n    import heapq\n    return heapq.nlargest(k, nums)[-1]"
+ },
+ "dsa-078": {
+  "id": "dsa-078",
+  "slug": "permutations",
+  "title": "Permutations",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/permutations/",
+  "description_md": "Given an array `nums` of distinct integers, generate every possible ordering (permutation) of its elements.\n\nReturn a list of all permutations; the order of the permutations in the output does not matter.\n\n**Example:** `nums = [1,2,3]` -> `[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]`.\n\n**Constraints:** `1 <= len(nums) <= 6`; values distinct; `-10 <= nums[i] <= 10`.",
+  "signature": {
+   "name": "permute",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def permute(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: List[List[int]]\n    \"\"\"\n    pass",
+  "reference_solution": "def permute(nums):\n    result = []\n    def backtrack(current, remaining):\n        if not remaining:\n            result.append(current[:])\n            return\n        for i in range(len(remaining)):\n            current.append(remaining[i])\n            backtrack(current, remaining[:i] + remaining[i+1:])\n            current.pop()\n    backtrack([], nums)\n    return result"
+ },
+ "dsa-084": {
+  "id": "dsa-084",
+  "slug": "number-of-islands",
+  "title": "Number of Islands",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/number-of-islands/",
+  "description_md": "You are given a 2D grid of `'1'` (land) and `'0'` (water) characters. An island is a group of land cells connected horizontally or vertically. Count how many distinct islands the grid contains.\n\nReturn that count.\n\n**Example:** grid `[[\"1\",\"1\",\"0\"],[\"1\",\"0\",\"0\"],[\"0\",\"0\",\"1\"]]` -> `2`.\n\n**Constraints:** `1 <= rows, cols <= 300`; each cell is `'0'` or `'1'`.",
+  "signature": {
+   "name": "numIslands",
+   "params": [
+    {
+     "name": "grid",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def numIslands(grid):\n    \"\"\"\n    :type grid: List[List[str]]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def numIslands(grid):\n    if not grid:\n        return 0\n    rows, cols = len(grid), len(grid[0])\n    def dfs(r, c):\n        if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] != '1':\n            return\n        grid[r][c] = '0'\n        dfs(r + 1, c)\n        dfs(r - 1, c)\n        dfs(r, c + 1)\n        dfs(r, c - 1)\n    count = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1':\n                dfs(r, c)\n                count += 1\n    return count"
+ },
+ "dsa-090": {
+  "id": "dsa-090",
+  "slug": "walls-and-gates",
+  "title": "Walls And Gates",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/walls-and-gates/",
+  "description_md": "You are given an `m x n` grid `rooms` where each cell is one of: `-1` a wall, `0` a gate, or `INF` (2147483647) an empty room. Fill each empty room with the number of steps to its nearest gate (moving up/down/left/right). If a room cannot reach any gate, leave it as `INF`.\n\nModify `rooms` in place; return `None`.\n\n**Example:** with gates at some `0` cells, an empty room two steps from the nearest gate becomes `2`.\n\n**Constraints:** `m == len(rooms)`, `n == len(rooms[0])`; `1 <= m, n <= 250`; each cell is `-1`, `0`, or `2147483647`.",
+  "signature": {
+   "name": "wallsAndGates",
+   "params": [
+    {
+     "name": "rooms",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def wallsAndGates(rooms):\n    \"\"\"\n    :type rooms: List[List[int]]\n    :rtype: None (modify rooms in place)\n    \"\"\"\n    pass",
+  "reference_solution": "def wallsAndGates(rooms):\n    from collections import deque\n    if not rooms:\n        return\n    rows, cols = len(rooms), len(rooms[0])\n    INF = 2147483647\n    q = deque()\n    for r in range(rows):\n        for c in range(cols):\n            if rooms[r][c] == 0:\n                q.append((r, c))\n    while q:\n        r, c = q.popleft()\n        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < rows and 0 <= nc < cols and rooms[nr][nc] == INF:\n                rooms[nr][nc] = rooms[r][c] + 1\n                q.append((nr, nc))"
+ },
+ "dsa-096": {
+  "id": "dsa-096",
+  "slug": "word-ladder",
+  "title": "Word Ladder",
+  "topic": "BFS/DFS",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/word-ladder/",
+  "description_md": "Given `beginWord`, `endWord`, and a `wordList`, transform `beginWord` into `endWord` by changing one letter at a time, where every intermediate word must be in `wordList`. Return the number of words in the shortest such transformation sequence (counting both endpoints), or `0` if none exists.\n\n**Example:** `beginWord = \"hit\"`, `endWord = \"cog\"`, `wordList = [\"hot\",\"dot\",\"dog\",\"lot\",\"log\",\"cog\"]` -> `5` (hit->hot->dot->dog->cog).\n\n**Constraints:** `1 <= len(beginWord) <= 10`; all words same length, lowercase; `1 <= len(wordList) <= 5000`.",
+  "signature": {
+   "name": "ladderLength",
+   "params": [
+    {
+     "name": "beginWord",
+     "kind": "value"
+    },
+    {
+     "name": "endWord",
+     "kind": "value"
+    },
+    {
+     "name": "wordList",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def ladderLength(beginWord, endWord, wordList):\n    \"\"\"\n    :type beginWord: str\n    :type endWord: str\n    :type wordList: List[str]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def ladderLength(beginWord, endWord, wordList):\n    from collections import deque, defaultdict\n    words = set(wordList)\n    if endWord not in words:\n        return 0\n    patterns = defaultdict(list)\n    for word in words:\n        for i in range(len(word)):\n            patterns[word[:i] + '*' + word[i+1:]].append(word)\n    q = deque([(beginWord, 1)])\n    visited = {beginWord}\n    while q:\n        word, steps = q.popleft()\n        if word == endWord:\n            return steps\n        for i in range(len(word)):\n            for nxt in patterns[word[:i] + '*' + word[i+1:]]:\n                if nxt not in visited:\n                    visited.add(nxt)\n                    q.append((nxt, steps + 1))\n    return 0"
+ },
+ "dsa-102": {
+  "id": "dsa-102",
+  "slug": "min-cost-climbing-stairs",
+  "title": "Min Cost Climbing Stairs",
+  "topic": "DP",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/min-cost-climbing-stairs/",
+  "description_md": "You are given `cost`, where `cost[i]` is the price paid to step off stair `i`. From a stair you may climb one or two stairs. You may start from index `0` or index `1`. Return the minimum total cost to climb past the top of the staircase (reach beyond the last stair).\n\n**Example:** `cost = [10,15,20]` -> `15` (start at index 1, pay 15, step two to the top); `cost = [1,100,1,1,1,100,1,1,100,1]` -> `6`.\n\n**Constraints:** `2 <= len(cost) <= 1000`; `0 <= cost[i] <= 999`.",
+  "signature": {
+   "name": "minCostClimbingStairs",
+   "params": [
+    {
+     "name": "cost",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minCostClimbingStairs(cost):\n    \"\"\"\n    :type cost: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def minCostClimbingStairs(cost):\n    prev2, prev1 = 0, 0\n    for i in range(2, len(cost) + 1):\n        current = min(prev1 + cost[i-1], prev2 + cost[i-2])\n        prev2, prev1 = prev1, current\n    return prev1"
+ },
+ "dsa-108": {
+  "id": "dsa-108",
+  "slug": "coin-change",
+  "title": "Coin Change",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/coin-change/",
+  "description_md": "You are given a list of `coins` denominations and a target `amount`. Using any number of each coin, return the fewest coins whose values sum exactly to `amount`. If it cannot be made, return `-1`.\n\n**Example:** `coins = [1,2,5]`, `amount = 11` -> `3` (5+5+1); `coins = [2]`, `amount = 3` -> `-1`.\n\n**Constraints:** `1 <= len(coins) <= 12`; `1 <= coins[i] <= 2^31 - 1`; `0 <= amount <= 10^4`.",
+  "signature": {
+   "name": "coinChange",
+   "params": [
+    {
+     "name": "coins",
+     "kind": "value"
+    },
+    {
+     "name": "amount",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def coinChange(coins, amount):\n    \"\"\"\n    :type coins: List[int]\n    :type amount: int\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def coinChange(coins, amount):\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for a in range(1, amount + 1):\n        for coin in coins:\n            if coin <= a:\n                dp[a] = min(dp[a], dp[a - coin] + 1)\n    return dp[amount] if dp[amount] != amount + 1 else -1"
+ },
+ "dsa-114": {
+  "id": "dsa-114",
+  "slug": "unique-paths",
+  "title": "Unique Paths",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/unique-paths/",
+  "description_md": "A robot starts at the top-left cell of an `m x n` grid and wants to reach the bottom-right cell. It may only move right or down at each step. Return how many distinct paths it can take.\n\n**Example:** `m = 3`, `n = 7` -> `28`; `m = 3`, `n = 2` -> `3`.\n\n**Constraints:** `1 <= m, n <= 100`; the answer fits in a 32-bit signed integer.",
+  "signature": {
+   "name": "uniquePaths",
+   "params": [
+    {
+     "name": "m",
+     "kind": "value"
+    },
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def uniquePaths(m, n):\n    \"\"\"\n    :type m: int\n    :type n: int\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def uniquePaths(m, n):\n    row = [1] * n\n    for _ in range(m - 1):\n        for j in range(1, n):\n            row[j] += row[j - 1]\n    return row[-1]"
+ },
+ "dsa-120": {
+  "id": "dsa-120",
+  "slug": "edit-distance",
+  "title": "Edit Distance",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/edit-distance/",
+  "description_md": "Given two strings `word1` and `word2`, return the minimum number of single-character operations needed to turn `word1` into `word2`. The allowed operations are insert a character, delete a character, or replace a character.\n\n**Example:** `word1 = \"horse\"`, `word2 = \"ros\"` -> `3`; `word1 = \"intention\"`, `word2 = \"execution\"` -> `5`.\n\n**Constraints:** `0 <= len(word1), len(word2) <= 500`; strings contain lowercase English letters.",
+  "signature": {
+   "name": "minDistance",
+   "params": [
+    {
+     "name": "word1",
+     "kind": "value"
+    },
+    {
+     "name": "word2",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minDistance(word1, word2):\n    \"\"\"\n    :type word1: str\n    :type word2: str\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def minDistance(word1, word2):\n    m, n = len(word1), len(word2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(m + 1):\n        dp[i][0] = i\n    for j in range(n + 1):\n        dp[0][j] = j\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if word1[i-1] == word2[j-1]:\n                dp[i][j] = dp[i-1][j-1]\n            else:\n                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])\n    return dp[m][n]"
+ },
+ "dsa-126": {
+  "id": "dsa-126",
+  "slug": "jump-game-ii",
+  "title": "Jump Game II",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/jump-game-ii/",
+  "description_md": "You are given an array `nums` where `nums[i]` is the maximum jump length forward from index `i`. Starting at index `0`, return the minimum number of jumps needed to reach the last index. It is guaranteed you can always reach the end.\n\n**Example:** `nums = [2,3,1,1,4]` -> `2` (jump 1 step to index 1, then 3 steps to the last index); `nums = [2,3,0,1,4]` -> `2`.\n\n**Constraints:** `1 <= len(nums) <= 10^4`; `0 <= nums[i] <= 1000`; the end is always reachable.",
+  "signature": {
+   "name": "jump",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def jump(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def jump(nums):\n    jumps = 0\n    current_end = 0\n    farthest = 0\n    for i in range(len(nums) - 1):\n        farthest = max(farthest, i + nums[i])\n        if i == current_end:\n            jumps += 1\n            current_end = farthest\n    return jumps"
+ },
+ "dsa-132": {
+  "id": "dsa-132",
+  "slug": "insert-interval",
+  "title": "Insert Interval",
+  "topic": "Intervals",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/insert-interval/",
+  "description_md": "You are given a list `intervals` of non-overlapping intervals sorted by start, and a `newInterval`. Insert the new interval and merge any overlaps so the result stays sorted and non-overlapping.\n\nReturn the resulting list of intervals.\n\n**Example:** `intervals = [[1,3],[6,9]]`, `newInterval = [2,5]` -> `[[1,5],[6,9]]`; `intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]]`, `newInterval = [4,8]` -> `[[1,2],[3,10],[12,16]]`.\n\n**Constraints:** `0 <= len(intervals) <= 10^4`; intervals sorted by start, non-overlapping; `0 <= start <= end <= 10^5`.",
+  "signature": {
+   "name": "insert",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    },
+    {
+     "name": "newInterval",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def insert(intervals, newInterval):\n    \"\"\"\n    :type intervals: List[List[int]]\n    :type newInterval: List[int]\n    :rtype: List[List[int]]\n    \"\"\"\n    pass",
+  "reference_solution": "def insert(intervals, newInterval):\n    result = []\n    i, n = 0, len(intervals)\n    while i < n and intervals[i][1] < newInterval[0]:\n        result.append(intervals[i])\n        i += 1\n    while i < n and intervals[i][0] <= newInterval[1]:\n        newInterval[0] = min(newInterval[0], intervals[i][0])\n        newInterval[1] = max(newInterval[1], intervals[i][1])\n        i += 1\n    result.append(newInterval)\n    while i < n:\n        result.append(intervals[i])\n        i += 1\n    return result"
+ },
+ "dsa-138": {
+  "id": "dsa-138",
+  "slug": "single-number",
+  "title": "Single Number",
+  "topic": "Bit Manipulation",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/single-number/",
+  "description_md": "Given a non-empty array `nums` in which every element appears exactly twice except for one element that appears once, find and return that single element. Aim for O(n) time and O(1) extra space.\n\n**Example:** `nums = [2,2,1]` -> `1`; `nums = [4,1,2,1,2]` -> `4`.\n\n**Constraints:** `1 <= len(nums) <= 3*10^4`; `-3*10^4 <= nums[i] <= 3*10^4`; exactly one element appears once, all others twice.",
+  "signature": {
+   "name": "singleNumber",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def singleNumber(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def singleNumber(nums):\n    result = 0\n    for n in nums:\n        result ^= n\n    return result"
+ },
+ "dsa-144": {
+  "id": "dsa-144",
+  "slug": "reverse-integer",
+  "title": "Reverse Integer",
+  "topic": "Math",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/reverse-integer/",
+  "description_md": "Given a signed 32-bit integer `x`, return `x` with its digits reversed (the sign is preserved). If reversing causes the value to fall outside the signed 32-bit range `[-2^31, 2^31 - 1]`, return `0` instead.\n\n**Example:** `x = 123` -> `321`; `x = -123` -> `-321`; `x = 120` -> `21`; `x = 1534236469` -> `0` (overflows).\n\n**Constraints:** `-2^31 <= x <= 2^31 - 1`; assume no 64-bit integers are available for storing the intermediate.",
+  "signature": {
+   "name": "reverse",
+   "params": [
+    {
+     "name": "x",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def reverse(x):\n    \"\"\"\n    :type x: int\n    :rtype: int\n    \"\"\"\n    pass",
+  "reference_solution": "def reverse(x):\n    INT_MIN, INT_MAX = -2**31, 2**31 - 1\n    sign = -1 if x < 0 else 1\n    rev = int(str(abs(x))[::-1]) * sign\n    if rev < INT_MIN or rev > INT_MAX:\n        return 0\n    return rev"
+ },
+ "dsa-003": {
+  "id": "dsa-003",
+  "slug": "two-sum",
+  "title": "Two Sum",
+  "topic": "Arrays & Hashing",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/two-sum/",
+  "description_md": "Given an integer array `nums` and an integer `target`, find the two positions whose values add up to `target`.\n\nReturn the pair of indices as a list. Each input has exactly one valid answer, and you may not reuse the same element twice.\n\n**Example:**\n- Input: `nums = [2, 7, 11, 15]`, `target = 9`\n- Output: `[0, 1]` (because `nums[0] + nums[1] == 9`)\n\n**Constraints:**\n- `2 <= len(nums) <= 10^4`\n- Exactly one solution exists.",
+  "signature": {
+   "name": "twoSum",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        \"\"\"\n        :param nums: list[int] - the input array\n        :param target: int - the target sum\n        :return: list[int] - indices of the two numbers that sum to target\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        seen = {}\n        for i, n in enumerate(nums):\n            complement = target - n\n            if complement in seen:\n                return [seen[complement], i]\n            seen[n] = i\n        return []"
+ },
+ "dsa-010": {
+  "id": "dsa-010",
+  "slug": "subarray-sum-equals-k",
+  "title": "Subarray Sum Equals K",
+  "topic": "Prefix Sums",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/subarray-sum-equals-k/",
+  "description_md": "Given an integer array `nums` and an integer `k`, count how many contiguous subarrays have elements summing exactly to `k`.\n\nReturn that count as an integer.\n\n**Example:**\n- Input: `nums = [1, 1, 1]`, `k = 2`\n- Output: `2` (the subarrays `[1,1]` at positions 0-1 and 1-2)\n\n**Constraints:**\n- `1 <= len(nums) <= 2*10^4`\n- Values may be negative.",
+  "signature": {
+   "name": "subarraySum",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def subarraySum(self, nums: list[int], k: int) -> int:\n        \"\"\"\n        :param nums: list[int] - the input array\n        :param k: int - target subarray sum\n        :return: int - number of contiguous subarrays summing to k\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def subarraySum(self, nums: list[int], k: int) -> int:\n        count = 0\n        prefix = 0\n        seen = {0: 1}\n        for n in nums:\n            prefix += n\n            count += seen.get(prefix - k, 0)\n            seen[prefix] = seen.get(prefix, 0) + 1\n        return count"
+ },
+ "dsa-017": {
+  "id": "dsa-017",
+  "slug": "trapping-rain-water",
+  "title": "Trapping Rain Water",
+  "topic": "Two Pointers",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/trapping-rain-water/",
+  "description_md": "You are given a list `height` of non-negative integers describing an elevation map where each bar has width 1. Compute how much rainwater can be held between the bars after it rains.\n\nReturn the total trapped water as an integer.\n\n**Example:**\n- Input: `height = [0,1,0,2,1,0,1,3,2,1,2,1]`\n- Output: `6`\n\n**Constraints:**\n- `0 <= len(height) <= 2*10^4`\n- `0 <= height[i] <= 10^5`",
+  "signature": {
+   "name": "trap",
+   "params": [
+    {
+     "name": "height",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def trap(self, height: list[int]) -> int:\n        \"\"\"\n        :param height: list[int] - elevation map bar heights\n        :return: int - total units of trapped rainwater\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def trap(self, height: list[int]) -> int:\n        if not height:\n            return 0\n        left, right = 0, len(height) - 1\n        left_max, right_max = height[left], height[right]\n        total = 0\n        while left < right:\n            if left_max < right_max:\n                left += 1\n                left_max = max(left_max, height[left])\n                total += left_max - height[left]\n            else:\n                right -= 1\n                right_max = max(right_max, height[right])\n                total += right_max - height[right]\n        return total"
+ },
+ "dsa-024": {
+  "id": "dsa-024",
+  "slug": "valid-parentheses",
+  "title": "Valid Parentheses",
+  "topic": "Stack",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/valid-parentheses/",
+  "description_md": "Given a string `s` made only of the characters `()[]{}`, decide whether every opening bracket is closed by the matching type of bracket in the correct order.\n\nReturn `True` if the string is valid, otherwise `False`.\n\n**Example:**\n- Input: `s = \"()[]{}\"`\n- Output: `True`\n- Input: `s = \"(]\"`\n- Output: `False`\n\n**Constraints:**\n- `1 <= len(s) <= 10^4`\n- `s` contains only bracket characters.",
+  "signature": {
+   "name": "isValid",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def isValid(self, s: str) -> bool:\n        \"\"\"\n        :param s: str - a string of bracket characters\n        :return: bool - True if all brackets are correctly matched\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def isValid(self, s: str) -> bool:\n        pairs = {')': '(', ']': '[', '}': '{'}\n        stack = []\n        for ch in s:\n            if ch in pairs:\n                if not stack or stack.pop() != pairs[ch]:\n                    return False\n            else:\n                stack.append(ch)\n        return not stack"
+ },
+ "dsa-031": {
+  "id": "dsa-031",
+  "slug": "next-greater-element-i",
+  "title": "Next Greater Element I",
+  "topic": "Monotonic Stack",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/next-greater-element-i/",
+  "description_md": "You are given two arrays `nums1` and `nums2`, where `nums1` is a subset of `nums2` and all values are distinct. For each value in `nums1`, find where it sits in `nums2` and return the first element to its right that is strictly larger. If there is none, use `-1`.\n\nReturn the answers as a list aligned with `nums1`.\n\n**Example:**\n- Input: `nums1 = [4,1,2]`, `nums2 = [1,3,4,2]`\n- Output: `[-1, 3, -1]`\n\n**Constraints:**\n- `1 <= len(nums1) <= len(nums2) <= 1000`\n- All integers are distinct.",
+  "signature": {
+   "name": "nextGreaterElement",
+   "params": [
+    {
+     "name": "nums1",
+     "kind": "value"
+    },
+    {
+     "name": "nums2",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def nextGreaterElement(self, nums1: list[int], nums2: list[int]) -> list[int]:\n        \"\"\"\n        :param nums1: list[int] - query values, a subset of nums2\n        :param nums2: list[int] - the reference array\n        :return: list[int] - next greater element for each nums1 value, or -1\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def nextGreaterElement(self, nums1: list[int], nums2: list[int]) -> list[int]:\n        next_greater = {}\n        stack = []\n        for n in nums2:\n            while stack and stack[-1] < n:\n                next_greater[stack.pop()] = n\n            stack.append(n)\n        return [next_greater.get(n, -1) for n in nums1]"
+ },
+ "dsa-037": {
+  "id": "dsa-037",
+  "slug": "time-based-key-value-store",
+  "title": "Time Based Key-Value Store",
+  "topic": "Binary Search",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/time-based-key-value-store/",
+  "description_md": "Design a key-value store that keeps multiple timestamped values per key. Support:\n- `set(key, value, timestamp)` records `value` for `key` at time `timestamp`.\n- `get(key, timestamp)` returns the value stored for `key` at the greatest recorded time that is `<= timestamp`; if none exists, return `\"\"`.\n\nTimestamps for each key are supplied in strictly increasing order.\n\n**Example:**\n- `set(\"foo\", \"bar\", 1)`; `get(\"foo\", 1)` -> `\"bar\"`; `get(\"foo\", 3)` -> `\"bar\"`; after `set(\"foo\", \"baz\", 4)`, `get(\"foo\", 4)` -> `\"baz\"`\n\n**Constraints:**\n- `1 <= timestamp <= 10^7`\n- Up to `2*10^5` calls total.",
+  "signature": {
+   "type": "class",
+   "name": "TimeMap",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class TimeMap:\n    def __init__(self):\n        \"\"\"Initialize the timestamped key-value store.\"\"\"\n        pass\n\n    def set(self, key: str, value: str, timestamp: int) -> None:\n        \"\"\"Store value for key at the given timestamp.\"\"\"\n        pass\n\n    def get(self, key: str, timestamp: int) -> str:\n        \"\"\"Return the value at the latest time <= timestamp, else ''.\"\"\"\n        pass",
+  "reference_solution": "import bisect\n\nclass TimeMap:\n    def __init__(self):\n        self.store = {}\n\n    def set(self, key: str, value: str, timestamp: int) -> None:\n        self.store.setdefault(key, []).append((timestamp, value))\n\n    def get(self, key: str, timestamp: int) -> str:\n        entries = self.store.get(key, [])\n        i = bisect.bisect_right(entries, (timestamp, chr(0x10FFFF)))\n        return entries[i - 1][1] if i else \"\""
+ },
+ "dsa-043": {
+  "id": "dsa-043",
+  "slug": "copy-list-with-random-pointer",
+  "title": "Copy List with Random Pointer",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/copy-list-with-random-pointer/",
+  "description_md": "You are given the head of a linked list where each node has a `next` pointer and an additional `random` pointer that may point to any node in the list or to `None`. Build a deep copy: a brand-new list of nodes whose `next` and `random` pointers mirror the structure of the original without referencing any original node.\n\nReturn the head of the copied list.\n\n**Example:**\n- Input: `head = [[7,None],[13,0],[11,4],[10,2],[1,0]]` (each pair is `[value, random_index]`)\n- Output: an identical structure built from new nodes.\n\n**Constraints:**\n- `0 <= number of nodes <= 1000`\n- `random` is `None` or a valid node index.",
+  "signature": {
+   "name": "copyRandomList",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "class Node:\n    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):\n        self.val = int(x)\n        self.next = next\n        self.random = random\n\nclass Solution:\n    def copyRandomList(self, head: 'Node') -> 'Node':\n        \"\"\"\n        :param head: Node - head of the list with random pointers\n        :return: Node - head of the deep-copied list\n        \"\"\"\n        pass",
+  "reference_solution": "class Node:\n    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):\n        self.val = int(x)\n        self.next = next\n        self.random = random\n\nclass Solution:\n    def copyRandomList(self, head: 'Node') -> 'Node':\n        if not head:\n            return None\n        clones = {None: None}\n        cur = head\n        while cur:\n            clones[cur] = Node(cur.val)\n            cur = cur.next\n        cur = head\n        while cur:\n            clones[cur].next = clones[cur.next]\n            clones[cur].random = clones[cur.random]\n            cur = cur.next\n        return clones[head]"
+ },
+ "dsa-049": {
+  "id": "dsa-049",
+  "slug": "reverse-linked-list-ii",
+  "title": "Reverse Linked List II",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/reverse-linked-list-ii/",
+  "description_md": "Given the head of a singly linked list and two 1-indexed positions `left` and `right` with `left <= right`, reverse the nodes from position `left` to position `right` inclusive and leave the rest untouched.\n\nReturn the head of the modified list.\n\n**Example:**\n- Input: `head = [1,2,3,4,5]`, `left = 2`, `right = 4`\n- Output: `[1,4,3,2,5]`\n\n**Constraints:**\n- `1 <= number of nodes <= 500`\n- `1 <= left <= right <= number of nodes`",
+  "signature": {
+   "name": "reverseBetween",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    },
+    {
+     "name": "left",
+     "kind": "value"
+    },
+    {
+     "name": "right",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "class ListNode:\n    def __init__(self, val: int = 0, next: 'ListNode' = None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def reverseBetween(self, head: 'ListNode', left: int, right: int) -> 'ListNode':\n        \"\"\"\n        :param head: ListNode - head of the list\n        :param left: int - 1-indexed start position of reversal\n        :param right: int - 1-indexed end position of reversal\n        :return: ListNode - head after reversing the sublist\n        \"\"\"\n        pass",
+  "reference_solution": "class ListNode:\n    def __init__(self, val: int = 0, next: 'ListNode' = None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def reverseBetween(self, head: 'ListNode', left: int, right: int) -> 'ListNode':\n        dummy = ListNode(0, head)\n        prev = dummy\n        for _ in range(left - 1):\n            prev = prev.next\n        cur = prev.next\n        for _ in range(right - left):\n            nxt = cur.next\n            cur.next = nxt.next\n            nxt.next = prev.next\n            prev.next = nxt\n        return dummy.next"
+ },
+ "dsa-055": {
+  "id": "dsa-055",
+  "slug": "subtree-of-another-tree",
+  "title": "Subtree of Another Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/subtree-of-another-tree/",
+  "description_md": "Given the roots of two binary trees `root` and `subRoot`, decide whether `subRoot` appears as a subtree of `root`. A subtree consists of some node in `root` together with all of that node's descendants, and it must match `subRoot` in both shape and node values.\n\nReturn `True` or `False`.\n\n**Example:**\n- Input: `root = [3,4,5,1,2]`, `subRoot = [4,1,2]`\n- Output: `True`\n\n**Constraints:**\n- `1 <= nodes in root <= 2000`\n- `1 <= nodes in subRoot <= 1000`",
+  "signature": {
+   "name": "isSubtree",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    },
+    {
+     "name": "subRoot",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class TreeNode:\n    def __init__(self, val: int = 0, left: 'TreeNode' = None, right: 'TreeNode' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def isSubtree(self, root: 'TreeNode', subRoot: 'TreeNode') -> bool:\n        \"\"\"\n        :param root: TreeNode - root of the main tree\n        :param subRoot: TreeNode - root of the candidate subtree\n        :return: bool - True if subRoot is a subtree of root\n        \"\"\"\n        pass",
+  "reference_solution": "class TreeNode:\n    def __init__(self, val: int = 0, left: 'TreeNode' = None, right: 'TreeNode' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def isSubtree(self, root: 'TreeNode', subRoot: 'TreeNode') -> bool:\n        def same(a, b):\n            if not a and not b:\n                return True\n            if not a or not b or a.val != b.val:\n                return False\n            return same(a.left, b.left) and same(a.right, b.right)\n        if not subRoot:\n            return True\n        if not root:\n            return False\n        if same(root, subRoot):\n            return True\n        return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)"
+ },
+ "dsa-061": {
+  "id": "dsa-061",
+  "slug": "kth-smallest-element-in-a-bst",
+  "title": "Kth Smallest Element in a BST",
+  "topic": "Trees",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
+  "description_md": "Given the root of a binary search tree and an integer `k`, return the value of the `k`-th smallest element (1-indexed) in the tree.\n\n**Example:**\n- Input: `root = [3,1,4,None,2]`, `k = 1`\n- Output: `1`\n- Input: `root = [5,3,6,2,4,None,None,1]`, `k = 3`\n- Output: `3`\n\n**Constraints:**\n- `1 <= k <= number of nodes <= 10^4`\n- Values are unique.",
+  "signature": {
+   "name": "kthSmallest",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class TreeNode:\n    def __init__(self, val: int = 0, left: 'TreeNode' = None, right: 'TreeNode' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def kthSmallest(self, root: 'TreeNode', k: int) -> int:\n        \"\"\"\n        :param root: TreeNode - root of the BST\n        :param k: int - 1-indexed rank to retrieve\n        :return: int - the k-th smallest value\n        \"\"\"\n        pass",
+  "reference_solution": "class TreeNode:\n    def __init__(self, val: int = 0, left: 'TreeNode' = None, right: 'TreeNode' = None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def kthSmallest(self, root: 'TreeNode', k: int) -> int:\n        stack = []\n        cur = root\n        while stack or cur:\n            while cur:\n                stack.append(cur)\n                cur = cur.left\n            cur = stack.pop()\n            k -= 1\n            if k == 0:\n                return cur.val\n            cur = cur.right\n        return -1"
+ },
+ "dsa-067": {
+  "id": "dsa-067",
+  "slug": "design-add-and-search-words-data-structure",
+  "title": "Design Add and Search Words Data Structure",
+  "topic": "Tries",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
+  "description_md": "Design a data structure that stores words and supports wildcard search. Support:\n- `addWord(word)` inserts a word.\n- `search(word)` returns `True` if any stored word matches `word`, where the character `.` in the query can match any single letter.\n\n**Example:**\n- `addWord(\"bad\")`, `addWord(\"dad\")`, `addWord(\"mad\")`\n- `search(\"pad\")` -> `False`; `search(\"bad\")` -> `True`; `search(\".ad\")` -> `True`; `search(\"b..\")` -> `True`\n\n**Constraints:**\n- `1 <= word length <= 25`; words in `addWord` are lowercase letters.\n- Up to `10^4` calls total.",
+  "signature": {
+   "type": "class",
+   "name": "WordDictionary",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class WordDictionary:\n    def __init__(self):\n        \"\"\"Initialize the word data structure.\"\"\"\n        pass\n\n    def addWord(self, word: str) -> None:\n        \"\"\"Insert a word into the structure.\"\"\"\n        pass\n\n    def search(self, word: str) -> bool:\n        \"\"\"Return True if any stored word matches word ('.' matches any letter).\"\"\"\n        pass",
+  "reference_solution": "class WordDictionary:\n    def __init__(self):\n        self.root = {}\n\n    def addWord(self, word: str) -> None:\n        node = self.root\n        for ch in word:\n            node = node.setdefault(ch, {})\n        node['$'] = True\n\n    def search(self, word: str) -> bool:\n        def dfs(node, i):\n            if i == len(word):\n                return '$' in node\n            ch = word[i]\n            if ch == '.':\n                return any(dfs(child, i + 1) for key, child in node.items() if key != '$')\n            return ch in node and dfs(node[ch], i + 1)\n        return dfs(self.root, 0)"
+ },
+ "dsa-073": {
+  "id": "dsa-073",
+  "slug": "task-scheduler",
+  "title": "Task Scheduler",
+  "topic": "Heap/Top-K",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/task-scheduler/",
+  "description_md": "Given a list `tasks` of CPU tasks (letters) and an integer `n`, each task takes one unit of time. Between two runs of the same task there must be at least `n` idle units. The CPU may run any task or stay idle each unit. Return the minimum total units needed to finish every task.\n\n**Example:**\n- Input: `tasks = [\"A\",\"A\",\"A\",\"B\",\"B\",\"B\"]`, `n = 2`\n- Output: `8` (e.g. A B idle A B idle A B)\n\n**Constraints:**\n- `1 <= len(tasks) <= 10^4`\n- `0 <= n <= 100`",
+  "signature": {
+   "name": "leastInterval",
+   "params": [
+    {
+     "name": "tasks",
+     "kind": "value"
+    },
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def leastInterval(self, tasks: list[str], n: int) -> int:\n        \"\"\"\n        :param tasks: list[str] - task identifiers\n        :param n: int - required cooldown between identical tasks\n        :return: int - minimum time units to complete all tasks\n        \"\"\"\n        pass",
+  "reference_solution": "from collections import Counter\n\nclass Solution:\n    def leastInterval(self, tasks: list[str], n: int) -> int:\n        counts = Counter(tasks)\n        max_count = max(counts.values())\n        max_freq_tasks = sum(1 for c in counts.values() if c == max_count)\n        intervals = (max_count - 1) * (n + 1) + max_freq_tasks\n        return max(len(tasks), intervals)"
+ },
+ "dsa-079": {
+  "id": "dsa-079",
+  "slug": "subsets-ii",
+  "title": "Subsets II",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/subsets-ii/",
+  "description_md": "Given an integer array `nums` that may contain duplicate values, return every possible subset (the power set) without listing any duplicate subset. The subsets may be returned in any order.\n\n**Example:**\n- Input: `nums = [1,2,2]`\n- Output: `[[], [1], [1,2], [1,2,2], [2], [2,2]]`\n\n**Constraints:**\n- `1 <= len(nums) <= 10`\n- `-10 <= nums[i] <= 10`",
+  "signature": {
+   "name": "subsetsWithDup",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def subsetsWithDup(self, nums: list[int]) -> list[list[int]]:\n        \"\"\"\n        :param nums: list[int] - input array, may contain duplicates\n        :return: list[list[int]] - all unique subsets\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def subsetsWithDup(self, nums: list[int]) -> list[list[int]]:\n        nums.sort()\n        result = []\n        path = []\n        def backtrack(start):\n            result.append(path[:])\n            for i in range(start, len(nums)):\n                if i > start and nums[i] == nums[i - 1]:\n                    continue\n                path.append(nums[i])\n                backtrack(i + 1)\n                path.pop()\n        backtrack(0)\n        return result"
+ },
+ "dsa-085": {
+  "id": "dsa-085",
+  "slug": "clone-graph",
+  "title": "Clone Graph",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/clone-graph/",
+  "description_md": "Given a reference to a node in a connected undirected graph, return a deep copy of the entire graph. Each node holds an integer value and a list of its neighbors. The copy must consist of entirely new nodes replicating the connectivity of the original.\n\n**Example:**\n- Input: adjacency list `[[2,4],[1,3],[2,4],[1,3]]` (node i connects to the listed node values)\n- Output: an identical graph built from new nodes.\n\n**Constraints:**\n- `0 <= number of nodes <= 100`\n- The graph is connected and has no self-loops or repeated edges.",
+  "signature": {
+   "name": "cloneGraph",
+   "params": [
+    {
+     "name": "node",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Node:\n    def __init__(self, val: int = 0, neighbors: list = None):\n        self.val = val\n        self.neighbors = neighbors if neighbors is not None else []\n\nclass Solution:\n    def cloneGraph(self, node: 'Node') -> 'Node':\n        \"\"\"\n        :param node: Node - a node in the graph to clone\n        :return: Node - the corresponding node in the deep-copied graph\n        \"\"\"\n        pass",
+  "reference_solution": "class Node:\n    def __init__(self, val: int = 0, neighbors: list = None):\n        self.val = val\n        self.neighbors = neighbors if neighbors is not None else []\n\nclass Solution:\n    def cloneGraph(self, node: 'Node') -> 'Node':\n        if not node:\n            return None\n        clones = {}\n        def dfs(cur):\n            if cur in clones:\n                return clones[cur]\n            copy = Node(cur.val)\n            clones[cur] = copy\n            for nb in cur.neighbors:\n                copy.neighbors.append(dfs(nb))\n            return copy\n        return dfs(node)"
+ },
+ "dsa-091": {
+  "id": "dsa-091",
+  "slug": "course-schedule",
+  "title": "Course Schedule",
+  "topic": "Graphs",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/course-schedule/",
+  "description_md": "There are `numCourses` courses labeled `0` to `numCourses - 1`. The list `prerequisites` contains pairs `[a, b]` meaning course `b` must be taken before course `a`. Determine whether it is possible to finish all courses (i.e. the prerequisite graph has no cycle).\n\nReturn `True` or `False`.\n\n**Example:**\n- Input: `numCourses = 2`, `prerequisites = [[1,0]]`\n- Output: `True`\n- Input: `numCourses = 2`, `prerequisites = [[1,0],[0,1]]`\n- Output: `False`\n\n**Constraints:**\n- `1 <= numCourses <= 2000`\n- Prerequisite pairs are unique.",
+  "signature": {
+   "name": "canFinish",
+   "params": [
+    {
+     "name": "numCourses",
+     "kind": "value"
+    },
+    {
+     "name": "prerequisites",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def canFinish(self, numCourses: int, prerequisites: list[list[int]]) -> bool:\n        \"\"\"\n        :param numCourses: int - total number of courses\n        :param prerequisites: list[list[int]] - [course, prereq] pairs\n        :return: bool - True if all courses can be completed\n        \"\"\"\n        pass",
+  "reference_solution": "from collections import deque\n\nclass Solution:\n    def canFinish(self, numCourses: int, prerequisites: list[list[int]]) -> bool:\n        graph = [[] for _ in range(numCourses)]\n        indegree = [0] * numCourses\n        for course, prereq in prerequisites:\n            graph[prereq].append(course)\n            indegree[course] += 1\n        queue = deque(i for i in range(numCourses) if indegree[i] == 0)\n        taken = 0\n        while queue:\n            node = queue.popleft()\n            taken += 1\n            for nxt in graph[node]:\n                indegree[nxt] -= 1\n                if indegree[nxt] == 0:\n                    queue.append(nxt)\n        return taken == numCourses"
+ },
+ "dsa-097": {
+  "id": "dsa-097",
+  "slug": "accounts-merge",
+  "title": "Accounts Merge",
+  "topic": "Union-Find",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/accounts-merge/",
+  "description_md": "You are given a list `accounts` where each entry is `[name, email1, email2, ...]`. Two accounts belong to the same person if they share at least one email (names may repeat across different people). Merge accounts of the same person: each merged result is the name followed by all of that person's emails sorted alphabetically.\n\nReturn the merged accounts in any order.\n\n**Example:**\n- Input: `accounts = [[\"John\",\"a@x.com\",\"b@x.com\"],[\"John\",\"b@x.com\",\"c@x.com\"],[\"Mary\",\"m@x.com\"]]`\n- Output: `[[\"John\",\"a@x.com\",\"b@x.com\",\"c@x.com\"],[\"Mary\",\"m@x.com\"]]`\n\n**Constraints:**\n- `1 <= len(accounts) <= 1000`\n- Emails are lowercase and well formed.",
+  "signature": {
+   "name": "accountsMerge",
+   "params": [
+    {
+     "name": "accounts",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def accountsMerge(self, accounts: list[list[str]]) -> list[list[str]]:\n        \"\"\"\n        :param accounts: list[list[str]] - [name, email, ...] entries\n        :return: list[list[str]] - merged [name, sorted emails...] entries\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def accountsMerge(self, accounts: list[list[str]]) -> list[list[str]]:\n        parent = {}\n        owner = {}\n        def find(x):\n            while parent[x] != x:\n                parent[x] = parent[parent[x]]\n                x = parent[x]\n            return x\n        def union(a, b):\n            parent[find(a)] = find(b)\n        for account in accounts:\n            name = account[0]\n            first = account[1]\n            for email in account[1:]:\n                parent.setdefault(email, email)\n                owner[email] = name\n                union(email, first)\n        groups = {}\n        for email in parent:\n            root = find(email)\n            groups.setdefault(root, []).append(email)\n        return [[owner[root]] + sorted(emails) for root, emails in groups.items()]"
+ },
+ "dsa-103": {
+  "id": "dsa-103",
+  "slug": "house-robber",
+  "title": "House Robber",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/house-robber/",
+  "description_md": "Given an integer array `nums` where `nums[i]` is the money in house `i`, choose houses to rob so as to maximize the loot, but you cannot rob two adjacent houses (an alarm would trigger).\n\nReturn the maximum amount you can rob.\n\n**Example:**\n- Input: `nums = [2,7,9,3,1]`\n- Output: `12` (rob houses 0, 2, and 4)\n\n**Constraints:**\n- `1 <= len(nums) <= 100`\n- `0 <= nums[i] <= 400`",
+  "signature": {
+   "name": "rob",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def rob(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - money in each house\n        :return: int - maximum money robbed without hitting adjacent houses\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def rob(self, nums: list[int]) -> int:\n        prev, curr = 0, 0\n        for n in nums:\n            prev, curr = curr, max(curr, prev + n)\n        return curr"
+ },
+ "dsa-109": {
+  "id": "dsa-109",
+  "slug": "maximum-product-subarray",
+  "title": "Maximum Product Subarray",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/maximum-product-subarray/",
+  "description_md": "Given an integer array `nums`, find the contiguous subarray (containing at least one number) whose product is the largest, and return that product.\n\n**Example:**\n- Input: `nums = [2,3,-2,4]`\n- Output: `6` (from subarray `[2,3]`)\n- Input: `nums = [-2,0,-1]`\n- Output: `0`\n\n**Constraints:**\n- `1 <= len(nums) <= 2*10^4`\n- The answer fits in a 32-bit integer.",
+  "signature": {
+   "name": "maxProduct",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def maxProduct(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - the input array\n        :return: int - the maximum product of any contiguous subarray\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def maxProduct(self, nums: list[int]) -> int:\n        result = nums[0]\n        cur_max = cur_min = nums[0]\n        for n in nums[1:]:\n            candidates = (n, cur_max * n, cur_min * n)\n            cur_max = max(candidates)\n            cur_min = min(candidates)\n            result = max(result, cur_max)\n        return result"
+ },
+ "dsa-115": {
+  "id": "dsa-115",
+  "slug": "minimum-path-sum",
+  "title": "Minimum Path Sum",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/minimum-path-sum/",
+  "description_md": "Given an `m x n` grid of non-negative integers, find a path from the top-left corner to the bottom-right corner that minimizes the sum of the numbers along the way. You may only move right or down at each step.\n\nReturn the minimum sum.\n\n**Example:**\n- Input: `grid = [[1,3,1],[1,5,1],[4,2,1]]`\n- Output: `7` (path 1 -> 3 -> 1 -> 1 -> 1)\n\n**Constraints:**\n- `1 <= m, n <= 200`\n- `0 <= grid[i][j] <= 200`",
+  "signature": {
+   "name": "minPathSum",
+   "params": [
+    {
+     "name": "grid",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def minPathSum(self, grid: list[list[int]]) -> int:\n        \"\"\"\n        :param grid: list[list[int]] - the m x n grid of costs\n        :return: int - minimum path sum from top-left to bottom-right\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def minPathSum(self, grid: list[list[int]]) -> int:\n        m, n = len(grid), len(grid[0])\n        dp = [float('inf')] * n\n        dp[0] = 0\n        for i in range(m):\n            for j in range(n):\n                if j == 0:\n                    dp[j] = dp[j] + grid[i][j]\n                else:\n                    dp[j] = min(dp[j], dp[j - 1]) + grid[i][j]\n        return dp[-1]"
+ },
+ "dsa-121": {
+  "id": "dsa-121",
+  "slug": "distinct-subsequences",
+  "title": "Distinct Subsequences",
+  "topic": "DP",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/distinct-subsequences/",
+  "description_md": "Given two strings `s` and `t`, count how many distinct subsequences of `s` are equal to `t`. A subsequence is formed by deleting zero or more characters from `s` without reordering the rest.\n\nReturn the count as an integer.\n\n**Example:**\n- Input: `s = \"rabbbit\"`, `t = \"rabbit\"`\n- Output: `3`\n- Input: `s = \"babgbag\"`, `t = \"bag\"`\n- Output: `5`\n\n**Constraints:**\n- `1 <= len(s), len(t) <= 1000`\n- The answer fits in a 32-bit signed integer.",
+  "signature": {
+   "name": "numDistinct",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "t",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def numDistinct(self, s: str, t: str) -> int:\n        \"\"\"\n        :param s: str - the source string\n        :param t: str - the target subsequence string\n        :return: int - number of distinct subsequences of s equal to t\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def numDistinct(self, s: str, t: str) -> int:\n        n = len(t)\n        dp = [0] * (n + 1)\n        dp[0] = 1\n        for ch in s:\n            for j in range(n, 0, -1):\n                if ch == t[j - 1]:\n                    dp[j] += dp[j - 1]\n        return dp[n]"
+ },
+ "dsa-127": {
+  "id": "dsa-127",
+  "slug": "gas-station",
+  "title": "Gas Station",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/gas-station/",
+  "description_md": "There are `n` gas stations arranged in a circle. `gas[i]` is the fuel available at station `i` and `cost[i]` is the fuel needed to drive from station `i` to the next one. Starting with an empty tank, find the index of the station from which you can complete a full loop. If no such start exists, return `-1`. When a solution exists it is unique.\n\n**Example:**\n- Input: `gas = [1,2,3,4,5]`, `cost = [3,4,5,1,2]`\n- Output: `3`\n\n**Constraints:**\n- `n == len(gas) == len(cost)`\n- `1 <= n <= 10^5`",
+  "signature": {
+   "name": "canCompleteCircuit",
+   "params": [
+    {
+     "name": "gas",
+     "kind": "value"
+    },
+    {
+     "name": "cost",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def canCompleteCircuit(self, gas: list[int], cost: list[int]) -> int:\n        \"\"\"\n        :param gas: list[int] - fuel available at each station\n        :param cost: list[int] - fuel needed to reach the next station\n        :return: int - starting index for a full loop, or -1\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def canCompleteCircuit(self, gas: list[int], cost: list[int]) -> int:\n        if sum(gas) < sum(cost):\n            return -1\n        start = 0\n        tank = 0\n        for i in range(len(gas)):\n            tank += gas[i] - cost[i]\n            if tank < 0:\n                start = i + 1\n                tank = 0\n        return start"
+ },
+ "dsa-133": {
+  "id": "dsa-133",
+  "slug": "merge-intervals",
+  "title": "Merge Intervals",
+  "topic": "Intervals",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/merge-intervals/",
+  "description_md": "Given a list `intervals` where each element is `[start, end]`, combine every set of overlapping intervals and return the resulting list of non-overlapping intervals covering the same ranges.\n\n**Example:**\n- Input: `intervals = [[1,3],[2,6],[8,10],[15,18]]`\n- Output: `[[1,6],[8,10],[15,18]]`\n\n**Constraints:**\n- `1 <= len(intervals) <= 10^4`\n- `start <= end` for every interval.",
+  "signature": {
+   "name": "merge",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def merge(self, intervals: list[list[int]]) -> list[list[int]]:\n        \"\"\"\n        :param intervals: list[list[int]] - the [start, end] intervals\n        :return: list[list[int]] - merged non-overlapping intervals\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def merge(self, intervals: list[list[int]]) -> list[list[int]]:\n        intervals.sort(key=lambda x: x[0])\n        merged = []\n        for start, end in intervals:\n            if merged and start <= merged[-1][1]:\n                merged[-1][1] = max(merged[-1][1], end)\n            else:\n                merged.append([start, end])\n        return merged"
+ },
+ "dsa-139": {
+  "id": "dsa-139",
+  "slug": "number-of-1-bits",
+  "title": "Number of 1 Bits",
+  "topic": "Bit Manipulation",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/number-of-1-bits/",
+  "description_md": "Given a non-negative integer `n`, return the number of set bits (the count of `1`s in its binary representation), also known as the Hamming weight.\n\n**Example:**\n- Input: `n = 11` (binary `1011`)\n- Output: `3`\n- Input: `n = 128` (binary `10000000`)\n- Output: `1`\n\n**Constraints:**\n- `0 <= n <= 2^31 - 1`",
+  "signature": {
+   "name": "hammingWeight",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        \"\"\"\n        :param n: int - a non-negative integer\n        :return: int - number of set bits in n\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        count = 0\n        while n:\n            n &= n - 1\n            count += 1\n        return count"
+ },
+ "dsa-145": {
+  "id": "dsa-145",
+  "slug": "rotate-image",
+  "title": "Rotate Image",
+  "topic": "Matrix",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/rotate-image/",
+  "description_md": "Given an `n x n` 2D matrix representing an image, rotate it 90 degrees clockwise. You must modify the matrix in place (no allocating a separate rotated matrix).\n\nThe function mutates `matrix` and returns `None`.\n\n**Example:**\n- Input: `matrix = [[1,2,3],[4,5,6],[7,8,9]]`\n- After call, `matrix == [[7,4,1],[8,5,2],[9,6,3]]`\n\n**Constraints:**\n- `n == len(matrix)`\n- `1 <= n <= 20`",
+  "signature": {
+   "name": "rotate",
+   "params": [
+    {
+     "name": "matrix",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def rotate(self, matrix: list[list[int]]) -> None:\n        \"\"\"\n        :param matrix: list[list[int]] - the n x n image, rotated in place\n        :return: None - matrix is modified in place\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def rotate(self, matrix: list[list[int]]) -> None:\n        n = len(matrix)\n        for i in range(n):\n            for j in range(i + 1, n):\n                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]\n        for row in matrix:\n            row.reverse()"
+ },
+ "dsa-004": {
+  "id": "dsa-004",
+  "slug": "group-anagrams",
+  "title": "Group Anagrams",
+  "topic": "Arrays & Hashing",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/group-anagrams/",
+  "description_md": "Given a list of strings, cluster together the ones that are anagrams of each other (i.e. share the same letters with the same counts, just reordered).\n\nReturn a list of groups; each group is a list of the input strings that belong together. The order of the groups and the order within each group do not matter.\n\n**Example:**\n\n- Input: `strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]`\n- Output: `[[\"eat\",\"tea\",\"ate\"],[\"tan\",\"nat\"],[\"bat\"]]`\n\n**Constraints:**\n\n- `1 <= len(strs) <= 10^4`\n- `0 <= len(strs[i]) <= 100`\n- Each string consists of lowercase English letters only.",
+  "signature": {
+   "name": "groupAnagrams",
+   "params": [
+    {
+     "name": "strs",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        \"\"\"\n        :param strs: list[str] - input words\n        :return: list[list[str]] - words grouped by anagram class\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        from collections import defaultdict\n        groups = defaultdict(list)\n        for s in strs:\n            key = tuple(sorted(s))\n            groups[key].append(s)\n        return list(groups.values())"
+ },
+ "dsa-011": {
+  "id": "dsa-011",
+  "slug": "find-pivot-index",
+  "title": "Find Pivot Index",
+  "topic": "Prefix Sums",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/find-pivot-index/",
+  "description_md": "Given an integer array, find the leftmost index where the sum of all elements strictly to its left equals the sum of all elements strictly to its right. The element at the index itself is not counted on either side. If no such index exists, return `-1`.\n\n**Example:**\n\n- Input: `nums = [1,7,3,6,5,6]`\n- Output: `3` (left sum `1+7+3 = 11` equals right sum `5+6 = 11`)\n\n**Constraints:**\n\n- `1 <= len(nums) <= 10^4`\n- `-1000 <= nums[i] <= 1000`",
+  "signature": {
+   "name": "pivotIndex",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def pivotIndex(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - input array\n        :return: int - leftmost pivot index, or -1 if none\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def pivotIndex(self, nums: list[int]) -> int:\n        total = sum(nums)\n        left = 0\n        for i, x in enumerate(nums):\n            if left == total - left - x:\n                return i\n            left += x\n        return -1"
+ },
+ "dsa-018": {
+  "id": "dsa-018",
+  "slug": "best-time-to-buy-and-sell-stock",
+  "title": "Best Time to Buy And Sell Stock",
+  "topic": "Sliding Window",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+  "description_md": "You are given daily prices of a stock, where `prices[i]` is the price on day `i`. You may buy on one day and sell on a strictly later day, at most once.\n\nReturn the maximum profit achievable. If no profitable transaction exists, return `0`.\n\n**Example:**\n\n- Input: `prices = [7,1,5,3,6,4]`\n- Output: `5` (buy at `1` on day 1, sell at `6` on day 4)\n\n**Constraints:**\n\n- `1 <= len(prices) <= 10^5`\n- `0 <= prices[i] <= 10^4`",
+  "signature": {
+   "name": "maxProfit",
+   "params": [
+    {
+     "name": "prices",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        \"\"\"\n        :param prices: list[int] - daily stock prices\n        :return: int - maximum single-transaction profit (0 if none)\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        best = 0\n        cheapest = float('inf')\n        for p in prices:\n            cheapest = min(cheapest, p)\n            best = max(best, p - cheapest)\n        return best"
+ },
+ "dsa-026": {
+  "id": "dsa-026",
+  "slug": "evaluate-reverse-polish-notation",
+  "title": "Evaluate Reverse Polish Notation",
+  "topic": "Stack",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/evaluate-reverse-polish-notation/",
+  "description_md": "You are given an arithmetic expression written in Reverse Polish (postfix) Notation as a list of tokens. Each token is either an integer or one of the operators `+`, `-`, `*`, `/`. An operator applies to the two most recent values.\n\nEvaluate the expression and return the resulting integer. Division truncates toward zero.\n\n**Example:**\n\n- Input: `tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]`\n- Output: `9` (computes `(2 + 1) * 3`)\n\n**Constraints:**\n\n- `1 <= len(tokens) <= 10^4`\n- Each token is an operator or an integer in the range `[-200, 200]`.\n- The expression is always valid.",
+  "signature": {
+   "name": "evalRPN",
+   "params": [
+    {
+     "name": "tokens",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def evalRPN(self, tokens: list[str]) -> int:\n        \"\"\"\n        :param tokens: list[str] - postfix expression tokens\n        :return: int - evaluated result\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def evalRPN(self, tokens: list[str]) -> int:\n        stack = []\n        ops = {'+', '-', '*', '/'}\n        for t in tokens:\n            if t in ops:\n                b = stack.pop()\n                a = stack.pop()\n                if t == '+':\n                    stack.append(a + b)\n                elif t == '-':\n                    stack.append(a - b)\n                elif t == '*':\n                    stack.append(a * b)\n                else:\n                    stack.append(int(a / b))\n            else:\n                stack.append(int(t))\n        return stack[0]"
+ },
+ "dsa-032": {
+  "id": "dsa-032",
+  "slug": "binary-search",
+  "title": "Binary Search",
+  "topic": "Binary Search",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/binary-search/",
+  "description_md": "Given an array of integers sorted in ascending order and a target value, return the index at which the target appears. If it is not present, return `-1`. Your solution must run in `O(log n)` time.\n\n**Example:**\n\n- Input: `nums = [-1,0,3,5,9,12], target = 9`\n- Output: `4`\n\n**Constraints:**\n\n- `1 <= len(nums) <= 10^4`\n- `-10^4 < nums[i], target < 10^4`\n- All values in `nums` are unique and sorted ascending.",
+  "signature": {
+   "name": "search",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def search(self, nums: list[int], target: int) -> int:\n        \"\"\"\n        :param nums: list[int] - sorted ascending array\n        :param target: int - value to locate\n        :return: int - index of target, or -1 if absent\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def search(self, nums: list[int], target: int) -> int:\n        lo, hi = 0, len(nums) - 1\n        while lo <= hi:\n            mid = (lo + hi) // 2\n            if nums[mid] == target:\n                return mid\n            if nums[mid] < target:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n        return -1"
+ },
+ "dsa-038": {
+  "id": "dsa-038",
+  "slug": "median-of-two-sorted-arrays",
+  "title": "Median of Two Sorted Arrays",
+  "topic": "Binary Search",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+  "description_md": "You are given two arrays of integers, each already sorted in ascending order. Considering the two arrays merged into one sorted sequence, return the median of the combined set as a float. The overall runtime should be `O(log(m+n))`.\n\n**Example:**\n\n- Input: `nums1 = [1,3], nums2 = [2]`\n- Output: `2.0` (merged is `[1,2,3]`, middle element is `2`)\n\n**Constraints:**\n\n- `0 <= len(nums1), len(nums2) <= 1000`\n- `1 <= len(nums1) + len(nums2) <= 2000`\n- `-10^6 <= nums1[i], nums2[i] <= 10^6`",
+  "signature": {
+   "name": "findMedianSortedArrays",
+   "params": [
+    {
+     "name": "nums1",
+     "kind": "value"
+    },
+    {
+     "name": "nums2",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:\n        \"\"\"\n        :param nums1: list[int] - first sorted array\n        :param nums2: list[int] - second sorted array\n        :return: float - median of the combined sorted values\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:\n        A, B = nums1, nums2\n        if len(A) > len(B):\n            A, B = B, A\n        total = len(A) + len(B)\n        half = total // 2\n        lo, hi = 0, len(A) - 1\n        while True:\n            i = (lo + hi) // 2\n            j = half - i - 2\n            Aleft = A[i] if i >= 0 else float('-inf')\n            Aright = A[i + 1] if i + 1 < len(A) else float('inf')\n            Bleft = B[j] if j >= 0 else float('-inf')\n            Bright = B[j + 1] if j + 1 < len(B) else float('inf')\n            if Aleft <= Bright and Bleft <= Aright:\n                if total % 2:\n                    return float(min(Aright, Bright))\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2\n            elif Aleft > Bright:\n                hi = i - 1\n            else:\n                lo = i + 1"
+ },
+ "dsa-044": {
+  "id": "dsa-044",
+  "slug": "add-two-numbers",
+  "title": "Add Two Numbers",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/add-two-numbers/",
+  "description_md": "Two non-negative integers are each represented by a singly linked list whose nodes hold single digits stored in reverse order (the ones digit is the head). Add the two numbers and return the sum as a linked list in the same reverse-order digit format.\n\n**Example:**\n\n- Input: `l1 = [2,4,3], l2 = [5,6,4]` (represents `342 + 465`)\n- Output: `[7,0,8]` (represents `807`)\n\n**Constraints:**\n\n- Each list has `1` to `100` nodes.\n- `0 <= Node.val <= 9`\n- Neither number has leading zeros except the number `0` itself.",
+  "signature": {
+   "name": "addTwoNumbers",
+   "params": [
+    {
+     "name": "l1",
+     "kind": "listnode"
+    },
+    {
+     "name": "l2",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def addTwoNumbers(self, l1: 'ListNode', l2: 'ListNode') -> 'ListNode':\n        \"\"\"\n        :param l1: ListNode - first number, digits in reverse order\n        :param l2: ListNode - second number, digits in reverse order\n        :return: ListNode - sum, digits in reverse order\n        \"\"\"\n        pass",
+  "reference_solution": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def addTwoNumbers(self, l1: 'ListNode', l2: 'ListNode') -> 'ListNode':\n        dummy = ListNode()\n        cur = dummy\n        carry = 0\n        while l1 or l2 or carry:\n            v = carry\n            if l1:\n                v += l1.val\n                l1 = l1.next\n            if l2:\n                v += l2.val\n                l2 = l2.next\n            carry, digit = divmod(v, 10)\n            cur.next = ListNode(digit)\n            cur = cur.next\n        return dummy.next"
+ },
+ "dsa-050": {
+  "id": "dsa-050",
+  "slug": "invert-binary-tree",
+  "title": "Invert Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/invert-binary-tree/",
+  "description_md": "Given the root of a binary tree, produce its mirror image by swapping the left and right child of every node, then return the root.\n\n**Example:**\n\n- Input: `root = [4,2,7,1,3,6,9]`\n- Output: `[4,7,2,9,6,3,1]`\n\n**Constraints:**\n\n- The tree has `0` to `100` nodes.\n- `-100 <= Node.val <= 100`",
+  "signature": {
+   "name": "invertTree",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "tree"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def invertTree(self, root: 'TreeNode') -> 'TreeNode':\n        \"\"\"\n        :param root: TreeNode - root of the binary tree\n        :return: TreeNode - root of the mirrored tree\n        \"\"\"\n        pass",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def invertTree(self, root: 'TreeNode') -> 'TreeNode':\n        if not root:\n            return None\n        root.left, root.right = self.invertTree(root.right), self.invertTree(root.left)\n        return root"
+ },
+ "dsa-056": {
+  "id": "dsa-056",
+  "slug": "lowest-common-ancestor-of-a-binary-search-tree",
+  "title": "Lowest Common Ancestor of a Binary Search Tree",
+  "topic": "Trees",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+  "description_md": "Given the root of a binary search tree and two nodes `p` and `q` that both exist in it, return their lowest common ancestor: the deepest node that has both `p` and `q` in its subtree (a node may be an ancestor of itself).\n\n**Example:**\n\n- Input: `root = [6,2,8,0,4,7,9], p = 2, q = 8`\n- Output: `6`\n\n**Constraints:**\n\n- The tree has `2` to `10^5` nodes.\n- All `Node.val` are unique; `p != q`; both exist in the BST.",
+  "signature": {
+   "name": "lowestCommonAncestor",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    },
+    {
+     "name": "p",
+     "kind": "tree"
+    },
+    {
+     "name": "q",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "tree"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\nclass Solution:\n    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n        \"\"\"\n        :param root: TreeNode - root of the BST\n        :param p: TreeNode - first target node\n        :param q: TreeNode - second target node\n        :return: TreeNode - lowest common ancestor\n        \"\"\"\n        pass",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\nclass Solution:\n    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n        node = root\n        while node:\n            if p.val < node.val and q.val < node.val:\n                node = node.left\n            elif p.val > node.val and q.val > node.val:\n                node = node.right\n            else:\n                return node"
+ },
+ "dsa-062": {
+  "id": "dsa-062",
+  "slug": "construct-binary-tree-from-preorder-and-inorder-traversal",
+  "title": "Construct Binary Tree from Preorder and Inorder Traversal",
+  "topic": "Trees",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
+  "description_md": "You are given two integer arrays: `preorder`, the preorder traversal of a binary tree, and `inorder`, its inorder traversal. All values are distinct. Rebuild the original tree and return its root.\n\n**Example:**\n\n- Input: `preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]`\n- Output: `[3,9,20,null,null,15,7]`\n\n**Constraints:**\n\n- `1 <= len(preorder) <= 3000`\n- `len(inorder) == len(preorder)`\n- All values are unique and both arrays describe the same tree.",
+  "signature": {
+   "name": "buildTree",
+   "params": [
+    {
+     "name": "preorder",
+     "kind": "value"
+    },
+    {
+     "name": "inorder",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "tree"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, preorder: list[int], inorder: list[int]) -> 'TreeNode':\n        \"\"\"\n        :param preorder: list[int] - preorder traversal\n        :param inorder: list[int] - inorder traversal\n        :return: TreeNode - reconstructed tree root\n        \"\"\"\n        pass",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, preorder: list[int], inorder: list[int]) -> 'TreeNode':\n        idx = {v: i for i, v in enumerate(inorder)}\n        self.pre = 0\n\n        def build(lo, hi):\n            if lo > hi:\n                return None\n            val = preorder[self.pre]\n            self.pre += 1\n            node = TreeNode(val)\n            mid = idx[val]\n            node.left = build(lo, mid - 1)\n            node.right = build(mid + 1, hi)\n            return node\n\n        return build(0, len(inorder) - 1)"
+ },
+ "dsa-068": {
+  "id": "dsa-068",
+  "slug": "word-search-ii",
+  "title": "Word Search II",
+  "topic": "Tries",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/word-search-ii/",
+  "description_md": "Given an `m x n` grid of lowercase letters and a list of target words, return every word from the list that can be spelled by walking through adjacent cells (up/down/left/right). A single cell cannot be reused within one word.\n\n**Example:**\n\n- Input: `board = [[\"o\",\"a\",\"a\",\"n\"],[\"e\",\"t\",\"a\",\"e\"],[\"i\",\"h\",\"k\",\"r\"],[\"i\",\"f\",\"l\",\"v\"]], words = [\"oath\",\"pea\",\"eat\",\"rain\"]`\n- Output: `[\"eat\",\"oath\"]`\n\n**Constraints:**\n\n- `1 <= m, n <= 12`\n- `1 <= len(words) <= 3 * 10^4`, each word length `1..10`, lowercase letters.",
+  "signature": {
+   "name": "findWords",
+   "params": [
+    {
+     "name": "board",
+     "kind": "value"
+    },
+    {
+     "name": "words",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findWords(self, board: list[list[str]], words: list[str]) -> list[str]:\n        \"\"\"\n        :param board: list[list[str]] - grid of lowercase letters\n        :param words: list[str] - words to search for\n        :return: list[str] - words found on the board\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def findWords(self, board: list[list[str]], words: list[str]) -> list[str]:\n        trie = {}\n        for w in words:\n            node = trie\n            for c in w:\n                node = node.setdefault(c, {})\n            node['$'] = w\n        rows, cols = len(board), len(board[0])\n        found = set()\n\n        def dfs(r, c, node):\n            ch = board[r][c]\n            if ch not in node:\n                return\n            nxt = node[ch]\n            if '$' in nxt:\n                found.add(nxt['$'])\n            board[r][c] = '#'\n            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                nr, nc = r + dr, c + dc\n                if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] != '#':\n                    dfs(nr, nc, nxt)\n            board[r][c] = ch\n\n        for r in range(rows):\n            for c in range(cols):\n                dfs(r, c, trie)\n        return list(found)"
+ },
+ "dsa-074": {
+  "id": "dsa-074",
+  "slug": "design-twitter",
+  "title": "Design Twitter",
+  "topic": "Heap/Top-K",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/design-twitter/",
+  "description_md": "Design a simplified Twitter supporting posting tweets, following/unfollowing users, and viewing a news feed. Implement:\n\n- `postTweet(userId, tweetId)` - user posts a tweet.\n- `getNewsFeed(userId)` - return the `10` most recent tweet ids posted by the user or anyone they follow, newest first.\n- `follow(followerId, followeeId)` - one user follows another.\n- `unfollow(followerId, followeeId)` - one user unfollows another.\n\n**Example:**\n\n- `postTweet(1, 5)`; `getNewsFeed(1)` -> `[5]`; `follow(1, 2)`; `postTweet(2, 6)`; `getNewsFeed(1)` -> `[6, 5]`; `unfollow(1, 2)`; `getNewsFeed(1)` -> `[5]`\n\n**Constraints:**\n\n- `1 <= userId, followerId, followeeId <= 500`; `0 <= tweetId <= 10^4`; at most `3 * 10^4` calls total.",
+  "signature": {
+   "type": "class",
+   "name": "Twitter",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class Twitter:\n    def __init__(self):\n        \"\"\"Initialize the Twitter data structure.\"\"\"\n        pass\n\n    def postTweet(self, userId: int, tweetId: int) -> None:\n        \"\"\"User userId posts a new tweet tweetId.\"\"\"\n        pass\n\n    def getNewsFeed(self, userId: int) -> list[int]:\n        \"\"\"Return the 10 most recent tweet ids in userId's feed, newest first.\"\"\"\n        pass\n\n    def follow(self, followerId: int, followeeId: int) -> None:\n        \"\"\"followerId starts following followeeId.\"\"\"\n        pass\n\n    def unfollow(self, followerId: int, followeeId: int) -> None:\n        \"\"\"followerId stops following followeeId.\"\"\"\n        pass",
+  "reference_solution": "import heapq\nfrom collections import defaultdict\n\n\nclass Twitter:\n    def __init__(self):\n        self.time = 0\n        self.tweets = defaultdict(list)  # userId -> list of (time, tweetId)\n        self.following = defaultdict(set)  # userId -> set of followees\n\n    def postTweet(self, userId: int, tweetId: int) -> None:\n        self.tweets[userId].append((self.time, tweetId))\n        self.time += 1\n\n    def getNewsFeed(self, userId: int) -> list[int]:\n        users = self.following[userId] | {userId}\n        heap = []\n        for u in users:\n            for t, tid in self.tweets[u]:\n                heap.append((t, tid))\n        heap.sort(reverse=True)\n        return [tid for _, tid in heap[:10]]\n\n    def follow(self, followerId: int, followeeId: int) -> None:\n        if followerId != followeeId:\n            self.following[followerId].add(followeeId)\n\n    def unfollow(self, followerId: int, followeeId: int) -> None:\n        self.following[followerId].discard(followeeId)"
+ },
+ "dsa-080": {
+  "id": "dsa-080",
+  "slug": "word-search",
+  "title": "Word Search",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/word-search/",
+  "description_md": "Given an `m x n` grid of characters and a target word, return `True` if the word can be traced through the grid by moving between horizontally or vertically adjacent cells. Each cell may be used at most once in the path.\n\n**Example:**\n\n- Input: `board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"ABCCED\"`\n- Output: `True`\n\n**Constraints:**\n\n- `1 <= m, n <= 6`\n- `1 <= len(word) <= 15`\n- `board` and `word` consist of uppercase and lowercase English letters.",
+  "signature": {
+   "name": "exist",
+   "params": [
+    {
+     "name": "board",
+     "kind": "value"
+    },
+    {
+     "name": "word",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def exist(self, board: list[list[str]], word: str) -> bool:\n        \"\"\"\n        :param board: list[list[str]] - grid of characters\n        :param word: str - target word to trace\n        :return: bool - whether the word exists in the grid\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def exist(self, board: list[list[str]], word: str) -> bool:\n        rows, cols = len(board), len(board[0])\n\n        def dfs(r, c, i):\n            if i == len(word):\n                return True\n            if r < 0 or c < 0 or r >= rows or c >= cols or board[r][c] != word[i]:\n                return False\n            tmp = board[r][c]\n            board[r][c] = '#'\n            found = (dfs(r + 1, c, i + 1) or dfs(r - 1, c, i + 1) or\n                     dfs(r, c + 1, i + 1) or dfs(r, c - 1, i + 1))\n            board[r][c] = tmp\n            return found\n\n        for r in range(rows):\n            for c in range(cols):\n                if dfs(r, c, 0):\n                    return True\n        return False"
+ },
+ "dsa-086": {
+  "id": "dsa-086",
+  "slug": "max-area-of-island",
+  "title": "Max Area of Island",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/max-area-of-island/",
+  "description_md": "You are given a grid of `0`s (water) and `1`s (land). An island is a maximal group of `1`s connected horizontally or vertically. The area of an island is its number of land cells.\n\nReturn the area of the largest island, or `0` if there is no land.\n\n**Example:**\n\n- Input: `grid = [[0,0,1,0],[0,1,1,0],[0,0,0,1]]`\n- Output: `3`\n\n**Constraints:**\n\n- `1 <= len(grid), len(grid[0]) <= 50`\n- Each cell is `0` or `1`.",
+  "signature": {
+   "name": "maxAreaOfIsland",
+   "params": [
+    {
+     "name": "grid",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def maxAreaOfIsland(self, grid: list[list[int]]) -> int:\n        \"\"\"\n        :param grid: list[list[int]] - grid of 0 (water) and 1 (land)\n        :return: int - area of the largest island\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def maxAreaOfIsland(self, grid: list[list[int]]) -> int:\n        rows, cols = len(grid), len(grid[0])\n\n        def dfs(r, c):\n            if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] == 0:\n                return 0\n            grid[r][c] = 0\n            return 1 + dfs(r + 1, c) + dfs(r - 1, c) + dfs(r, c + 1) + dfs(r, c - 1)\n\n        best = 0\n        for r in range(rows):\n            for c in range(cols):\n                if grid[r][c] == 1:\n                    best = max(best, dfs(r, c))\n        return best"
+ },
+ "dsa-092": {
+  "id": "dsa-092",
+  "slug": "course-schedule-ii",
+  "title": "Course Schedule II",
+  "topic": "Graphs",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/course-schedule-ii/",
+  "description_md": "There are `numCourses` courses labeled `0` to `numCourses - 1`. Each entry `[a, b]` in `prerequisites` means course `b` must be completed before course `a`.\n\nReturn any valid order in which all courses can be taken. If completing every course is impossible (a cycle exists), return an empty list.\n\n**Example:**\n\n- Input: `numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]`\n- Output: `[0,1,2,3]` (any valid topological order is accepted)\n\n**Constraints:**\n\n- `1 <= numCourses <= 2000`\n- `0 <= len(prerequisites) <= numCourses * (numCourses - 1)`\n- All prerequisite pairs are distinct.",
+  "signature": {
+   "name": "findOrder",
+   "params": [
+    {
+     "name": "numCourses",
+     "kind": "value"
+    },
+    {
+     "name": "prerequisites",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findOrder(self, numCourses: int, prerequisites: list[list[int]]) -> list[int]:\n        \"\"\"\n        :param numCourses: int - number of courses\n        :param prerequisites: list[list[int]] - [course, prereq] pairs\n        :return: list[int] - a valid ordering, or [] if impossible\n        \"\"\"\n        pass",
+  "reference_solution": "from collections import deque, defaultdict\n\n\nclass Solution:\n    def findOrder(self, numCourses: int, prerequisites: list[list[int]]) -> list[int]:\n        graph = defaultdict(list)\n        indeg = [0] * numCourses\n        for a, b in prerequisites:\n            graph[b].append(a)\n            indeg[a] += 1\n        queue = deque(i for i in range(numCourses) if indeg[i] == 0)\n        order = []\n        while queue:\n            node = queue.popleft()\n            order.append(node)\n            for nxt in graph[node]:\n                indeg[nxt] -= 1\n                if indeg[nxt] == 0:\n                    queue.append(nxt)\n        return order if len(order) == numCourses else []"
+ },
+ "dsa-098": {
+  "id": "dsa-098",
+  "slug": "network-delay-time",
+  "title": "Network Delay Time",
+  "topic": "Graphs",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/network-delay-time/",
+  "description_md": "You are given a directed weighted network of `n` nodes labeled `1` to `n`. Each entry `[u, v, w]` in `times` means a signal from node `u` reaches node `v` after `w` time. A signal starts at node `k`.\n\nReturn the time it takes for all `n` nodes to receive the signal, or `-1` if some node is unreachable.\n\n**Example:**\n\n- Input: `times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2`\n- Output: `2`\n\n**Constraints:**\n\n- `1 <= k <= n <= 100`\n- `1 <= len(times) <= 6000`; `1 <= w <= 100`; edges have distinct `(u, v)`.",
+  "signature": {
+   "name": "networkDelayTime",
+   "params": [
+    {
+     "name": "times",
+     "kind": "value"
+    },
+    {
+     "name": "n",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def networkDelayTime(self, times: list[list[int]], n: int, k: int) -> int:\n        \"\"\"\n        :param times: list[list[int]] - directed edges [u, v, w]\n        :param n: int - number of nodes (labeled 1..n)\n        :param k: int - starting node\n        :return: int - time for all nodes to receive the signal, or -1\n        \"\"\"\n        pass",
+  "reference_solution": "import heapq\nfrom collections import defaultdict\n\n\nclass Solution:\n    def networkDelayTime(self, times: list[list[int]], n: int, k: int) -> int:\n        graph = defaultdict(list)\n        for u, v, w in times:\n            graph[u].append((v, w))\n        dist = {}\n        heap = [(0, k)]\n        while heap:\n            d, node = heapq.heappop(heap)\n            if node in dist:\n                continue\n            dist[node] = d\n            for nxt, w in graph[node]:\n                if nxt not in dist:\n                    heapq.heappush(heap, (d + w, nxt))\n        return max(dist.values()) if len(dist) == n else -1"
+ },
+ "dsa-104": {
+  "id": "dsa-104",
+  "slug": "house-robber-ii",
+  "title": "House Robber II",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/house-robber-ii/",
+  "description_md": "Houses holding money are arranged in a circle, so the first and last houses are adjacent. You cannot rob two directly neighboring houses, or the alarm triggers.\n\nGiven the amount in each house, return the maximum total you can rob without alerting the police.\n\n**Example:**\n\n- Input: `nums = [2,3,2]`\n- Output: `3` (you cannot take house 0 and house 2 since they are adjacent in the circle)\n\n**Constraints:**\n\n- `1 <= len(nums) <= 100`\n- `0 <= nums[i] <= 1000`",
+  "signature": {
+   "name": "rob",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def rob(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - money in each house arranged in a circle\n        :return: int - maximum money that can be robbed\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def rob(self, nums: list[int]) -> int:\n        if len(nums) == 1:\n            return nums[0]\n\n        def rob_line(houses):\n            prev, cur = 0, 0\n            for money in houses:\n                prev, cur = cur, max(cur, prev + money)\n            return cur\n\n        return max(rob_line(nums[1:]), rob_line(nums[:-1]))"
+ },
+ "dsa-110": {
+  "id": "dsa-110",
+  "slug": "word-break",
+  "title": "Word Break",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/word-break/",
+  "description_md": "Given a string `s` and a dictionary of words `wordDict`, decide whether `s` can be split into a sequence of one or more dictionary words. Dictionary words may be reused any number of times.\n\nReturn `True` if such a segmentation exists, otherwise `False`.\n\n**Example:**\n\n- Input: `s = \"leetcode\", wordDict = [\"leet\",\"code\"]`\n- Output: `True` (`\"leet\" + \"code\"`)\n\n**Constraints:**\n\n- `1 <= len(s) <= 300`\n- `1 <= len(wordDict) <= 1000`; each word length `1..20`; all lowercase letters.",
+  "signature": {
+   "name": "wordBreak",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "wordDict",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def wordBreak(self, s: str, wordDict: list[str]) -> bool:\n        \"\"\"\n        :param s: str - string to segment\n        :param wordDict: list[str] - allowed words (reusable)\n        :return: bool - whether s can be fully segmented\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def wordBreak(self, s: str, wordDict: list[str]) -> bool:\n        words = set(wordDict)\n        n = len(s)\n        dp = [False] * (n + 1)\n        dp[n] = True\n        for i in range(n - 1, -1, -1):\n            for w in words:\n                if s[i:i + len(w)] == w and dp[i + len(w)]:\n                    dp[i] = True\n                    break\n        return dp[0]"
+ },
+ "dsa-116": {
+  "id": "dsa-116",
+  "slug": "longest-common-subsequence",
+  "title": "Longest Common Subsequence",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/longest-common-subsequence/",
+  "description_md": "Given two strings, return the length of their longest common subsequence. A subsequence keeps characters in their original relative order but does not require them to be contiguous. If there is no common subsequence, return `0`.\n\n**Example:**\n\n- Input: `text1 = \"abcde\", text2 = \"ace\"`\n- Output: `3` (the subsequence `\"ace\"`)\n\n**Constraints:**\n\n- `1 <= len(text1), len(text2) <= 1000`\n- Both strings consist of lowercase English letters.",
+  "signature": {
+   "name": "longestCommonSubsequence",
+   "params": [
+    {
+     "name": "text1",
+     "kind": "value"
+    },
+    {
+     "name": "text2",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def longestCommonSubsequence(self, text1: str, text2: str) -> int:\n        \"\"\"\n        :param text1: str - first string\n        :param text2: str - second string\n        :return: int - length of the longest common subsequence\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def longestCommonSubsequence(self, text1: str, text2: str) -> int:\n        m, n = len(text1), len(text2)\n        dp = [[0] * (n + 1) for _ in range(m + 1)]\n        for i in range(m - 1, -1, -1):\n            for j in range(n - 1, -1, -1):\n                if text1[i] == text2[j]:\n                    dp[i][j] = 1 + dp[i + 1][j + 1]\n                else:\n                    dp[i][j] = max(dp[i + 1][j], dp[i][j + 1])\n        return dp[0][0]"
+ },
+ "dsa-122": {
+  "id": "dsa-122",
+  "slug": "burst-balloons",
+  "title": "Burst Balloons",
+  "topic": "DP",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/burst-balloons/",
+  "description_md": "You have `n` balloons, each painted with a number in `nums`. Bursting balloon `i` earns `nums[left] * nums[i] * nums[right]` coins, where `left` and `right` are its current neighbors (treat out-of-range positions as a balloon worth `1`). After a burst its neighbors become adjacent.\n\nReturn the maximum coins you can collect by bursting every balloon in some order.\n\n**Example:**\n\n- Input: `nums = [3,1,5,8]`\n- Output: `167`\n\n**Constraints:**\n\n- `1 <= len(nums) <= 300`\n- `0 <= nums[i] <= 100`",
+  "signature": {
+   "name": "maxCoins",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def maxCoins(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - values painted on the balloons\n        :return: int - maximum coins obtainable\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def maxCoins(self, nums: list[int]) -> int:\n        balloons = [1] + nums + [1]\n        n = len(balloons)\n        dp = [[0] * n for _ in range(n)]\n        for length in range(2, n):\n            for left in range(0, n - length):\n                right = left + length\n                for k in range(left + 1, right):\n                    coins = balloons[left] * balloons[k] * balloons[right]\n                    coins += dp[left][k] + dp[k][right]\n                    dp[left][right] = max(dp[left][right], coins)\n        return dp[0][n - 1]"
+ },
+ "dsa-128": {
+  "id": "dsa-128",
+  "slug": "hand-of-straights",
+  "title": "Hand of Straights",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/hand-of-straights/",
+  "description_md": "You are given an array `hand` of card values and an integer `groupSize`. Decide whether all the cards can be split into groups where each group has exactly `groupSize` cards whose values form a run of consecutive integers.\n\nReturn `True` if such a partition is possible, otherwise `False`.\n\n**Example:**\n\n- Input: `hand = [1,2,3,6,2,3,4,7,8], groupSize = 3`\n- Output: `True` (`[1,2,3], [2,3,4], [6,7,8]`)\n\n**Constraints:**\n\n- `1 <= len(hand) <= 10^4`\n- `0 <= hand[i] <= 10^9`; `1 <= groupSize <= len(hand)`",
+  "signature": {
+   "name": "isNStraightHand",
+   "params": [
+    {
+     "name": "hand",
+     "kind": "value"
+    },
+    {
+     "name": "groupSize",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def isNStraightHand(self, hand: list[int], groupSize: int) -> bool:\n        \"\"\"\n        :param hand: list[int] - card values\n        :param groupSize: int - required size of each consecutive run\n        :return: bool - whether the hand can be fully partitioned\n        \"\"\"\n        pass",
+  "reference_solution": "import heapq\nfrom collections import Counter\n\n\nclass Solution:\n    def isNStraightHand(self, hand: list[int], groupSize: int) -> bool:\n        if len(hand) % groupSize != 0:\n            return False\n        count = Counter(hand)\n        heap = list(count.keys())\n        heapq.heapify(heap)\n        while heap:\n            start = heap[0]\n            for card in range(start, start + groupSize):\n                if count[card] == 0:\n                    return False\n                count[card] -= 1\n                if count[card] == 0:\n                    if card != heap[0]:\n                        return False\n                    heapq.heappop(heap)\n        return True"
+ },
+ "dsa-134": {
+  "id": "dsa-134",
+  "slug": "non-overlapping-intervals",
+  "title": "Non-overlapping Intervals",
+  "topic": "Intervals",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/non-overlapping-intervals/",
+  "description_md": "Given a collection of intervals `[start, end)`, return the minimum number of intervals you must remove so that none of the remaining intervals overlap. Two intervals that merely touch at an endpoint (e.g. `[1,2]` and `[2,3]`) are not considered overlapping.\n\n**Example:**\n\n- Input: `intervals = [[1,2],[2,3],[3,4],[1,3]]`\n- Output: `1` (remove `[1,3]`)\n\n**Constraints:**\n\n- `1 <= len(intervals) <= 10^5`\n- `intervals[i] == [start, end]` with `-5 * 10^4 <= start < end <= 5 * 10^4`",
+  "signature": {
+   "name": "eraseOverlapIntervals",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def eraseOverlapIntervals(self, intervals: list[list[int]]) -> int:\n        \"\"\"\n        :param intervals: list[list[int]] - [start, end] intervals\n        :return: int - minimum removals so none overlap\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def eraseOverlapIntervals(self, intervals: list[list[int]]) -> int:\n        intervals.sort(key=lambda x: x[1])\n        removals = 0\n        prev_end = float('-inf')\n        for start, end in intervals:\n            if start >= prev_end:\n                prev_end = end\n            else:\n                removals += 1\n        return removals"
+ },
+ "dsa-140": {
+  "id": "dsa-140",
+  "slug": "counting-bits",
+  "title": "Counting Bits",
+  "topic": "Bit Manipulation",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/counting-bits/",
+  "description_md": "Given an integer `n`, return an array `ans` of length `n + 1` where `ans[i]` is the number of `1` bits in the binary representation of `i`, for every `i` from `0` to `n`.\n\n**Example:**\n\n- Input: `n = 5`\n- Output: `[0,1,1,2,1,2]` (binary `0,1,10,11,100,101`)\n\n**Constraints:**\n\n- `0 <= n <= 10^5`",
+  "signature": {
+   "name": "countBits",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def countBits(self, n: int) -> list[int]:\n        \"\"\"\n        :param n: int - upper bound (inclusive)\n        :return: list[int] - popcount of each i in 0..n\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def countBits(self, n: int) -> list[int]:\n        dp = [0] * (n + 1)\n        for i in range(1, n + 1):\n            dp[i] = dp[i >> 1] + (i & 1)\n        return dp"
+ },
+ "dsa-146": {
+  "id": "dsa-146",
+  "slug": "spiral-matrix",
+  "title": "Spiral Matrix",
+  "topic": "Matrix",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/spiral-matrix/",
+  "description_md": "Given an `m x n` matrix, return all of its elements gathered in spiral order: start at the top-left, move right across the top row, then down the right column, then left across the bottom, then up, spiraling inward until every element is collected.\n\n**Example:**\n\n- Input: `matrix = [[1,2,3],[4,5,6],[7,8,9]]`\n- Output: `[1,2,3,6,9,8,7,4,5]`\n\n**Constraints:**\n\n- `1 <= m, n <= 10`\n- `-100 <= matrix[i][j] <= 100`",
+  "signature": {
+   "name": "spiralOrder",
+   "params": [
+    {
+     "name": "matrix",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def spiralOrder(self, matrix: list[list[int]]) -> list[int]:\n        \"\"\"\n        :param matrix: list[list[int]] - m x n matrix\n        :return: list[int] - elements in spiral order\n        \"\"\"\n        pass",
+  "reference_solution": "class Solution:\n    def spiralOrder(self, matrix: list[list[int]]) -> list[int]:\n        result = []\n        top, bottom = 0, len(matrix) - 1\n        left, right = 0, len(matrix[0]) - 1\n        while top <= bottom and left <= right:\n            for c in range(left, right + 1):\n                result.append(matrix[top][c])\n            top += 1\n            for r in range(top, bottom + 1):\n                result.append(matrix[r][right])\n            right -= 1\n            if top <= bottom:\n                for c in range(right, left - 1, -1):\n                    result.append(matrix[bottom][c])\n                bottom -= 1\n            if left <= right:\n                for r in range(bottom, top - 1, -1):\n                    result.append(matrix[r][left])\n                left += 1\n        return result"
+ },
+ "dsa-005": {
+  "id": "dsa-005",
+  "slug": "top-k-frequent-elements",
+  "title": "Top K Frequent Elements",
+  "topic": "Heap/Top-K",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/top-k-frequent-elements/",
+  "description_md": "Given an integer array `nums` and an integer `k`, return the `k` values that occur most often.\n\nGiven: `nums` (a list of integers) and `k` (how many of the most frequent values to return).\nReturn: a list of the `k` most frequent elements, in any order.\n\n**Example:**\nInput: `nums = [1,1,1,2,2,3]`, `k = 2`\nOutput: `[1,2]` (1 appears 3 times, 2 appears twice, so these are the two most frequent).\n\n**Constraints:**\n- `1 <= nums.length <= 10^5`\n- `k` is between 1 and the number of distinct values in `nums`.\n- The answer is guaranteed to be unique.",
+  "signature": {
+   "name": "topKFrequent",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def topKFrequent(self, nums: list[int], k: int) -> list[int]:\n        \"\"\"\n        :param nums: list[int] - the input array\n        :param k: int - number of most frequent elements to return\n        :return: list[int] - the k most frequent elements\n        \"\"\"\n        pass\n",
+  "reference_solution": "from collections import Counter\n\n\nclass Solution:\n    def topKFrequent(self, nums: list[int], k: int) -> list[int]:\n        count = Counter(nums)\n        buckets = [[] for _ in range(len(nums) + 1)]\n        for num, freq in count.items():\n            buckets[freq].append(num)\n        result = []\n        for freq in range(len(buckets) - 1, 0, -1):\n            for num in buckets[freq]:\n                result.append(num)\n                if len(result) == k:\n                    return result\n        return result\n"
+ },
+ "dsa-012": {
+  "id": "dsa-012",
+  "slug": "contiguous-array",
+  "title": "Contiguous Array",
+  "topic": "Prefix Sums",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/contiguous-array/",
+  "description_md": "Given a binary array `nums` (only 0s and 1s), find the length of the longest contiguous subarray that contains an equal number of 0s and 1s.\n\nGiven: `nums`, a list containing only 0 and 1.\nReturn: the maximum length of a contiguous run holding the same count of 0s as 1s.\n\n**Example:**\nInput: `nums = [0,1,0,0,1,1,0]`\nOutput: `6` (the subarray `[1,0,0,1,1,0]` has three 0s and three 1s).\n\n**Constraints:**\n- `1 <= nums.length <= 10^5`\n- Each element is either 0 or 1.",
+  "signature": {
+   "name": "findMaxLength",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findMaxLength(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - binary array of 0s and 1s\n        :return: int - length of the longest balanced contiguous subarray\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def findMaxLength(self, nums: list[int]) -> int:\n        first_seen = {0: -1}\n        count = 0\n        best = 0\n        for i, num in enumerate(nums):\n            count += 1 if num == 1 else -1\n            if count in first_seen:\n                best = max(best, i - first_seen[count])\n            else:\n                first_seen[count] = i\n        return best\n"
+ },
+ "dsa-020": {
+  "id": "dsa-020",
+  "slug": "longest-repeating-character-replacement",
+  "title": "Longest Repeating Character Replacement",
+  "topic": "Sliding Window",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/longest-repeating-character-replacement/",
+  "description_md": "You are given a string `s` of uppercase letters and an integer `k`. You may change up to `k` characters to any other uppercase letter. Return the length of the longest substring that can be made to consist of a single repeated character after at most `k` changes.\n\nGiven: `s` (uppercase string) and `k` (max allowed replacements).\nReturn: the longest achievable run of one identical character.\n\n**Example:**\nInput: `s = \"AABABBA\"`, `k = 1`\nOutput: `4` (change one character in `\"ABBA\"` or `\"AABA\"` to get four equal letters).\n\n**Constraints:**\n- `1 <= s.length <= 10^5`\n- `s` contains only uppercase English letters.\n- `0 <= k <= s.length`",
+  "signature": {
+   "name": "characterReplacement",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        \"\"\"\n        :param s: str - string of uppercase letters\n        :param k: int - maximum number of character replacements allowed\n        :return: int - length of the longest single-character substring achievable\n        \"\"\"\n        pass\n",
+  "reference_solution": "from collections import defaultdict\n\n\nclass Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        count = defaultdict(int)\n        left = 0\n        max_freq = 0\n        best = 0\n        for right in range(len(s)):\n            count[s[right]] += 1\n            max_freq = max(max_freq, count[s[right]])\n            while (right - left + 1) - max_freq > k:\n                count[s[left]] -= 1\n                left += 1\n            best = max(best, right - left + 1)\n        return best\n"
+ },
+ "dsa-027": {
+  "id": "dsa-027",
+  "slug": "generate-parentheses",
+  "title": "Generate Parentheses",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/generate-parentheses/",
+  "description_md": "Given `n` pairs of parentheses, produce every distinct way to arrange them so that they are well-formed (correctly opened and closed).\n\nGiven: `n`, the number of parenthesis pairs.\nReturn: a list of all valid combination strings.\n\n**Example:**\nInput: `n = 2`\nOutput: `[\"(())\", \"()()\"]`\n\n**Constraints:**\n- `1 <= n <= 8`",
+  "signature": {
+   "name": "generateParenthesis",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def generateParenthesis(self, n: int) -> list[str]:\n        \"\"\"\n        :param n: int - number of pairs of parentheses\n        :return: list[str] - all valid parenthesis combinations\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def generateParenthesis(self, n: int) -> list[str]:\n        result = []\n        stack = []\n\n        def backtrack(open_count: int, close_count: int) -> None:\n            if open_count == close_count == n:\n                result.append(\"\".join(stack))\n                return\n            if open_count < n:\n                stack.append(\"(\")\n                backtrack(open_count + 1, close_count)\n                stack.pop()\n            if close_count < open_count:\n                stack.append(\")\")\n                backtrack(open_count, close_count + 1)\n                stack.pop()\n\n        backtrack(0, 0)\n        return result\n"
+ },
+ "dsa-033": {
+  "id": "dsa-033",
+  "slug": "search-a-2d-matrix",
+  "title": "Search a 2D Matrix",
+  "topic": "Binary Search",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/search-a-2d-matrix/",
+  "description_md": "You are given an `m x n` matrix where each row is sorted left to right, and the first value of every row is greater than the last value of the previous row (so the whole grid reads as one sorted list). Given a `target`, report whether it exists in the matrix.\n\nGiven: `matrix` (rows/columns as described) and `target` (integer to find).\nReturn: `True` if `target` is present, otherwise `False`.\n\n**Example:**\nInput: `matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]]`, `target = 16`\nOutput: `True`\n\n**Constraints:**\n- `1 <= m, n <= 100`\n- `-10^4 <= matrix[i][j], target <= 10^4`",
+  "signature": {
+   "name": "searchMatrix",
+   "params": [
+    {
+     "name": "matrix",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def searchMatrix(self, matrix: list[list[int]], target: int) -> bool:\n        \"\"\"\n        :param matrix: list[list[int]] - row-sorted, globally-sorted matrix\n        :param target: int - value to search for\n        :return: bool - True if target is in the matrix\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def searchMatrix(self, matrix: list[list[int]], target: int) -> bool:\n        if not matrix or not matrix[0]:\n            return False\n        rows, cols = len(matrix), len(matrix[0])\n        lo, hi = 0, rows * cols - 1\n        while lo <= hi:\n            mid = (lo + hi) // 2\n            value = matrix[mid // cols][mid % cols]\n            if value == target:\n                return True\n            if value < target:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n        return False\n"
+ },
+ "dsa-039": {
+  "id": "dsa-039",
+  "slug": "reverse-linked-list",
+  "title": "Reverse Linked List",
+  "topic": "Linked List",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/reverse-linked-list/",
+  "description_md": "Given the head of a singly linked list, reverse the order of its nodes and return the new head.\n\nGiven: `head`, the first node of a singly linked list (may be empty).\nReturn: the head of the reversed list.\n\n**Example:**\nInput: `head = 1 -> 2 -> 3 -> 4 -> 5`\nOutput: `5 -> 4 -> 3 -> 2 -> 1`\n\n**Constraints:**\n- The list has between 0 and 5000 nodes.\n- `-5000 <= Node.val <= 5000`",
+  "signature": {
+   "name": "reverseList",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def reverseList(self, head: 'ListNode | None') -> 'ListNode | None':\n        \"\"\"\n        :param head: ListNode | None - head of the singly linked list\n        :return: ListNode | None - head of the reversed list\n        \"\"\"\n        pass\n",
+  "reference_solution": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def reverseList(self, head: 'ListNode | None') -> 'ListNode | None':\n        prev = None\n        curr = head\n        while curr:\n            nxt = curr.next\n            curr.next = prev\n            prev = curr\n            curr = nxt\n        return prev\n"
+ },
+ "dsa-045": {
+  "id": "dsa-045",
+  "slug": "linked-list-cycle",
+  "title": "Linked List Cycle",
+  "topic": "Linked List",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/linked-list-cycle/",
+  "description_md": "Given the head of a linked list, decide whether it contains a cycle (some node whose `next` pointer revisits an earlier node).\n\nGiven: `head`, the first node of the list.\nReturn: `True` if traversing `next` pointers ever loops back, otherwise `False`.\n\n**Example:**\nInput: a list `3 -> 2 -> 0 -> -4` whose last node points back to the node with value 2.\nOutput: `True`\n\n**Constraints:**\n- The number of nodes is in the range 0 to 10^4.\n- `-10^5 <= Node.val <= 10^5`",
+  "signature": {
+   "name": "hasCycle",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\n\nclass Solution:\n    def hasCycle(self, head: 'ListNode | None') -> bool:\n        \"\"\"\n        :param head: ListNode | None - head of the linked list\n        :return: bool - True if the list contains a cycle\n        \"\"\"\n        pass\n",
+  "reference_solution": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\n\nclass Solution:\n    def hasCycle(self, head: 'ListNode | None') -> bool:\n        slow = fast = head\n        while fast and fast.next:\n            slow = slow.next\n            fast = fast.next.next\n            if slow is fast:\n                return True\n        return False\n"
+ },
+ "dsa-051": {
+  "id": "dsa-051",
+  "slug": "maximum-depth-of-binary-tree",
+  "title": "Maximum Depth of Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+  "description_md": "Given the root of a binary tree, return its maximum depth: the number of nodes along the longest path from the root down to a leaf.\n\nGiven: `root`, the root node of a binary tree (may be empty).\nReturn: the depth as an integer (0 for an empty tree).\n\n**Example:**\nInput: `root = [3,9,20,null,null,15,7]`\nOutput: `3`\n\n**Constraints:**\n- The number of nodes is in the range 0 to 10^4.\n- `-100 <= Node.val <= 100`",
+  "signature": {
+   "name": "maxDepth",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def maxDepth(self, root: 'TreeNode | None') -> int:\n        \"\"\"\n        :param root: TreeNode | None - root of the binary tree\n        :return: int - maximum depth of the tree\n        \"\"\"\n        pass\n",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def maxDepth(self, root: 'TreeNode | None') -> int:\n        if not root:\n            return 0\n        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))\n"
+ },
+ "dsa-057": {
+  "id": "dsa-057",
+  "slug": "binary-tree-level-order-traversal",
+  "title": "Binary Tree Level Order Traversal",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+  "description_md": "Given the root of a binary tree, return its level-order traversal: a list of levels, where each level is the list of node values read left to right.\n\nGiven: `root`, the root of a binary tree (may be empty).\nReturn: a list of lists, one inner list per depth level.\n\n**Example:**\nInput: `root = [3,9,20,null,null,15,7]`\nOutput: `[[3],[9,20],[15,7]]`\n\n**Constraints:**\n- The number of nodes is in the range 0 to 2000.\n- `-1000 <= Node.val <= 1000`",
+  "signature": {
+   "name": "levelOrder",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def levelOrder(self, root: 'TreeNode | None') -> list[list[int]]:\n        \"\"\"\n        :param root: TreeNode | None - root of the binary tree\n        :return: list[list[int]] - values grouped by level, left to right\n        \"\"\"\n        pass\n",
+  "reference_solution": "from collections import deque\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def levelOrder(self, root: 'TreeNode | None') -> list[list[int]]:\n        result = []\n        if not root:\n            return result\n        queue = deque([root])\n        while queue:\n            level = []\n            for _ in range(len(queue)):\n                node = queue.popleft()\n                level.append(node.val)\n                if node.left:\n                    queue.append(node.left)\n                if node.right:\n                    queue.append(node.right)\n            result.append(level)\n        return result\n"
+ },
+ "dsa-063": {
+  "id": "dsa-063",
+  "slug": "binary-tree-maximum-path-sum",
+  "title": "Binary Tree Maximum Path Sum",
+  "topic": "DP",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
+  "description_md": "A path in a binary tree is any sequence of connected nodes where each adjacent pair shares an edge, and a node appears at most once. A path need not pass through the root. Given the root, return the maximum possible sum of node values along any such path.\n\nGiven: `root`, the root of a non-empty binary tree.\nReturn: the largest achievable path sum.\n\n**Example:**\nInput: `root = [-10,9,20,null,null,15,7]`\nOutput: `42` (the path `15 -> 20 -> 7` sums to 42).\n\n**Constraints:**\n- The number of nodes is in the range 1 to 3 * 10^4.\n- `-1000 <= Node.val <= 1000`",
+  "signature": {
+   "name": "maxPathSum",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def maxPathSum(self, root: 'TreeNode | None') -> int:\n        \"\"\"\n        :param root: TreeNode | None - root of the binary tree\n        :return: int - maximum path sum over any path in the tree\n        \"\"\"\n        pass\n",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Solution:\n    def maxPathSum(self, root: 'TreeNode | None') -> int:\n        best = float('-inf')\n\n        def gain(node):\n            nonlocal best\n            if not node:\n                return 0\n            left = max(gain(node.left), 0)\n            right = max(gain(node.right), 0)\n            best = max(best, node.val + left + right)\n            return node.val + max(left, right)\n\n        gain(root)\n        return best\n"
+ },
+ "dsa-069": {
+  "id": "dsa-069",
+  "slug": "kth-largest-element-in-a-stream",
+  "title": "Kth Largest Element in a Stream",
+  "topic": "Heap/Top-K",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
+  "description_md": "Design a class that reports the k-th largest value seen so far in a stream (the k-th largest in sorted order, allowing duplicates, not the k-th distinct value).\n\n- `KthLargest(k, nums)`: initialize with the ranking `k` and an initial list `nums`.\n- `add(val)`: insert `val` into the stream and return the current k-th largest value.\n\n**Example:**\n`KthLargest(3, [4,5,8,2])`; `add(3)` -> `4`; `add(5)` -> `5`; `add(10)` -> `5`; `add(9)` -> `8`; `add(4)` -> `8`.\n\n**Constraints:**\n- `1 <= k <= 10^4`\n- `-10^4 <= nums[i], val <= 10^4`\n- At most 10^4 calls to `add`; it is always valid to find the k-th largest.",
+  "signature": {
+   "type": "class",
+   "name": "KthLargest",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class KthLargest:\n    def __init__(self, k: int, nums: list[int]):\n        \"\"\"\n        :param k: int - rank of the largest element to track\n        :param nums: list[int] - initial stream values\n        \"\"\"\n        pass\n\n    def add(self, val: int) -> int:\n        \"\"\"\n        :param val: int - new value to add to the stream\n        :return: int - the current kth largest value\n        \"\"\"\n        pass\n",
+  "reference_solution": "import heapq\n\n\nclass KthLargest:\n    def __init__(self, k: int, nums: list[int]):\n        self.k = k\n        self.heap = nums\n        heapq.heapify(self.heap)\n        while len(self.heap) > k:\n            heapq.heappop(self.heap)\n\n    def add(self, val: int) -> int:\n        heapq.heappush(self.heap, val)\n        while len(self.heap) > self.k:\n            heapq.heappop(self.heap)\n        return self.heap[0]\n"
+ },
+ "dsa-075": {
+  "id": "dsa-075",
+  "slug": "find-median-from-data-stream",
+  "title": "Find Median from Data Stream",
+  "topic": "Heap/Top-K",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/find-median-from-data-stream/",
+  "description_md": "Design a structure that supports adding numbers one at a time and querying the median of everything added so far. With an odd count the median is the middle value; with an even count it is the average of the two middle values.\n\n- `MedianFinder()`: create the empty structure.\n- `addNum(num)`: add an integer to the running data set.\n- `findMedian()`: return the median of all values added so far as a float.\n\n**Example:**\n`MedianFinder()`; `addNum(1)`; `addNum(2)`; `findMedian()` -> `1.5`; `addNum(3)`; `findMedian()` -> `2.0`.\n\n**Constraints:**\n- `-10^5 <= num <= 10^5`\n- `findMedian` is only called after at least one `addNum`.\n- Up to 5 * 10^4 total calls.",
+  "signature": {
+   "type": "class",
+   "name": "MedianFinder",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class MedianFinder:\n    def __init__(self):\n        \"\"\"\n        Initialize the empty data structure.\n        \"\"\"\n        pass\n\n    def addNum(self, num: int) -> None:\n        \"\"\"\n        :param num: int - value to add to the data stream\n        :return: None\n        \"\"\"\n        pass\n\n    def findMedian(self) -> float:\n        \"\"\"\n        :return: float - median of all values added so far\n        \"\"\"\n        pass\n",
+  "reference_solution": "import heapq\n\n\nclass MedianFinder:\n    def __init__(self):\n        self.small = []  # max-heap (store negatives)\n        self.large = []  # min-heap\n\n    def addNum(self, num: int) -> None:\n        heapq.heappush(self.small, -num)\n        if self.small and self.large and (-self.small[0]) > self.large[0]:\n            heapq.heappush(self.large, -heapq.heappop(self.small))\n        if len(self.small) > len(self.large) + 1:\n            heapq.heappush(self.large, -heapq.heappop(self.small))\n        if len(self.large) > len(self.small) + 1:\n            heapq.heappush(self.small, -heapq.heappop(self.large))\n\n    def findMedian(self) -> float:\n        if len(self.small) > len(self.large):\n            return -self.small[0]\n        if len(self.large) > len(self.small):\n            return self.large[0]\n        return (-self.small[0] + self.large[0]) / 2\n"
+ },
+ "dsa-081": {
+  "id": "dsa-081",
+  "slug": "palindrome-partitioning",
+  "title": "Palindrome Partitioning",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/palindrome-partitioning/",
+  "description_md": "Given a string `s`, split it into contiguous pieces so that every piece is a palindrome. Return all possible such partitions.\n\nGiven: `s`, the string to partition.\nReturn: a list of partitions, each a list of palindromic substrings that concatenate back to `s`.\n\n**Example:**\nInput: `s = \"aab\"`\nOutput: `[[\"a\",\"a\",\"b\"],[\"aa\",\"b\"]]`\n\n**Constraints:**\n- `1 <= s.length <= 16`\n- `s` contains only lowercase English letters.",
+  "signature": {
+   "name": "partition",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def partition(self, s: str) -> list[list[str]]:\n        \"\"\"\n        :param s: str - the string to partition\n        :return: list[list[str]] - all palindrome partitions of s\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def partition(self, s: str) -> list[list[str]]:\n        result = []\n        current = []\n\n        def is_palindrome(left: int, right: int) -> bool:\n            while left < right:\n                if s[left] != s[right]:\n                    return False\n                left += 1\n                right -= 1\n            return True\n\n        def backtrack(start: int) -> None:\n            if start == len(s):\n                result.append(current[:])\n                return\n            for end in range(start, len(s)):\n                if is_palindrome(start, end):\n                    current.append(s[start:end + 1])\n                    backtrack(end + 1)\n                    current.pop()\n\n        backtrack(0)\n        return result\n"
+ },
+ "dsa-087": {
+  "id": "dsa-087",
+  "slug": "pacific-atlantic-water-flow",
+  "title": "Pacific Atlantic Water Flow",
+  "topic": "Graphs",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/pacific-atlantic-water-flow/",
+  "description_md": "You are given an `m x n` grid `heights` of cell elevations. The Pacific Ocean touches the top and left edges; the Atlantic touches the bottom and right edges. Water flows from a cell to a neighbor (up/down/left/right) only if the neighbor's height is less than or equal to the current cell's. Return every cell from which water can reach BOTH oceans.\n\nGiven: `heights`, a 2D grid of non-negative integers.\nReturn: a list of `[row, col]` coordinates that drain to both oceans.\n\n**Example:**\nInput: `heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]`\nOutput includes coordinates such as `[0,4]`, `[1,3]`, `[1,4]`, `[2,2]`, `[3,0]`, `[3,1]`, `[4,0]`.\n\n**Constraints:**\n- `1 <= m, n <= 200`\n- `0 <= heights[i][j] <= 10^5`",
+  "signature": {
+   "name": "pacificAtlantic",
+   "params": [
+    {
+     "name": "heights",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def pacificAtlantic(self, heights: list[list[int]]) -> list[list[int]]:\n        \"\"\"\n        :param heights: list[list[int]] - grid of cell elevations\n        :return: list[list[int]] - coordinates reaching both oceans\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def pacificAtlantic(self, heights: list[list[int]]) -> list[list[int]]:\n        if not heights or not heights[0]:\n            return []\n        rows, cols = len(heights), len(heights[0])\n        pacific, atlantic = set(), set()\n\n        def dfs(r, c, visited, prev_height):\n            if (\n                (r, c) in visited\n                or r < 0 or c < 0 or r >= rows or c >= cols\n                or heights[r][c] < prev_height\n            ):\n                return\n            visited.add((r, c))\n            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                dfs(r + dr, c + dc, visited, heights[r][c])\n\n        for c in range(cols):\n            dfs(0, c, pacific, heights[0][c])\n            dfs(rows - 1, c, atlantic, heights[rows - 1][c])\n        for r in range(rows):\n            dfs(r, 0, pacific, heights[r][0])\n            dfs(r, cols - 1, atlantic, heights[r][cols - 1])\n\n        return [[r, c] for r, c in pacific & atlantic]\n"
+ },
+ "dsa-093": {
+  "id": "dsa-093",
+  "slug": "redundant-connection",
+  "title": "Redundant Connection",
+  "topic": "Union-Find",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/redundant-connection/",
+  "description_md": "You start with a tree of `n` nodes labeled 1..n, then one extra edge is added, forming exactly one cycle. Given the list of `edges`, return the added edge that can be removed so the graph is a tree again. If several qualify, return the one appearing last in the input.\n\nGiven: `edges`, a list of `[u, v]` pairs.\nReturn: the `[u, v]` edge to remove.\n\n**Example:**\nInput: `edges = [[1,2],[1,3],[2,3]]`\nOutput: `[2,3]`\n\n**Constraints:**\n- `n == edges.length`\n- `3 <= n <= 1000`\n- Each `edges[i]` connects two distinct nodes; no repeated edges.",
+  "signature": {
+   "name": "findRedundantConnection",
+   "params": [
+    {
+     "name": "edges",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findRedundantConnection(self, edges: list[list[int]]) -> list[int]:\n        \"\"\"\n        :param edges: list[list[int]] - edges of the graph\n        :return: list[int] - the redundant edge to remove\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def findRedundantConnection(self, edges: list[list[int]]) -> list[int]:\n        parent = list(range(len(edges) + 1))\n        rank = [1] * (len(edges) + 1)\n\n        def find(x):\n            while parent[x] != x:\n                parent[x] = parent[parent[x]]\n                x = parent[x]\n            return x\n\n        def union(a, b):\n            ra, rb = find(a), find(b)\n            if ra == rb:\n                return False\n            if rank[ra] < rank[rb]:\n                ra, rb = rb, ra\n            parent[rb] = ra\n            rank[ra] += rank[rb]\n            return True\n\n        for u, v in edges:\n            if not union(u, v):\n                return [u, v]\n        return []\n"
+ },
+ "dsa-099": {
+  "id": "dsa-099",
+  "slug": "cheapest-flights-within-k-stops",
+  "title": "Cheapest Flights Within K Stops",
+  "topic": "Graphs",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+  "description_md": "You have `n` cities and a list of `flights` where each `[from, to, price]` is a directed edge with a cost. Given a `src`, a `dst`, and an integer `k`, return the cheapest price to travel from `src` to `dst` using at most `k` intermediate stops. If no such route exists, return `-1`.\n\nGiven: `n`, `flights`, `src`, `dst`, `k`.\nReturn: the minimum total cost, or `-1`.\n\n**Example:**\nInput: `n = 4`, `flights = [[0,1,100],[1,2,100],[2,0,100],[1,3,600],[2,3,200]]`, `src = 0`, `dst = 3`, `k = 1`\nOutput: `700` (route `0 -> 1 -> 3` costs 700 within 1 stop).\n\n**Constraints:**\n- `1 <= n <= 100`\n- `0 <= flights.length <= n * (n - 1) / 2`\n- `0 <= src, dst, k < n`, `src != dst`",
+  "signature": {
+   "name": "findCheapestPrice",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    },
+    {
+     "name": "flights",
+     "kind": "value"
+    },
+    {
+     "name": "src",
+     "kind": "value"
+    },
+    {
+     "name": "dst",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def findCheapestPrice(self, n: int, flights: list[list[int]], src: int, dst: int, k: int) -> int:\n        \"\"\"\n        :param n: int - number of cities\n        :param flights: list[list[int]] - directed [from, to, price] edges\n        :param src: int - starting city\n        :param dst: int - destination city\n        :param k: int - maximum number of intermediate stops\n        :return: int - cheapest price within k stops, or -1\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def findCheapestPrice(self, n: int, flights: list[list[int]], src: int, dst: int, k: int) -> int:\n        prices = [float('inf')] * n\n        prices[src] = 0\n        for _ in range(k + 1):\n            snapshot = prices[:]\n            for u, v, cost in flights:\n                if snapshot[u] == float('inf'):\n                    continue\n                if snapshot[u] + cost < prices[v]:\n                    prices[v] = snapshot[u] + cost\n        return prices[dst] if prices[dst] != float('inf') else -1\n"
+ },
+ "dsa-105": {
+  "id": "dsa-105",
+  "slug": "longest-palindromic-substring",
+  "title": "Longest Palindromic Substring",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/longest-palindromic-substring/",
+  "description_md": "Given a string `s`, return the longest contiguous substring of `s` that reads the same forwards and backwards.\n\nGiven: `s`, the input string.\nReturn: a longest palindromic substring (any one, if there are ties).\n\n**Example:**\nInput: `s = \"babad\"`\nOutput: `\"bab\"` (`\"aba\"` is also a valid answer).\n\n**Constraints:**\n- `1 <= s.length <= 1000`\n- `s` consists of digits and English letters.",
+  "signature": {
+   "name": "longestPalindrome",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        \"\"\"\n        :param s: str - the input string\n        :return: str - a longest palindromic substring\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        if len(s) < 2:\n            return s\n        start, best_len = 0, 1\n\n        def expand(left: int, right: int) -> None:\n            nonlocal start, best_len\n            while left >= 0 and right < len(s) and s[left] == s[right]:\n                if right - left + 1 > best_len:\n                    start = left\n                    best_len = right - left + 1\n                left -= 1\n                right += 1\n\n        for i in range(len(s)):\n            expand(i, i)\n            expand(i, i + 1)\n        return s[start:start + best_len]\n"
+ },
+ "dsa-111": {
+  "id": "dsa-111",
+  "slug": "longest-increasing-subsequence",
+  "title": "Longest Increasing Subsequence",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/longest-increasing-subsequence/",
+  "description_md": "Given an integer array `nums`, return the length of the longest strictly increasing subsequence. A subsequence keeps original order but need not be contiguous.\n\nGiven: `nums`, a list of integers.\nReturn: the length of the longest strictly increasing subsequence.\n\n**Example:**\nInput: `nums = [10,9,2,5,3,7,101,18]`\nOutput: `4` (one such subsequence is `[2,3,7,101]`).\n\n**Constraints:**\n- `1 <= nums.length <= 2500`\n- `-10^4 <= nums[i] <= 10^4`",
+  "signature": {
+   "name": "lengthOfLIS",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def lengthOfLIS(self, nums: list[int]) -> int:\n        \"\"\"\n        :param nums: list[int] - the input array\n        :return: int - length of the longest strictly increasing subsequence\n        \"\"\"\n        pass\n",
+  "reference_solution": "import bisect\n\n\nclass Solution:\n    def lengthOfLIS(self, nums: list[int]) -> int:\n        tails = []\n        for num in nums:\n            idx = bisect.bisect_left(tails, num)\n            if idx == len(tails):\n                tails.append(num)\n            else:\n                tails[idx] = num\n        return len(tails)\n"
+ },
+ "dsa-117": {
+  "id": "dsa-117",
+  "slug": "best-time-to-buy-and-sell-stock-with-cooldown",
+  "title": "Best Time to Buy And Sell Stock With Cooldown",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+  "description_md": "Given an array `prices` where `prices[i]` is a stock's price on day `i`, find the maximum profit from any number of buy/sell transactions, subject to two rules: you may hold at most one share at a time, and after selling you must wait one full day (cooldown) before buying again.\n\nGiven: `prices`, a list of daily prices.\nReturn: the maximum achievable profit.\n\n**Example:**\nInput: `prices = [1,2,3,0,2]`\nOutput: `3` (buy at 1, sell at 3, cooldown, buy at 0, sell at 2).\n\n**Constraints:**\n- `1 <= prices.length <= 5000`\n- `0 <= prices[i] <= 1000`",
+  "signature": {
+   "name": "maxProfit",
+   "params": [
+    {
+     "name": "prices",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        \"\"\"\n        :param prices: list[int] - daily stock prices\n        :return: int - maximum profit with a one-day cooldown after selling\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        hold = float('-inf')  # best profit while holding a share\n        sold = 0              # best profit on the day we just sold\n        rest = 0              # best profit while free to buy (post-cooldown)\n        for price in prices:\n            prev_sold = sold\n            sold = hold + price\n            hold = max(hold, rest - price)\n            rest = max(rest, prev_sold)\n        return max(sold, rest)\n"
+ },
+ "dsa-123": {
+  "id": "dsa-123",
+  "slug": "regular-expression-matching",
+  "title": "Regular Expression Matching",
+  "topic": "DP",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/regular-expression-matching/",
+  "description_md": "Given an input string `s` and a pattern `p`, decide whether `p` matches the entire string `s`. The pattern supports `.` (matches any single character) and `*` (matches zero or more of the character immediately before it). The match must cover all of `s`, not just part.\n\nGiven: `s` (the text) and `p` (the pattern).\nReturn: `True` if `p` fully matches `s`, otherwise `False`.\n\n**Example:**\nInput: `s = \"aab\"`, `p = \"c*a*b\"`\nOutput: `True` (`c*` matches zero c's, `a*` matches two a's, then `b`).\n\n**Constraints:**\n- `1 <= s.length <= 20`, `1 <= p.length <= 20`\n- `s` contains only lowercase letters; `p` contains lowercase letters, `.`, and `*`.\n- Each `*` has a valid preceding character.",
+  "signature": {
+   "name": "isMatch",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "p",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        \"\"\"\n        :param s: str - the input text\n        :param p: str - the pattern with '.' and '*' support\n        :return: bool - True if the pattern matches the entire string\n        \"\"\"\n        pass\n",
+  "reference_solution": "from functools import lru_cache\n\n\nclass Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        @lru_cache(maxsize=None)\n        def dp(i: int, j: int) -> bool:\n            if j == len(p):\n                return i == len(s)\n            first = i < len(s) and p[j] in (s[i], '.')\n            if j + 1 < len(p) and p[j + 1] == '*':\n                return dp(i, j + 2) or (first and dp(i + 1, j))\n            return first and dp(i + 1, j + 1)\n\n        return dp(0, 0)\n"
+ },
+ "dsa-129": {
+  "id": "dsa-129",
+  "slug": "merge-triplets-to-form-target-triplet",
+  "title": "Merge Triplets to Form Target Triplet",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/merge-triplets-to-form-target-triplet/",
+  "description_md": "You are given a list of `triplets`, each `[a, b, c]`, and a `target` triplet `[x, y, z]`. A merge of two triplets replaces each with the elementwise maximum of the pair. Choose any subset of triplets to merge (in any order) and decide whether you can obtain exactly `target`.\n\nGiven: `triplets` and `target`.\nReturn: `True` if some sequence of merges yields `target`, otherwise `False`.\n\n**Example:**\nInput: `triplets = [[2,5,3],[1,8,4],[1,7,5]]`, `target = [2,7,5]`\nOutput: `True` (merging `[2,5,3]` and `[1,7,5]` gives `[2,7,5]`).\n\n**Constraints:**\n- `1 <= triplets.length <= 10^5`\n- `1 <= a, b, c, x, y, z <= 1000`",
+  "signature": {
+   "name": "mergeTriplets",
+   "params": [
+    {
+     "name": "triplets",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def mergeTriplets(self, triplets: list[list[int]], target: list[int]) -> bool:\n        \"\"\"\n        :param triplets: list[list[int]] - available triplets\n        :param target: list[int] - the triplet to form\n        :return: bool - True if target can be formed by merging a subset\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def mergeTriplets(self, triplets: list[list[int]], target: list[int]) -> bool:\n        good = set()\n        for a, b, c in triplets:\n            if a > target[0] or b > target[1] or c > target[2]:\n                continue\n            if a == target[0]:\n                good.add(0)\n            if b == target[1]:\n                good.add(1)\n            if c == target[2]:\n                good.add(2)\n        return len(good) == 3\n"
+ },
+ "dsa-135": {
+  "id": "dsa-135",
+  "slug": "meeting-rooms",
+  "title": "Meeting Rooms",
+  "topic": "Intervals",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/meeting-rooms/",
+  "description_md": "Given a list of meeting time `intervals`, each `[start, end]`, decide whether a single person could attend every meeting (i.e., no two meetings overlap). A meeting ending exactly when another begins does not count as an overlap.\n\nGiven: `intervals`, a list of `[start, end]` pairs.\nReturn: `True` if no meetings overlap, otherwise `False`.\n\n**Example:**\nInput: `intervals = [[0,30],[5,10],[15,20]]`\nOutput: `False` (`[0,30]` overlaps with `[5,10]`).\n\n**Constraints:**\n- `0 <= intervals.length <= 10^4`\n- `intervals[i][0] < intervals[i][1]`",
+  "signature": {
+   "name": "canAttendMeetings",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def canAttendMeetings(self, intervals: list[list[int]]) -> bool:\n        \"\"\"\n        :param intervals: list[list[int]] - meeting [start, end] pairs\n        :return: bool - True if a single person can attend all meetings\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def canAttendMeetings(self, intervals: list[list[int]]) -> bool:\n        intervals.sort(key=lambda interval: interval[0])\n        for i in range(1, len(intervals)):\n            if intervals[i][0] < intervals[i - 1][1]:\n                return False\n        return True\n"
+ },
+ "dsa-141": {
+  "id": "dsa-141",
+  "slug": "reverse-bits",
+  "title": "Reverse Bits",
+  "topic": "Bit Manipulation",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/reverse-bits/",
+  "description_md": "Given a 32-bit unsigned integer `n`, return the integer produced by reversing the order of its 32 bits.\n\nGiven: `n`, treated as a 32-bit unsigned value.\nReturn: the value whose bit pattern is the reverse of `n`'s.\n\n**Example:**\nInput: `n = 43261596` (binary `00000010100101000001111010011100`)\nOutput: `964176192` (binary `00111001011110000010100101000000`).\n\n**Constraints:**\n- The input is a 32-bit unsigned integer.",
+  "signature": {
+   "name": "reverseBits",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def reverseBits(self, n: int) -> int:\n        \"\"\"\n        :param n: int - a 32-bit unsigned integer\n        :return: int - the integer with its 32 bits reversed\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def reverseBits(self, n: int) -> int:\n        result = 0\n        for _ in range(32):\n            result = (result << 1) | (n & 1)\n            n >>= 1\n        return result\n"
+ },
+ "dsa-147": {
+  "id": "dsa-147",
+  "slug": "set-matrix-zeroes",
+  "title": "Set Matrix Zeroes",
+  "topic": "Matrix",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/set-matrix-zeroes/",
+  "description_md": "Given an `m x n` integer matrix, if any cell is 0, set its entire row and its entire column to 0. Do this in place, modifying the input matrix directly.\n\nGiven: `matrix`, a 2D list of integers.\nReturn: nothing; mutate `matrix` in place.\n\n**Example:**\nInput: `matrix = [[1,1,1],[1,0,1],[1,1,1]]`\nAfter the call `matrix` becomes `[[1,0,1],[0,0,0],[1,0,1]]`.\n\n**Constraints:**\n- `1 <= m, n <= 200`\n- `-2^31 <= matrix[i][j] <= 2^31 - 1`",
+  "signature": {
+   "name": "setZeroes",
+   "params": [
+    {
+     "name": "matrix",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Solution:\n    def setZeroes(self, matrix: list[list[int]]) -> None:\n        \"\"\"\n        :param matrix: list[list[int]] - the matrix to modify in place\n        :return: None - the matrix is mutated in place\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Solution:\n    def setZeroes(self, matrix: list[list[int]]) -> None:\n        rows, cols = len(matrix), len(matrix[0])\n        first_row_zero = any(matrix[0][c] == 0 for c in range(cols))\n        first_col_zero = any(matrix[r][0] == 0 for r in range(rows))\n\n        for r in range(1, rows):\n            for c in range(1, cols):\n                if matrix[r][c] == 0:\n                    matrix[r][0] = 0\n                    matrix[0][c] = 0\n\n        for r in range(1, rows):\n            for c in range(1, cols):\n                if matrix[r][0] == 0 or matrix[0][c] == 0:\n                    matrix[r][c] = 0\n\n        if first_row_zero:\n            for c in range(cols):\n                matrix[0][c] = 0\n        if first_col_zero:\n            for r in range(rows):\n                matrix[r][0] = 0\n"
+ },
+ "dsa-006": {
+  "id": "dsa-006",
+  "slug": "product-of-array-except-self",
+  "title": "Product of Array Except Self",
+  "topic": "Prefix Sums",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/product-of-array-except-self/",
+  "description_md": "Given an integer array `nums`, build a new array `answer` where `answer[i]` equals the product of every element of `nums` except `nums[i]`.\n\nYou must solve it without using the division operator, and the intended runtime is O(n).\n\n**Example:**\nInput: `nums = [1, 2, 3, 4]`\nOutput: `[24, 12, 8, 6]`\n(`24 = 2*3*4`, `12 = 1*3*4`, `8 = 1*2*4`, `6 = 1*2*3`)\n\n**Constraints:**\n- `2 <= len(nums) <= 10^5`\n- `-30 <= nums[i] <= 30`\n- The full product of any prefix/suffix fits in a 32-bit integer.",
+  "signature": {
+   "name": "productExceptSelf",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def productExceptSelf(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: List[int]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def productExceptSelf(nums):\n    n = len(nums)\n    res = [1] * n\n    prefix = 1\n    for i in range(n):\n        res[i] = prefix\n        prefix *= nums[i]\n    suffix = 1\n    for i in range(n - 1, -1, -1):\n        res[i] *= suffix\n        suffix *= nums[i]\n    return res\n"
+ },
+ "dsa-014": {
+  "id": "dsa-014",
+  "slug": "two-sum-ii-input-array-is-sorted",
+  "title": "Two Sum II - Input Array Is Sorted",
+  "topic": "Two Pointers",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+  "description_md": "You are given a 1-indexed array `numbers` sorted in non-decreasing order and a `target`. Find the two distinct positions whose values add up exactly to `target`.\n\nReturn the two 1-based indices as a list `[i, j]` with `i < j`. Exactly one valid answer exists, and you may only use constant extra space.\n\n**Example:**\nInput: `numbers = [2, 7, 11, 15]`, `target = 9`\nOutput: `[1, 2]` (because `2 + 7 = 9`)\n\n**Constraints:**\n- `2 <= len(numbers) <= 3*10^4`\n- `-1000 <= numbers[i] <= 1000`, sorted ascending\n- `-1000 <= target <= 1000`; a unique solution is guaranteed.",
+  "signature": {
+   "name": "twoSum",
+   "params": [
+    {
+     "name": "numbers",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def twoSum(numbers, target):\n    \"\"\"\n    :type numbers: List[int]\n    :type target: int\n    :rtype: List[int]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def twoSum(numbers, target):\n    lo, hi = 0, len(numbers) - 1\n    while lo < hi:\n        s = numbers[lo] + numbers[hi]\n        if s == target:\n            return [lo + 1, hi + 1]\n        if s < target:\n            lo += 1\n        else:\n            hi -= 1\n    return []\n"
+ },
+ "dsa-021": {
+  "id": "dsa-021",
+  "slug": "permutation-in-string",
+  "title": "Permutation in String",
+  "topic": "Sliding Window",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/permutation-in-string/",
+  "description_md": "Given two strings `s1` and `s2`, decide whether `s2` contains any permutation of `s1` as a contiguous substring. Return `True` if it does, otherwise `False`.\n\nIn other words, check if some window of `s2` with length `len(s1)` has the exact same character counts as `s1`.\n\n**Example:**\nInput: `s1 = \"ab\"`, `s2 = \"eidbaooo\"`\nOutput: `True` (the window `\"ba\"` is a permutation of `\"ab\"`)\n\n**Constraints:**\n- `1 <= len(s1), len(s2) <= 10^4`\n- `s1` and `s2` consist of lowercase English letters.",
+  "signature": {
+   "name": "checkInclusion",
+   "params": [
+    {
+     "name": "s1",
+     "kind": "value"
+    },
+    {
+     "name": "s2",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def checkInclusion(s1, s2):\n    \"\"\"\n    :type s1: str\n    :type s2: str\n    :rtype: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "from collections import Counter\n\ndef checkInclusion(s1, s2):\n    if len(s1) > len(s2):\n        return False\n    need = Counter(s1)\n    window = Counter(s2[:len(s1)])\n    if window == need:\n        return True\n    for i in range(len(s1), len(s2)):\n        window[s2[i]] += 1\n        left = s2[i - len(s1)]\n        window[left] -= 1\n        if window[left] == 0:\n            del window[left]\n        if window == need:\n            return True\n    return False\n"
+ },
+ "dsa-028": {
+  "id": "dsa-028",
+  "slug": "daily-temperatures",
+  "title": "Daily Temperatures",
+  "topic": "Monotonic Stack",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/daily-temperatures/",
+  "description_md": "You are given a list `temperatures` of daily temperatures. For each day, compute how many days you must wait until a warmer temperature appears. If no warmer day follows, use `0`.\n\nReturn an array `answer` where `answer[i]` is that waiting count for day `i`.\n\n**Example:**\nInput: `temperatures = [73, 74, 75, 71, 69, 72, 76, 73]`\nOutput: `[1, 1, 4, 2, 1, 1, 0, 0]`\n\n**Constraints:**\n- `1 <= len(temperatures) <= 10^5`\n- `30 <= temperatures[i] <= 100`",
+  "signature": {
+   "name": "dailyTemperatures",
+   "params": [
+    {
+     "name": "temperatures",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def dailyTemperatures(temperatures):\n    \"\"\"\n    :type temperatures: List[int]\n    :rtype: List[int]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def dailyTemperatures(temperatures):\n    res = [0] * len(temperatures)\n    stack = []  # indices of days with unresolved warmer-day\n    for i, t in enumerate(temperatures):\n        while stack and temperatures[stack[-1]] < t:\n            j = stack.pop()\n            res[j] = i - j\n        stack.append(i)\n    return res\n"
+ },
+ "dsa-034": {
+  "id": "dsa-034",
+  "slug": "koko-eating-bananas",
+  "title": "Koko Eating Bananas",
+  "topic": "Binary Search",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/koko-eating-bananas/",
+  "description_md": "There are `piles` of bananas and a guard who returns in `h` hours. Each hour Koko picks one pile and eats up to `k` bananas from it; if the pile has fewer than `k`, she finishes it and stops eating that hour.\n\nFind the smallest integer eating speed `k` that lets her finish every pile within `h` hours.\n\n**Example:**\nInput: `piles = [3, 6, 7, 11]`, `h = 8`\nOutput: `4`\n\n**Constraints:**\n- `1 <= len(piles) <= 10^4`\n- `len(piles) <= h <= 10^9`\n- `1 <= piles[i] <= 10^9`",
+  "signature": {
+   "name": "minEatingSpeed",
+   "params": [
+    {
+     "name": "piles",
+     "kind": "value"
+    },
+    {
+     "name": "h",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minEatingSpeed(piles, h):\n    \"\"\"\n    :type piles: List[int]\n    :type h: int\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "import math\n\ndef minEatingSpeed(piles, h):\n    def hours_needed(k):\n        return sum(math.ceil(p / k) for p in piles)\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if hours_needed(mid) <= h:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo\n"
+ },
+ "dsa-040": {
+  "id": "dsa-040",
+  "slug": "merge-two-sorted-lists",
+  "title": "Merge Two Sorted Lists",
+  "topic": "Linked List",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/merge-two-sorted-lists/",
+  "description_md": "You are given the heads of two singly linked lists, `list1` and `list2`, each sorted in non-decreasing order. Splice them together into one sorted list by reusing the existing nodes, and return the head of the merged list.\n\n**Example:**\nInput: `list1 = 1 -> 2 -> 4`, `list2 = 1 -> 3 -> 4`\nOutput: `1 -> 1 -> 2 -> 3 -> 4 -> 4`\n\n**Constraints:**\n- Each list has `0` to `50` nodes.\n- `-100 <= Node.val <= 100`\n- Both lists are already sorted ascending.",
+  "signature": {
+   "name": "mergeTwoLists",
+   "params": [
+    {
+     "name": "list1",
+     "kind": "listnode"
+    },
+    {
+     "name": "list2",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "listnode"
+   }
+  },
+  "starter_code": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\ndef mergeTwoLists(list1, list2):\n    \"\"\"\n    :type list1: Optional[ListNode]\n    :type list2: Optional[ListNode]\n    :rtype: Optional[ListNode]\n    \"\"\"\n    pass\n",
+  "reference_solution": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\ndef mergeTwoLists(list1, list2):\n    dummy = tail = ListNode()\n    while list1 and list2:\n        if list1.val <= list2.val:\n            tail.next = list1\n            list1 = list1.next\n        else:\n            tail.next = list2\n            list2 = list2.next\n        tail = tail.next\n    tail.next = list1 if list1 else list2\n    return dummy.next\n"
+ },
+ "dsa-046": {
+  "id": "dsa-046",
+  "slug": "find-the-duplicate-number",
+  "title": "Find the Duplicate Number",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/find-the-duplicate-number/",
+  "description_md": "You are given an array `nums` of `n + 1` integers where every value is in the range `[1, n]`. By the pigeonhole principle at least one value repeats. Return the single repeated value.\n\nSolve it without modifying the array and using only O(1) extra space (Floyd's cycle detection treats indices/values as a linked list).\n\n**Example:**\nInput: `nums = [1, 3, 4, 2, 2]`\nOutput: `2`\n\n**Constraints:**\n- `1 <= n <= 10^5`, `len(nums) == n + 1`\n- `1 <= nums[i] <= n`\n- Exactly one value is repeated (possibly more than twice).",
+  "signature": {
+   "name": "findDuplicate",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def findDuplicate(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def findDuplicate(nums):\n    slow = fast = nums[0]\n    while True:\n        slow = nums[slow]\n        fast = nums[nums[fast]]\n        if slow == fast:\n            break\n    slow2 = nums[0]\n    while slow2 != slow:\n        slow = nums[slow]\n        slow2 = nums[slow2]\n    return slow\n"
+ },
+ "dsa-052": {
+  "id": "dsa-052",
+  "slug": "diameter-of-binary-tree",
+  "title": "Diameter of Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/diameter-of-binary-tree/",
+  "description_md": "Given the `root` of a binary tree, return its diameter: the number of edges on the longest path between any two nodes. This path does not have to run through the root.\n\n**Example:**\nInput: tree `[1, 2, 3, 4, 5]` (root 1; left child 2 with children 4 and 5; right child 3)\nOutput: `3` (the path 4 -> 2 -> 5 ... continuing 5 -> 2 -> 1 -> 3 has length 3 edges: 4-2-1-3)\n\n**Constraints:**\n- The tree has `1` to `10^4` nodes.\n- `-100 <= Node.val <= 100`",
+  "signature": {
+   "name": "diameterOfBinaryTree",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\ndef diameterOfBinaryTree(root):\n    \"\"\"\n    :type root: Optional[TreeNode]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\ndef diameterOfBinaryTree(root):\n    best = 0\n    def depth(node):\n        nonlocal best\n        if not node:\n            return 0\n        left = depth(node.left)\n        right = depth(node.right)\n        best = max(best, left + right)\n        return 1 + max(left, right)\n    depth(root)\n    return best\n"
+ },
+ "dsa-058": {
+  "id": "dsa-058",
+  "slug": "binary-tree-right-side-view",
+  "title": "Binary Tree Right Side View",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/binary-tree-right-side-view/",
+  "description_md": "Given the `root` of a binary tree, imagine standing to the right of it. Return the values of the nodes you can see from top to bottom — that is, the rightmost node at each level.\n\n**Example:**\nInput: tree `[1, 2, 3, null, 5, null, 4]`\nOutput: `[1, 3, 4]`\n\n**Constraints:**\n- The tree has `0` to `100` nodes.\n- `-100 <= Node.val <= 100`",
+  "signature": {
+   "name": "rightSideView",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\ndef rightSideView(root):\n    \"\"\"\n    :type root: Optional[TreeNode]\n    :rtype: List[int]\n    \"\"\"\n    pass\n",
+  "reference_solution": "from collections import deque\n\n# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\ndef rightSideView(root):\n    if not root:\n        return []\n    res = []\n    q = deque([root])\n    while q:\n        n = len(q)\n        for i in range(n):\n            node = q.popleft()\n            if i == n - 1:\n                res.append(node.val)\n            if node.left:\n                q.append(node.left)\n            if node.right:\n                q.append(node.right)\n    return res\n"
+ },
+ "dsa-064": {
+  "id": "dsa-064",
+  "slug": "serialize-and-deserialize-binary-tree",
+  "title": "Serialize and Deserialize Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
+  "description_md": "Design a `Codec` class that can turn a binary tree into a string (`serialize`) and rebuild the exact same tree from that string (`deserialize`). The encoding format is up to you as long as the round trip reproduces the original structure and values.\n\n**Example:**\nInput: tree `[1, 2, 3, null, null, 4, 5]`\nA valid round trip: `serialize(root)` produces some string, and `deserialize` of that string returns a tree identical to the original.\n\n**Constraints:**\n- The tree has `0` to `10^4` nodes.\n- `-1000 <= Node.val <= 1000`",
+  "signature": {
+   "type": "class",
+   "name": "Codec",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Codec:\n    def serialize(self, root):\n        \"\"\"Encodes a tree to a single string.\n        :type root: Optional[TreeNode]\n        :rtype: str\n        \"\"\"\n        pass\n\n    def deserialize(self, data):\n        \"\"\"Decodes your encoded data to tree.\n        :type data: str\n        :rtype: Optional[TreeNode]\n        \"\"\"\n        pass\n",
+  "reference_solution": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\n\nclass Codec:\n    def serialize(self, root):\n        out = []\n        def dfs(node):\n            if not node:\n                out.append('#')\n                return\n            out.append(str(node.val))\n            dfs(node.left)\n            dfs(node.right)\n        dfs(root)\n        return ','.join(out)\n\n    def deserialize(self, data):\n        vals = iter(data.split(','))\n        def build():\n            v = next(vals)\n            if v == '#':\n                return None\n            node = TreeNode(int(v))\n            node.left = build()\n            node.right = build()\n            return node\n        return build()\n"
+ },
+ "dsa-070": {
+  "id": "dsa-070",
+  "slug": "last-stone-weight",
+  "title": "Last Stone Weight",
+  "topic": "Heap/Top-K",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/last-stone-weight/",
+  "description_md": "You are given an array `stones` of positive weights. Repeatedly take the two heaviest stones and smash them: if they weigh the same both are destroyed, otherwise the lighter one is destroyed and the heavier is reduced by the lighter's weight.\n\nContinue until at most one stone remains. Return the weight of the last stone, or `0` if none remain.\n\n**Example:**\nInput: `stones = [2, 7, 4, 1, 8, 1]`\nOutput: `1`\n\n**Constraints:**\n- `1 <= len(stones) <= 30`\n- `1 <= stones[i] <= 1000`",
+  "signature": {
+   "name": "lastStoneWeight",
+   "params": [
+    {
+     "name": "stones",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def lastStoneWeight(stones):\n    \"\"\"\n    :type stones: List[int]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "import heapq\n\ndef lastStoneWeight(stones):\n    heap = [-s for s in stones]\n    heapq.heapify(heap)\n    while len(heap) > 1:\n        a = -heapq.heappop(heap)\n        b = -heapq.heappop(heap)\n        if a != b:\n            heapq.heappush(heap, -(a - b))\n    return -heap[0] if heap else 0\n"
+ },
+ "dsa-076": {
+  "id": "dsa-076",
+  "slug": "subsets",
+  "title": "Subsets",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/subsets/",
+  "description_md": "Given an array `nums` of distinct integers, return every possible subset (the power set). The result must not contain duplicate subsets and may be returned in any order.\n\n**Example:**\nInput: `nums = [1, 2, 3]`\nOutput: `[[], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3]]` (any order)\n\n**Constraints:**\n- `1 <= len(nums) <= 10`\n- `-10 <= nums[i] <= 10`\n- All elements are distinct.",
+  "signature": {
+   "name": "subsets",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def subsets(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: List[List[int]]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def subsets(nums):\n    res = []\n    path = []\n    def backtrack(start):\n        res.append(path[:])\n        for i in range(start, len(nums)):\n            path.append(nums[i])\n            backtrack(i + 1)\n            path.pop()\n    backtrack(0)\n    return res\n"
+ },
+ "dsa-082": {
+  "id": "dsa-082",
+  "slug": "letter-combinations-of-a-phone-number",
+  "title": "Letter Combinations of a Phone Number",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
+  "description_md": "Given a string `digits` containing digits `2`–`9`, return every letter combination the number could spell, using the classic telephone keypad mapping (2=abc, 3=def, ..., 9=wxyz). Return an empty list when `digits` is empty. Any order is accepted.\n\n**Example:**\nInput: `digits = \"23\"`\nOutput: `[\"ad\", \"ae\", \"af\", \"bd\", \"be\", \"bf\", \"cd\", \"ce\", \"cf\"]`\n\n**Constraints:**\n- `0 <= len(digits) <= 4`\n- Each character is a digit in `2`–`9`.",
+  "signature": {
+   "name": "letterCombinations",
+   "params": [
+    {
+     "name": "digits",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def letterCombinations(digits):\n    \"\"\"\n    :type digits: str\n    :rtype: List[str]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def letterCombinations(digits):\n    if not digits:\n        return []\n    mapping = {\n        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',\n        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'\n    }\n    res = []\n    path = []\n    def backtrack(i):\n        if i == len(digits):\n            res.append(''.join(path))\n            return\n        for ch in mapping[digits[i]]:\n            path.append(ch)\n            backtrack(i + 1)\n            path.pop()\n    backtrack(0)\n    return res\n"
+ },
+ "dsa-088": {
+  "id": "dsa-088",
+  "slug": "surrounded-regions",
+  "title": "Surrounded Regions",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/surrounded-regions/",
+  "description_md": "You are given an `m x n` grid `board` filled with `'X'` and `'O'`. Flip every `'O'` that is fully surrounded by `'X'` into `'X'`. An `'O'` is safe (not flipped) if it can reach the border through other `'O'` cells (up/down/left/right). Modify `board` in place.\n\n**Example:**\nInput: `board = [[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"O\",\"O\",\"X\"],[\"X\",\"X\",\"O\",\"X\"],[\"X\",\"O\",\"X\",\"X\"]]`\nOutput: `[[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"O\",\"X\",\"X\"]]`\n\n**Constraints:**\n- `1 <= m, n <= 200`\n- Each cell is `'X'` or `'O'`.",
+  "signature": {
+   "name": "solve",
+   "params": [
+    {
+     "name": "board",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def solve(board):\n    \"\"\"\n    :type board: List[List[str]]\n    :rtype: None Do not return anything, modify board in-place instead.\n    \"\"\"\n    pass\n",
+  "reference_solution": "def solve(board):\n    if not board or not board[0]:\n        return\n    m, n = len(board), len(board[0])\n\n    def dfs(r, c):\n        if r < 0 or r >= m or c < 0 or c >= n or board[r][c] != 'O':\n            return\n        board[r][c] = 'S'\n        dfs(r + 1, c)\n        dfs(r - 1, c)\n        dfs(r, c + 1)\n        dfs(r, c - 1)\n\n    for r in range(m):\n        dfs(r, 0)\n        dfs(r, n - 1)\n    for c in range(n):\n        dfs(0, c)\n        dfs(m - 1, c)\n\n    for r in range(m):\n        for c in range(n):\n            if board[r][c] == 'O':\n                board[r][c] = 'X'\n            elif board[r][c] == 'S':\n                board[r][c] = 'O'\n"
+ },
+ "dsa-094": {
+  "id": "dsa-094",
+  "slug": "number-of-connected-components-in-an-undirected-graph",
+  "title": "Number of Connected Components in an Undirected Graph",
+  "topic": "Union-Find",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/",
+  "description_md": "You have `n` nodes labeled `0` to `n-1` and a list `edges` where each `[a, b]` connects nodes `a` and `b` in an undirected graph. Return the number of connected components.\n\n**Example:**\nInput: `n = 5`, `edges = [[0,1],[1,2],[3,4]]`\nOutput: `2` (component `{0,1,2}` and component `{3,4}`)\n\n**Constraints:**\n- `1 <= n <= 2000`\n- `0 <= len(edges) <= n*(n-1)/2`\n- No self-loops or duplicate edges.",
+  "signature": {
+   "name": "countComponents",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    },
+    {
+     "name": "edges",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def countComponents(n, edges):\n    \"\"\"\n    :type n: int\n    :type edges: List[List[int]]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def countComponents(n, edges):\n    parent = list(range(n))\n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n\n    count = n\n    for a, b in edges:\n        ra, rb = find(a), find(b)\n        if ra != rb:\n            parent[ra] = rb\n            count -= 1\n    return count\n"
+ },
+ "dsa-100": {
+  "id": "dsa-100",
+  "slug": "swim-in-rising-water",
+  "title": "Swim in Rising Water",
+  "topic": "Graphs",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/swim-in-rising-water/",
+  "description_md": "You are given an `n x n` grid where `grid[r][c]` is the elevation at that cell. At time `t` the water level is `t`, and you may move between two adjacent cells (4-directionally) only when both their elevations are at most `t`. Starting at the top-left corner, return the earliest time `t` at which you can reach the bottom-right corner.\n\n**Example:**\nInput: `grid = [[0,2],[1,3]]`\nOutput: `3`\n\n**Constraints:**\n- `1 <= n <= 50`\n- `0 <= grid[r][c] < n*n`\n- Each elevation value is unique.",
+  "signature": {
+   "name": "swimInWater",
+   "params": [
+    {
+     "name": "grid",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def swimInWater(grid):\n    \"\"\"\n    :type grid: List[List[int]]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "import heapq\n\ndef swimInWater(grid):\n    n = len(grid)\n    visited = [[False] * n for _ in range(n)]\n    heap = [(grid[0][0], 0, 0)]\n    visited[0][0] = True\n    ans = 0\n    while heap:\n        t, r, c = heapq.heappop(heap)\n        ans = max(ans, t)\n        if r == n - 1 and c == n - 1:\n            return ans\n        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < n and 0 <= nc < n and not visited[nr][nc]:\n                visited[nr][nc] = True\n                heapq.heappush(heap, (grid[nr][nc], nr, nc))\n    return ans\n"
+ },
+ "dsa-106": {
+  "id": "dsa-106",
+  "slug": "palindromic-substrings",
+  "title": "Palindromic Substrings",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/palindromic-substrings/",
+  "description_md": "Given a string `s`, count how many of its contiguous substrings are palindromes. Substrings that are equal as strings but occur at different positions are counted separately.\n\n**Example:**\nInput: `s = \"aaa\"`\nOutput: `6` (the palindromes are `\"a\"`, `\"a\"`, `\"a\"`, `\"aa\"`, `\"aa\"`, `\"aaa\"`)\n\n**Constraints:**\n- `1 <= len(s) <= 1000`\n- `s` consists of lowercase English letters.",
+  "signature": {
+   "name": "countSubstrings",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def countSubstrings(s):\n    \"\"\"\n    :type s: str\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def countSubstrings(s):\n    count = 0\n    n = len(s)\n    def expand(l, r):\n        c = 0\n        while l >= 0 and r < n and s[l] == s[r]:\n            c += 1\n            l -= 1\n            r += 1\n        return c\n    for i in range(n):\n        count += expand(i, i)\n        count += expand(i, i + 1)\n    return count\n"
+ },
+ "dsa-112": {
+  "id": "dsa-112",
+  "slug": "partition-equal-subset-sum",
+  "title": "Partition Equal Subset Sum",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/partition-equal-subset-sum/",
+  "description_md": "Given an array `nums` of positive integers, decide whether it can be split into two subsets whose sums are equal. Return `True` or `False`.\n\nThis is possible only if the total sum is even and some subset sums to half of it.\n\n**Example:**\nInput: `nums = [1, 5, 11, 5]`\nOutput: `True` (`[1, 5, 5]` and `[11]` both sum to 11)\n\n**Constraints:**\n- `1 <= len(nums) <= 200`\n- `1 <= nums[i] <= 100`",
+  "signature": {
+   "name": "canPartition",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def canPartition(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "def canPartition(nums):\n    total = sum(nums)\n    if total % 2 != 0:\n        return False\n    target = total // 2\n    dp = set([0])\n    for num in nums:\n        nxt = set(dp)\n        for s in dp:\n            if s + num == target:\n                return True\n            if s + num < target:\n                nxt.add(s + num)\n        dp = nxt\n    return target in dp\n"
+ },
+ "dsa-118": {
+  "id": "dsa-118",
+  "slug": "coin-change-ii",
+  "title": "Coin Change II",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/coin-change-ii/",
+  "description_md": "You are given an integer `amount` and an array `coins` of distinct coin denominations (unlimited supply of each). Return the number of distinct combinations of coins that add up exactly to `amount`. Combinations that differ only in order are considered the same. Return `0` if the amount cannot be made.\n\n**Example:**\nInput: `amount = 5`, `coins = [1, 2, 5]`\nOutput: `4` (`5`, `2+2+1`, `2+1+1+1`, `1+1+1+1+1`)\n\n**Constraints:**\n- `1 <= len(coins) <= 300`\n- `1 <= coins[i] <= 5000`, all distinct\n- `0 <= amount <= 5000`",
+  "signature": {
+   "name": "change",
+   "params": [
+    {
+     "name": "amount",
+     "kind": "value"
+    },
+    {
+     "name": "coins",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def change(amount, coins):\n    \"\"\"\n    :type amount: int\n    :type coins: List[int]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def change(amount, coins):\n    dp = [0] * (amount + 1)\n    dp[0] = 1\n    for coin in coins:\n        for a in range(coin, amount + 1):\n            dp[a] += dp[a - coin]\n    return dp[amount]\n"
+ },
+ "dsa-124": {
+  "id": "dsa-124",
+  "slug": "maximum-subarray",
+  "title": "Maximum Subarray",
+  "topic": "Greedy/DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/maximum-subarray/",
+  "description_md": "Given an integer array `nums`, find the contiguous subarray (containing at least one element) with the largest sum and return that sum.\n\n**Example:**\nInput: `nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]`\nOutput: `6` (the subarray `[4, -1, 2, 1]` sums to 6)\n\n**Constraints:**\n- `1 <= len(nums) <= 10^5`\n- `-10^4 <= nums[i] <= 10^4`",
+  "signature": {
+   "name": "maxSubArray",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def maxSubArray(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def maxSubArray(nums):\n    best = cur = nums[0]\n    for num in nums[1:]:\n        cur = max(num, cur + num)\n        best = max(best, cur)\n    return best\n"
+ },
+ "dsa-130": {
+  "id": "dsa-130",
+  "slug": "partition-labels",
+  "title": "Partition Labels",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/partition-labels/",
+  "description_md": "Given a string `s`, split it into as many contiguous parts as possible so that every distinct letter appears in at most one part. Return a list of the sizes of those parts, in order.\n\n**Example:**\nInput: `s = \"ababcbacadefegdehijhklij\"`\nOutput: `[9, 7, 8]`\n\n**Constraints:**\n- `1 <= len(s) <= 500`\n- `s` consists of lowercase English letters.",
+  "signature": {
+   "name": "partitionLabels",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def partitionLabels(s):\n    \"\"\"\n    :type s: str\n    :rtype: List[int]\n    \"\"\"\n    pass\n",
+  "reference_solution": "def partitionLabels(s):\n    last = {ch: i for i, ch in enumerate(s)}\n    res = []\n    start = end = 0\n    for i, ch in enumerate(s):\n        end = max(end, last[ch])\n        if i == end:\n            res.append(end - start + 1)\n            start = i + 1\n    return res\n"
+ },
+ "dsa-136": {
+  "id": "dsa-136",
+  "slug": "meeting-rooms-ii",
+  "title": "Meeting Rooms II",
+  "topic": "Intervals",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/meeting-rooms-ii/",
+  "description_md": "Given an array `intervals` where `intervals[i] = [start, end]` represents a meeting, return the minimum number of conference rooms required so that no two overlapping meetings share a room. A meeting ending at time `t` frees the room for another meeting starting at time `t`.\n\n**Example:**\nInput: `intervals = [[0, 30], [5, 10], [15, 20]]`\nOutput: `2`\n\n**Constraints:**\n- `1 <= len(intervals) <= 10^4`\n- `0 <= start < end <= 10^6`",
+  "signature": {
+   "name": "minMeetingRooms",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minMeetingRooms(intervals):\n    \"\"\"\n    :type intervals: List[List[int]]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "import heapq\n\ndef minMeetingRooms(intervals):\n    if not intervals:\n        return 0\n    intervals.sort(key=lambda x: x[0])\n    heap = []  # end times of ongoing meetings\n    for start, end in intervals:\n        if heap and heap[0] <= start:\n            heapq.heappop(heap)\n        heapq.heappush(heap, end)\n    return len(heap)\n"
+ },
+ "dsa-142": {
+  "id": "dsa-142",
+  "slug": "missing-number",
+  "title": "Missing Number",
+  "topic": "Bit Manipulation",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/missing-number/",
+  "description_md": "Given an array `nums` holding `n` distinct numbers taken from the range `[0, n]`, exactly one value in that range is missing. Return the missing number.\n\n**Example:**\nInput: `nums = [3, 0, 1]`\nOutput: `2` (the range is `[0, 3]`, and `2` does not appear)\n\n**Constraints:**\n- `n == len(nums)`, `1 <= n <= 10^4`\n- `0 <= nums[i] <= n`, all values distinct.",
+  "signature": {
+   "name": "missingNumber",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def missingNumber(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: int\n    \"\"\"\n    pass\n",
+  "reference_solution": "def missingNumber(nums):\n    result = len(nums)\n    for i, num in enumerate(nums):\n        result ^= i ^ num\n    return result\n"
+ },
+ "dsa-148": {
+  "id": "dsa-148",
+  "slug": "sort-colors",
+  "title": "Sort Colors",
+  "topic": "Two Pointers",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/sort-colors/",
+  "description_md": "Given an array `nums` containing only the values `0`, `1`, and `2` (representing red, white, and blue), sort it in place so all `0`s come first, then all `1`s, then all `2`s. Solve it in one pass with constant extra space, without using a library sort.\n\n**Example:**\nInput: `nums = [2, 0, 2, 1, 1, 0]`\nOutput: `[0, 0, 1, 1, 2, 2]`\n\n**Constraints:**\n- `1 <= len(nums) <= 300`\n- `nums[i]` is `0`, `1`, or `2`.",
+  "signature": {
+   "name": "sortColors",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def sortColors(nums):\n    \"\"\"\n    :type nums: List[int]\n    :rtype: None Do not return anything, modify nums in-place instead.\n    \"\"\"\n    pass\n",
+  "reference_solution": "def sortColors(nums):\n    low, mid, high = 0, 0, len(nums) - 1\n    while mid <= high:\n        if nums[mid] == 0:\n            nums[low], nums[mid] = nums[mid], nums[low]\n            low += 1\n            mid += 1\n        elif nums[mid] == 1:\n            mid += 1\n        else:\n            nums[mid], nums[high] = nums[high], nums[mid]\n            high -= 1\n"
+ },
+ "dsa-008": {
+  "id": "dsa-008",
+  "slug": "encode-and-decode-strings",
+  "title": "Encode and Decode Strings",
+  "topic": "Arrays & Hashing",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/encode-and-decode-strings/",
+  "description_md": "Design a pair of functions that can serialize a list of strings into a single string and later reconstruct the original list from that string. The encoding must round-trip exactly, even when the individual strings contain any characters (including delimiters or digits).\n\nGiven a list of strings, `encode` returns one string; `decode` takes that string and returns the original list.\n\n**Example:**\n\nInput: `[\"code\", \"love\", \"you\"]`\n\nAfter `encode` -> `\"4#code4#love3#you\"` (length-prefixed), then `decode` -> `[\"code\", \"love\", \"you\"]`\n\n**Constraints:**\n- `0 <= len(strs) <= 200`\n- `0 <= len(strs[i]) <= 200`\n- `strs[i]` may contain any ASCII characters.",
+  "signature": {
+   "name": "encode",
+   "params": [
+    {
+     "name": "strs",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class Codec:\n    def encode(self, strs: list[str]) -> str:\n        \"\"\"Encode a list of strings to a single string.\n\n        :param strs: list[str] to serialize\n        :return: str encoded form\n        \"\"\"\n        pass\n\n    def decode(self, s: str) -> list[str]:\n        \"\"\"Decode a single string back to a list of strings.\n\n        :param s: str produced by encode\n        :return: list[str] original list\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Codec:\n    def encode(self, strs: list[str]) -> str:\n        res = \"\"\n        for s in strs:\n            res += str(len(s)) + \"#\" + s\n        return res\n\n    def decode(self, s: str) -> list[str]:\n        res = []\n        i = 0\n        while i < len(s):\n            j = i\n            while s[j] != \"#\":\n                j += 1\n            length = int(s[i:j])\n            start = j + 1\n            res.append(s[start:start + length])\n            i = start + length\n        return res\n"
+ },
+ "dsa-015": {
+  "id": "dsa-015",
+  "slug": "3sum",
+  "title": "3Sum",
+  "topic": "Two Pointers",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/3sum/",
+  "description_md": "Given an integer array, find every unique triple of elements whose values add up to zero. Each triple must use three distinct positions in the array, and the returned collection must not contain duplicate triples.\n\nReturn a list of the triples (order of triples and order within each triple does not matter).\n\n**Example:**\n\nInput: `nums = [-1, 0, 1, 2, -1, -4]`\n\nOutput: `[[-1, -1, 2], [-1, 0, 1]]`\n\n**Constraints:**\n- `3 <= len(nums) <= 3000`\n- `-100000 <= nums[i] <= 100000`",
+  "signature": {
+   "name": "threeSum",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def threeSum(nums: list[int]) -> list[list[int]]:\n    \"\"\"Find all unique zero-sum triples.\n\n    :param nums: list[int]\n    :return: list[list[int]] of unique triples summing to 0\n    \"\"\"\n    pass\n",
+  "reference_solution": "def threeSum(nums: list[int]) -> list[list[int]]:\n    nums.sort()\n    res = []\n    n = len(nums)\n    for i in range(n):\n        if i > 0 and nums[i] == nums[i - 1]:\n            continue\n        if nums[i] > 0:\n            break\n        lo, hi = i + 1, n - 1\n        while lo < hi:\n            total = nums[i] + nums[lo] + nums[hi]\n            if total < 0:\n                lo += 1\n            elif total > 0:\n                hi -= 1\n            else:\n                res.append([nums[i], nums[lo], nums[hi]])\n                lo += 1\n                hi -= 1\n                while lo < hi and nums[lo] == nums[lo - 1]:\n                    lo += 1\n                while lo < hi and nums[hi] == nums[hi + 1]:\n                    hi -= 1\n    return res\n"
+ },
+ "dsa-022": {
+  "id": "dsa-022",
+  "slug": "minimum-window-substring",
+  "title": "Minimum Window Substring",
+  "topic": "Sliding Window",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/minimum-window-substring/",
+  "description_md": "Given two strings `s` and `t`, find the shortest contiguous substring of `s` that contains every character of `t` including repeats (multiplicities must be satisfied). If no such window exists, return the empty string.\n\nReturn the minimal window substring; the answer is guaranteed unique when it exists.\n\n**Example:**\n\nInput: `s = \"ADOBECODEBANC\"`, `t = \"ABC\"`\n\nOutput: `\"BANC\"`\n\n**Constraints:**\n- `1 <= len(s), len(t) <= 100000`\n- `s` and `t` consist of uppercase and lowercase English letters.",
+  "signature": {
+   "name": "minWindow",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    },
+    {
+     "name": "t",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minWindow(s: str, t: str) -> str:\n    \"\"\"Return the smallest window in s containing all chars of t.\n\n    :param s: str source string\n    :param t: str target characters (with multiplicity)\n    :return: str minimal window, or '' if none\n    \"\"\"\n    pass\n",
+  "reference_solution": "from collections import Counter\n\ndef minWindow(s: str, t: str) -> str:\n    if not t or not s:\n        return \"\"\n    need = Counter(t)\n    missing = len(t)\n    best_len = float(\"inf\")\n    best_l = 0\n    l = 0\n    for r, ch in enumerate(s):\n        if need[ch] > 0:\n            missing -= 1\n        need[ch] -= 1\n        while missing == 0:\n            if r - l + 1 < best_len:\n                best_len = r - l + 1\n                best_l = l\n            need[s[l]] += 1\n            if need[s[l]] > 0:\n                missing += 1\n            l += 1\n    return \"\" if best_len == float(\"inf\") else s[best_l:best_l + best_len]\n"
+ },
+ "dsa-029": {
+  "id": "dsa-029",
+  "slug": "car-fleet",
+  "title": "Car Fleet",
+  "topic": "Monotonic Stack",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/car-fleet/",
+  "description_md": "Cars travel toward a common destination at position `target` on a single-lane road (no passing). Each car `i` starts at `position[i]` and moves at constant `speed[i]`. A faster car that catches up to a slower one ahead cannot pass; it slows and joins to form a single fleet that then moves at the slower car's speed. A fleet may be a single car.\n\nReturn how many distinct fleets arrive at the destination.\n\n**Example:**\n\nInput: `target = 12`, `position = [10, 8, 0, 5, 3]`, `speed = [2, 4, 1, 1, 3]`\n\nOutput: `3`\n\n**Constraints:**\n- `1 <= len(position) == len(speed) <= 100000`\n- `0 < target <= 1000000`\n- `0 <= position[i] < target`, all positions distinct\n- `0 < speed[i] <= 1000000`",
+  "signature": {
+   "name": "carFleet",
+   "params": [
+    {
+     "name": "target",
+     "kind": "value"
+    },
+    {
+     "name": "position",
+     "kind": "value"
+    },
+    {
+     "name": "speed",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def carFleet(target: int, position: list[int], speed: list[int]) -> int:\n    \"\"\"Count fleets arriving at target.\n\n    :param target: int destination position\n    :param position: list[int] starting positions\n    :param speed: list[int] speeds\n    :return: int number of fleets\n    \"\"\"\n    pass\n",
+  "reference_solution": "def carFleet(target: int, position: list[int], speed: list[int]) -> int:\n    pairs = sorted(zip(position, speed), reverse=True)\n    fleets = 0\n    lead_time = 0.0\n    for pos, spd in pairs:\n        time = (target - pos) / spd\n        if time > lead_time:\n            fleets += 1\n            lead_time = time\n    return fleets\n"
+ },
+ "dsa-035": {
+  "id": "dsa-035",
+  "slug": "find-minimum-in-rotated-sorted-array",
+  "title": "Find Minimum in Rotated Sorted Array",
+  "topic": "Binary Search",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
+  "description_md": "An array of distinct integers that was originally sorted in ascending order has been rotated an unknown number of times (each rotation moves the last element to the front). Find the smallest element. Your solution must run in O(log n) time.\n\nReturn the minimum value in the array.\n\n**Example:**\n\nInput: `nums = [3, 4, 5, 1, 2]`\n\nOutput: `1`\n\n**Constraints:**\n- `1 <= len(nums) <= 5000`\n- `-5000 <= nums[i] <= 5000`, all values unique\n- The array is a rotation of a strictly ascending array.",
+  "signature": {
+   "name": "findMin",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def findMin(nums: list[int]) -> int:\n    \"\"\"Find the minimum in a rotated sorted array in O(log n).\n\n    :param nums: list[int] rotated ascending array\n    :return: int minimum element\n    \"\"\"\n    pass\n",
+  "reference_solution": "def findMin(nums: list[int]) -> int:\n    lo, hi = 0, len(nums) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] > nums[hi]:\n            lo = mid + 1\n        else:\n            hi = mid\n    return nums[lo]\n"
+ },
+ "dsa-041": {
+  "id": "dsa-041",
+  "slug": "reorder-list",
+  "title": "Reorder List",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/reorder-list/",
+  "description_md": "Given the head of a singly linked list `L0 -> L1 -> ... -> Ln-1 -> Ln`, rearrange the nodes in place into the interleaved order `L0 -> Ln -> L1 -> Ln-1 -> L2 -> ...`. You may only change node links, not node values.\n\nModify the list in place; nothing is returned.\n\n**Example:**\n\nInput: `1 -> 2 -> 3 -> 4`\n\nOutput: `1 -> 4 -> 2 -> 3`\n\n**Constraints:**\n- `1 <= number of nodes <= 50000`\n- `1 <= Node.val <= 1000`",
+  "signature": {
+   "name": "reorderList",
+   "params": [
+    {
+     "name": "head",
+     "kind": "listnode"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef reorderList(head: ListNode) -> None:\n    \"\"\"Reorder the list in place: L0->Ln->L1->Ln-1->...\n\n    :param head: ListNode head of the list\n    :return: None (modified in place)\n    \"\"\"\n    pass\n",
+  "reference_solution": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef reorderList(head: ListNode) -> None:\n    if not head or not head.next:\n        return\n    slow, fast = head, head.next\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n    second = slow.next\n    slow.next = None\n    prev = None\n    while second:\n        nxt = second.next\n        second.next = prev\n        prev = second\n        second = nxt\n    first = head\n    while prev:\n        n1, n2 = first.next, prev.next\n        first.next = prev\n        prev.next = n1\n        first, prev = n1, n2\n"
+ },
+ "dsa-047": {
+  "id": "dsa-047",
+  "slug": "lru-cache",
+  "title": "LRU Cache",
+  "topic": "Linked List",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/lru-cache/",
+  "description_md": "Design a fixed-capacity cache that evicts the least recently used entry. Construct it with a positive `capacity`. `get(key)` returns the stored value or `-1` if the key is absent. `put(key, value)` inserts or updates the key; if this pushes the size past `capacity`, the least recently used key is removed. Both operations must run in O(1) average time. Any `get` or `put` counts as a use of that key.\n\n**Example:**\n\n`LRUCache(2)`, `put(1,1)`, `put(2,2)`, `get(1)` -> `1`, `put(3,3)` (evicts key 2), `get(2)` -> `-1`\n\n**Constraints:**\n- `1 <= capacity <= 3000`\n- `0 <= key, value <= 100000`\n- Up to `2 * 10^5` calls to get/put.",
+  "signature": {
+   "type": "class",
+   "name": "LRUCache",
+   "params": [],
+   "returns": {}
+  },
+  "starter_code": "class LRUCache:\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with the given capacity.\n\n        :param capacity: int maximum number of entries\n        \"\"\"\n        pass\n\n    def get(self, key: int) -> int:\n        \"\"\"Return value for key, or -1 if absent. Marks key as used.\n\n        :param key: int\n        :return: int value or -1\n        \"\"\"\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        \"\"\"Insert or update key; evict LRU entry if over capacity.\n\n        :param key: int\n        :param value: int\n        :return: None\n        \"\"\"\n        pass\n",
+  "reference_solution": "class Node:\n    def __init__(self, key=0, val=0):\n        self.key = key\n        self.val = val\n        self.prev = None\n        self.next = None\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.cap = capacity\n        self.cache = {}\n        self.head = Node()\n        self.tail = Node()\n        self.head.next = self.tail\n        self.tail.prev = self.head\n\n    def _remove(self, node: 'Node') -> None:\n        node.prev.next = node.next\n        node.next.prev = node.prev\n\n    def _insert_front(self, node: 'Node') -> None:\n        node.next = self.head.next\n        node.prev = self.head\n        self.head.next.prev = node\n        self.head.next = node\n\n    def get(self, key: int) -> int:\n        if key not in self.cache:\n            return -1\n        node = self.cache[key]\n        self._remove(node)\n        self._insert_front(node)\n        return node.val\n\n    def put(self, key: int, value: int) -> None:\n        if key in self.cache:\n            self._remove(self.cache[key])\n        node = Node(key, value)\n        self.cache[key] = node\n        self._insert_front(node)\n        if len(self.cache) > self.cap:\n            lru = self.tail.prev\n            self._remove(lru)\n            del self.cache[lru.key]\n"
+ },
+ "dsa-053": {
+  "id": "dsa-053",
+  "slug": "balanced-binary-tree",
+  "title": "Balanced Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/balanced-binary-tree/",
+  "description_md": "Given the root of a binary tree, decide whether it is height-balanced: for every node, the heights of its left and right subtrees differ by at most one.\n\nReturn `True` if balanced, otherwise `False`.\n\n**Example:**\n\nInput: tree `[3, 9, 20, null, null, 15, 7]`\n\nOutput: `True`\n\n**Constraints:**\n- Number of nodes in range `[0, 5000]`\n- `-10000 <= Node.val <= 10000`",
+  "signature": {
+   "name": "isBalanced",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef isBalanced(root: TreeNode) -> bool:\n    \"\"\"Return True if the tree is height-balanced.\n\n    :param root: TreeNode root of the tree\n    :return: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef isBalanced(root: TreeNode) -> bool:\n    def dfs(node):\n        if not node:\n            return 0\n        left = dfs(node.left)\n        if left == -1:\n            return -1\n        right = dfs(node.right)\n        if right == -1:\n            return -1\n        if abs(left - right) > 1:\n            return -1\n        return 1 + max(left, right)\n    return dfs(root) != -1\n"
+ },
+ "dsa-059": {
+  "id": "dsa-059",
+  "slug": "count-good-nodes-in-binary-tree",
+  "title": "Count Good Nodes in Binary Tree",
+  "topic": "Trees",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/count-good-nodes-in-binary-tree/",
+  "description_md": "In a binary tree, call a node \"good\" if, on the path from the root down to that node, no node has a value strictly greater than it (i.e. it is at least as large as every ancestor, and the root is always good).\n\nGiven the root, return the count of good nodes.\n\n**Example:**\n\nInput: tree `[3, 1, 4, 3, null, 1, 5]`\n\nOutput: `4` (nodes with value 3 (root), 4, 5, and the deeper 3 are good)\n\n**Constraints:**\n- Number of nodes in range `[1, 100000]`\n- `-10000 <= Node.val <= 10000`",
+  "signature": {
+   "name": "goodNodes",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef goodNodes(root: TreeNode) -> int:\n    \"\"\"Count nodes that are >= every ancestor on their root path.\n\n    :param root: TreeNode root of the tree\n    :return: int number of good nodes\n    \"\"\"\n    pass\n",
+  "reference_solution": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef goodNodes(root: TreeNode) -> int:\n    def dfs(node, max_so_far):\n        if not node:\n            return 0\n        count = 1 if node.val >= max_so_far else 0\n        new_max = max(max_so_far, node.val)\n        count += dfs(node.left, new_max)\n        count += dfs(node.right, new_max)\n        return count\n    return dfs(root, root.val)\n"
+ },
+ "dsa-065": {
+  "id": "dsa-065",
+  "slug": "house-robber-iii",
+  "title": "House Robber III",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/house-robber-iii/",
+  "description_md": "Houses are arranged as a binary tree; the root is the entry house. A silent alarm triggers if you rob two houses that are directly connected (a parent and its immediate child). Each node's value is the money in that house.\n\nGiven the root, return the maximum money you can rob without ever robbing two directly-linked houses.\n\n**Example:**\n\nInput: tree `[3, 2, 3, null, 3, null, 1]`\n\nOutput: `7` (rob root 3 + the two grandchildren 3 + 1)\n\n**Constraints:**\n- Number of nodes in range `[1, 10000]`\n- `0 <= Node.val <= 10000`",
+  "signature": {
+   "name": "rob",
+   "params": [
+    {
+     "name": "root",
+     "kind": "tree"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef rob(root: TreeNode) -> int:\n    \"\"\"Max money robbable with no two directly-connected houses.\n\n    :param root: TreeNode root of the tree\n    :return: int maximum money\n    \"\"\"\n    pass\n",
+  "reference_solution": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef rob(root: TreeNode) -> int:\n    def dfs(node):\n        if not node:\n            return (0, 0)\n        left = dfs(node.left)\n        right = dfs(node.right)\n        with_node = node.val + left[1] + right[1]\n        without_node = max(left) + max(right)\n        return (with_node, without_node)\n    return max(dfs(root))\n"
+ },
+ "dsa-071": {
+  "id": "dsa-071",
+  "slug": "k-closest-points-to-origin",
+  "title": "K Closest Points to Origin",
+  "topic": "Heap/Top-K",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/k-closest-points-to-origin/",
+  "description_md": "Given a list of 2D points and an integer `k`, return the `k` points nearest to the origin `(0, 0)`, using standard Euclidean distance. The answer may be returned in any order and is unique except for the order of ties.\n\nReturn a list of the `k` closest points.\n\n**Example:**\n\nInput: `points = [[1, 3], [-2, 2]]`, `k = 1`\n\nOutput: `[[-2, 2]]`\n\n**Constraints:**\n- `1 <= k <= len(points) <= 10000`\n- `-10000 <= xi, yi <= 10000`",
+  "signature": {
+   "name": "kClosest",
+   "params": [
+    {
+     "name": "points",
+     "kind": "value"
+    },
+    {
+     "name": "k",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def kClosest(points: list[list[int]], k: int) -> list[list[int]]:\n    \"\"\"Return the k points closest to the origin.\n\n    :param points: list[list[int]] of [x, y] points\n    :param k: int number of nearest points\n    :return: list[list[int]] the k closest points\n    \"\"\"\n    pass\n",
+  "reference_solution": "import heapq\n\ndef kClosest(points: list[list[int]], k: int) -> list[list[int]]:\n    heap = []\n    for x, y in points:\n        dist = x * x + y * y\n        heapq.heappush(heap, (-dist, x, y))\n        if len(heap) > k:\n            heapq.heappop(heap)\n    return [[x, y] for _, x, y in heap]\n"
+ },
+ "dsa-077": {
+  "id": "dsa-077",
+  "slug": "combination-sum",
+  "title": "Combination Sum",
+  "topic": "Backtracking",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/combination-sum/",
+  "description_md": "Given an array of distinct positive integers `candidates` and a `target`, find all unique combinations of candidates that sum exactly to the target. Each candidate may be reused an unlimited number of times, and two combinations are the same if they contain the same multiset of numbers.\n\nReturn a list of the unique combinations in any order.\n\n**Example:**\n\nInput: `candidates = [2, 3, 6, 7]`, `target = 7`\n\nOutput: `[[2, 2, 3], [7]]`\n\n**Constraints:**\n- `1 <= len(candidates) <= 30`, values distinct\n- `2 <= candidates[i] <= 40`\n- `1 <= target <= 500`",
+  "signature": {
+   "name": "combinationSum",
+   "params": [
+    {
+     "name": "candidates",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def combinationSum(candidates: list[int], target: int) -> list[list[int]]:\n    \"\"\"Find all combinations (reuse allowed) summing to target.\n\n    :param candidates: list[int] distinct positive integers\n    :param target: int desired sum\n    :return: list[list[int]] unique combinations\n    \"\"\"\n    pass\n",
+  "reference_solution": "def combinationSum(candidates: list[int], target: int) -> list[list[int]]:\n    res = []\n    candidates.sort()\n\n    def backtrack(start, remaining, path):\n        if remaining == 0:\n            res.append(path[:])\n            return\n        for i in range(start, len(candidates)):\n            if candidates[i] > remaining:\n                break\n            path.append(candidates[i])\n            backtrack(i, remaining - candidates[i], path)\n            path.pop()\n\n    backtrack(0, target, [])\n    return res\n"
+ },
+ "dsa-083": {
+  "id": "dsa-083",
+  "slug": "n-queens",
+  "title": "N-Queens",
+  "topic": "Backtracking",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/n-queens/",
+  "description_md": "Place `n` queens on an `n x n` chessboard so that no two queens attack each other (no two share a row, column, or diagonal). Return every distinct valid arrangement.\n\nEach solution is a list of `n` strings; each string is a board row using `'Q'` for a queen and `'.'` for an empty square.\n\n**Example:**\n\nInput: `n = 4`\n\nOutput: `[[\".Q..\", \"...Q\", \"Q...\", \"..Q.\"], [\"..Q.\", \"Q...\", \"...Q\", \".Q..\"]]`\n\n**Constraints:**\n- `1 <= n <= 9`",
+  "signature": {
+   "name": "solveNQueens",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def solveNQueens(n: int) -> list[list[str]]:\n    \"\"\"Return all distinct solutions to the n-queens puzzle.\n\n    :param n: int board size and queen count\n    :return: list[list[str]] board configurations\n    \"\"\"\n    pass\n",
+  "reference_solution": "def solveNQueens(n: int) -> list[list[str]]:\n    res = []\n    cols = set()\n    diag = set()\n    anti = set()\n    board = [[\".\"] * n for _ in range(n)]\n\n    def backtrack(r):\n        if r == n:\n            res.append([\"\".join(row) for row in board])\n            return\n        for c in range(n):\n            if c in cols or (r - c) in diag or (r + c) in anti:\n                continue\n            cols.add(c)\n            diag.add(r - c)\n            anti.add(r + c)\n            board[r][c] = \"Q\"\n            backtrack(r + 1)\n            cols.remove(c)\n            diag.remove(r - c)\n            anti.remove(r + c)\n            board[r][c] = \".\"\n\n    backtrack(0)\n    return res\n"
+ },
+ "dsa-089": {
+  "id": "dsa-089",
+  "slug": "rotting-oranges",
+  "title": "Rotting Oranges",
+  "topic": "BFS/DFS",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/rotting-oranges/",
+  "description_md": "You are given a grid where each cell is `0` (empty), `1` (a fresh orange), or `2` (a rotten orange). Every minute, any fresh orange that is 4-directionally adjacent to a rotten one becomes rotten. Return the minimum number of minutes until no fresh orange remains, or `-1` if some fresh orange can never rot.\n\n**Example:**\n\nInput: `grid = [[2, 1, 1], [1, 1, 0], [0, 1, 1]]`\n\nOutput: `4`\n\n**Constraints:**\n- `1 <= rows, cols <= 10`\n- Each cell is `0`, `1`, or `2`.",
+  "signature": {
+   "name": "orangesRotting",
+   "params": [
+    {
+     "name": "grid",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def orangesRotting(grid: list[list[int]]) -> int:\n    \"\"\"Minutes until no fresh orange remains, or -1 if impossible.\n\n    :param grid: list[list[int]] of 0/1/2 cells\n    :return: int minutes or -1\n    \"\"\"\n    pass\n",
+  "reference_solution": "from collections import deque\n\ndef orangesRotting(grid: list[list[int]]) -> int:\n    rows, cols = len(grid), len(grid[0])\n    queue = deque()\n    fresh = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == 2:\n                queue.append((r, c))\n            elif grid[r][c] == 1:\n                fresh += 1\n    minutes = 0\n    dirs = [(1, 0), (-1, 0), (0, 1), (0, -1)]\n    while queue and fresh > 0:\n        for _ in range(len(queue)):\n            r, c = queue.popleft()\n            for dr, dc in dirs:\n                nr, nc = r + dr, c + dc\n                if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:\n                    grid[nr][nc] = 2\n                    fresh -= 1\n                    queue.append((nr, nc))\n        minutes += 1\n    return minutes if fresh == 0 else -1\n"
+ },
+ "dsa-095": {
+  "id": "dsa-095",
+  "slug": "graph-valid-tree",
+  "title": "Graph Valid Tree",
+  "topic": "Union-Find",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/graph-valid-tree/",
+  "description_md": "You are given `n` nodes labeled `0` to `n-1` and a list of undirected `edges`. Decide whether these edges form a valid tree: the graph must be fully connected (one component) and contain no cycles.\n\nReturn `True` if the edges form a valid tree, otherwise `False`.\n\n**Example:**\n\nInput: `n = 5`, `edges = [[0, 1], [0, 2], [0, 3], [1, 4]]`\n\nOutput: `True`\n\n**Constraints:**\n- `1 <= n <= 2000`\n- `0 <= len(edges) <= 5000`\n- No duplicate edges and no self-loops.",
+  "signature": {
+   "name": "validTree",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    },
+    {
+     "name": "edges",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def validTree(n: int, edges: list[list[int]]) -> bool:\n    \"\"\"Return True if the edges form a valid tree over n nodes.\n\n    :param n: int number of nodes (labeled 0..n-1)\n    :param edges: list[list[int]] undirected edges\n    :return: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "def validTree(n: int, edges: list[list[int]]) -> bool:\n    if len(edges) != n - 1:\n        return False\n    parent = list(range(n))\n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n\n    for a, b in edges:\n        ra, rb = find(a), find(b)\n        if ra == rb:\n            return False\n        parent[ra] = rb\n    return True\n"
+ },
+ "dsa-101": {
+  "id": "dsa-101",
+  "slug": "climbing-stairs",
+  "title": "Climbing Stairs",
+  "topic": "DP",
+  "difficulty": "Easy",
+  "link": "https://leetcode.com/problems/climbing-stairs/",
+  "description_md": "You are climbing a staircase with `n` steps. On each move you may go up either 1 or 2 steps. Count how many distinct sequences of moves reach the top.\n\nReturn the number of distinct ways.\n\n**Example:**\n\nInput: `n = 3`\n\nOutput: `3` (1+1+1, 1+2, 2+1)\n\n**Constraints:**\n- `1 <= n <= 45`",
+  "signature": {
+   "name": "climbStairs",
+   "params": [
+    {
+     "name": "n",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def climbStairs(n: int) -> int:\n    \"\"\"Count distinct ways to climb n steps taking 1 or 2 at a time.\n\n    :param n: int number of steps\n    :return: int number of distinct ways\n    \"\"\"\n    pass\n",
+  "reference_solution": "def climbStairs(n: int) -> int:\n    one, two = 1, 1\n    for _ in range(n - 1):\n        one, two = one + two, one\n    return one\n"
+ },
+ "dsa-107": {
+  "id": "dsa-107",
+  "slug": "decode-ways",
+  "title": "Decode Ways",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/decode-ways/",
+  "description_md": "A message of digits was encoded using the mapping `'A'->1, 'B'->2, ..., 'Z'->26`. Given a digit string `s`, count how many distinct ways it can be decoded back into letters. A `'0'` never stands alone (no letter maps to 0), so groupings must avoid leading zeros and stay within 1..26.\n\nReturn the number of valid decodings.\n\n**Example:**\n\nInput: `s = \"226\"`\n\nOutput: `3` (\"BZ\", \"VF\", \"BBF\")\n\n**Constraints:**\n- `1 <= len(s) <= 100`\n- `s` contains only digits and may contain leading zeros.",
+  "signature": {
+   "name": "numDecodings",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def numDecodings(s: str) -> int:\n    \"\"\"Count valid decodings of the digit string s.\n\n    :param s: str of digits\n    :return: int number of decodings\n    \"\"\"\n    pass\n",
+  "reference_solution": "def numDecodings(s: str) -> int:\n    if not s or s[0] == \"0\":\n        return 0\n    prev, curr = 1, 1\n    for i in range(1, len(s)):\n        temp = 0\n        if s[i] != \"0\":\n            temp += curr\n        if 10 <= int(s[i - 1:i + 1]) <= 26:\n            temp += prev\n        prev, curr = curr, temp\n    return curr\n"
+ },
+ "dsa-113": {
+  "id": "dsa-113",
+  "slug": "target-sum",
+  "title": "Target Sum",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/target-sum/",
+  "description_md": "Given an integer array `nums` and an integer `target`, place a `+` or `-` sign in front of every element and concatenate them into an expression. Count how many sign assignments make the expression evaluate to `target`.\n\nReturn the number of ways.\n\n**Example:**\n\nInput: `nums = [1, 1, 1, 1, 1]`, `target = 3`\n\nOutput: `5`\n\n**Constraints:**\n- `1 <= len(nums) <= 20`\n- `0 <= nums[i] <= 1000`, sum of nums <= 1000\n- `-1000 <= target <= 1000`",
+  "signature": {
+   "name": "findTargetSumWays",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    },
+    {
+     "name": "target",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def findTargetSumWays(nums: list[int], target: int) -> int:\n    \"\"\"Count sign assignments (+/-) making the sum equal target.\n\n    :param nums: list[int]\n    :param target: int desired signed sum\n    :return: int number of ways\n    \"\"\"\n    pass\n",
+  "reference_solution": "from collections import defaultdict\n\ndef findTargetSumWays(nums: list[int], target: int) -> int:\n    dp = defaultdict(int)\n    dp[0] = 1\n    for num in nums:\n        next_dp = defaultdict(int)\n        for total, count in dp.items():\n            next_dp[total + num] += count\n            next_dp[total - num] += count\n        dp = next_dp\n    return dp[target]\n"
+ },
+ "dsa-119": {
+  "id": "dsa-119",
+  "slug": "interleaving-string",
+  "title": "Interleaving String",
+  "topic": "DP",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/interleaving-string/",
+  "description_md": "Given strings `s1`, `s2`, and `s3`, decide whether `s3` can be formed by interleaving `s1` and `s2` — that is, weaving their characters together while preserving the left-to-right order within each of `s1` and `s2`.\n\nReturn `True` if `s3` is such an interleaving, otherwise `False`.\n\n**Example:**\n\nInput: `s1 = \"aabcc\"`, `s2 = \"dbbca\"`, `s3 = \"aadbbcbcac\"`\n\nOutput: `True`\n\n**Constraints:**\n- `0 <= len(s1), len(s2) <= 100`\n- `0 <= len(s3) <= 200`\n- All strings consist of lowercase English letters.",
+  "signature": {
+   "name": "isInterleave",
+   "params": [
+    {
+     "name": "s1",
+     "kind": "value"
+    },
+    {
+     "name": "s2",
+     "kind": "value"
+    },
+    {
+     "name": "s3",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def isInterleave(s1: str, s2: str, s3: str) -> bool:\n    \"\"\"Return True if s3 is an interleaving of s1 and s2.\n\n    :param s1: str\n    :param s2: str\n    :param s3: str\n    :return: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "def isInterleave(s1: str, s2: str, s3: str) -> bool:\n    m, n = len(s1), len(s2)\n    if m + n != len(s3):\n        return False\n    dp = [False] * (n + 1)\n    dp[0] = True\n    for j in range(1, n + 1):\n        dp[j] = dp[j - 1] and s2[j - 1] == s3[j - 1]\n    for i in range(1, m + 1):\n        dp[0] = dp[0] and s1[i - 1] == s3[i - 1]\n        for j in range(1, n + 1):\n            dp[j] = (dp[j] and s1[i - 1] == s3[i + j - 1]) or \\\n                    (dp[j - 1] and s2[j - 1] == s3[i + j - 1])\n    return dp[n]\n"
+ },
+ "dsa-125": {
+  "id": "dsa-125",
+  "slug": "jump-game",
+  "title": "Jump Game",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/jump-game/",
+  "description_md": "You are given an integer array `nums`; you start at index 0, and each `nums[i]` is the maximum number of steps you may jump forward from position `i`. Determine whether you can reach the last index.\n\nReturn `True` if the last index is reachable, otherwise `False`.\n\n**Example:**\n\nInput: `nums = [2, 3, 1, 1, 4]`\n\nOutput: `True`\n\n**Constraints:**\n- `1 <= len(nums) <= 10000`\n- `0 <= nums[i] <= 100000`",
+  "signature": {
+   "name": "canJump",
+   "params": [
+    {
+     "name": "nums",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def canJump(nums: list[int]) -> bool:\n    \"\"\"Return True if the last index is reachable from index 0.\n\n    :param nums: list[int] max jump lengths\n    :return: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "def canJump(nums: list[int]) -> bool:\n    goal = len(nums) - 1\n    for i in range(len(nums) - 1, -1, -1):\n        if i + nums[i] >= goal:\n            goal = i\n    return goal == 0\n"
+ },
+ "dsa-131": {
+  "id": "dsa-131",
+  "slug": "valid-parenthesis-string",
+  "title": "Valid Parenthesis String",
+  "topic": "Greedy",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/valid-parenthesis-string/",
+  "description_md": "Given a string containing only `'('`, `')'`, and `'*'`, decide whether it can be a valid parenthesis string. Each `'*'` may act as a single `'('`, a single `')'`, or an empty string. A string is valid when every `'('` has a matching later `')'` and parentheses nest correctly.\n\nReturn `True` if a valid interpretation exists, otherwise `False`.\n\n**Example:**\n\nInput: `s = \"(*))\"`\n\nOutput: `True`\n\n**Constraints:**\n- `1 <= len(s) <= 100`\n- `s` consists only of `'('`, `')'`, and `'*'`.",
+  "signature": {
+   "name": "checkValidString",
+   "params": [
+    {
+     "name": "s",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def checkValidString(s: str) -> bool:\n    \"\"\"Return True if s can be a valid parenthesis string ('*' wild).\n\n    :param s: str of '(', ')', '*'\n    :return: bool\n    \"\"\"\n    pass\n",
+  "reference_solution": "def checkValidString(s: str) -> bool:\n    low, high = 0, 0\n    for ch in s:\n        if ch == \"(\":\n            low += 1\n            high += 1\n        elif ch == \")\":\n            low -= 1\n            high -= 1\n        else:\n            low -= 1\n            high += 1\n        if high < 0:\n            return False\n        if low < 0:\n            low = 0\n    return low == 0\n"
+ },
+ "dsa-137": {
+  "id": "dsa-137",
+  "slug": "minimum-interval-to-include-each-query",
+  "title": "Minimum Interval to Include Each Query",
+  "topic": "Intervals",
+  "difficulty": "Hard",
+  "link": "https://leetcode.com/problems/minimum-interval-to-include-each-query/",
+  "description_md": "You are given a list of `intervals` where `intervals[i] = [left_i, right_i]` (inclusive) and a list of `queries`. For each query value `q`, find the length of the smallest interval that contains `q` (an interval contains `q` when `left <= q <= right`; its length is `right - left + 1`). If no interval contains `q`, the answer for it is `-1`.\n\nReturn a list of answers aligned with `queries`.\n\n**Example:**\n\nInput: `intervals = [[1, 4], [2, 4], [3, 6], [4, 4]]`, `queries = [2, 3, 4, 5]`\n\nOutput: `[3, 3, 1, 4]`\n\n**Constraints:**\n- `1 <= len(intervals) <= 100000`, `1 <= len(queries) <= 100000`\n- `1 <= left_i <= right_i <= 10000000`\n- `1 <= queries[j] <= 10000000`",
+  "signature": {
+   "name": "minInterval",
+   "params": [
+    {
+     "name": "intervals",
+     "kind": "value"
+    },
+    {
+     "name": "queries",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def minInterval(intervals: list[list[int]], queries: list[int]) -> list[int]:\n    \"\"\"For each query, smallest interval length containing it, else -1.\n\n    :param intervals: list[list[int]] of [left, right]\n    :param queries: list[int] query points\n    :return: list[int] answers aligned with queries\n    \"\"\"\n    pass\n",
+  "reference_solution": "import heapq\n\ndef minInterval(intervals: list[list[int]], queries: list[int]) -> list[int]:\n    intervals.sort()\n    res = {}\n    heap = []\n    i = 0\n    n = len(intervals)\n    for q in sorted(queries):\n        while i < n and intervals[i][0] <= q:\n            left, right = intervals[i]\n            heapq.heappush(heap, (right - left + 1, right))\n            i += 1\n        while heap and heap[0][1] < q:\n            heapq.heappop(heap)\n        res[q] = heap[0][0] if heap else -1\n    return [res[q] for q in queries]\n"
+ },
+ "dsa-143": {
+  "id": "dsa-143",
+  "slug": "sum-of-two-integers",
+  "title": "Sum of Two Integers",
+  "topic": "Bit Manipulation",
+  "difficulty": "Medium",
+  "link": "https://leetcode.com/problems/sum-of-two-integers/",
+  "description_md": "Compute the sum of two integers `a` and `b` without using the `+` or `-` operators. Use bitwise operations to add via carry propagation, handling negative values correctly.\n\nReturn `a + b`.\n\n**Example:**\n\nInput: `a = 2`, `b = 3`\n\nOutput: `5`\n\n**Constraints:**\n- `-1000 <= a, b <= 1000`",
+  "signature": {
+   "name": "getSum",
+   "params": [
+    {
+     "name": "a",
+     "kind": "value"
+    },
+    {
+     "name": "b",
+     "kind": "value"
+    }
+   ],
+   "returns": {
+    "kind": "value"
+   }
+  },
+  "starter_code": "def getSum(a: int, b: int) -> int:\n    \"\"\"Return a + b without using + or -.\n\n    :param a: int\n    :param b: int\n    :return: int the sum\n    \"\"\"\n    pass\n",
+  "reference_solution": "def getSum(a: int, b: int) -> int:\n    mask = 0xFFFFFFFF\n    while b & mask:\n        carry = (a & b) << 1\n        a = a ^ b\n        b = carry\n    a &= mask\n    if a > 0x7FFFFFFF:\n        return ~(a ^ mask)\n    return a\n"
  }
 }
