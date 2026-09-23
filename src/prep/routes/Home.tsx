@@ -46,7 +46,7 @@ export default function Home() {
             return (
               <a key={a.key} className="glass-card area-card co-card" href={a.href}>
                 <div className="card-head">
-                  <h3>{a.label}</h3>
+                  <h2>{a.label}</h2>
                   <span className="meta">reference · {COMPANIES.length} companies</span>
                 </div>
                 <p className="meta blurb">{a.blurb}</p>
@@ -57,16 +57,18 @@ export default function Home() {
           return (
             <a key={a.key} className="glass-card area-card" href={a.href}>
               <div className="card-head">
-                <h3>
-                  <span className="step-num">{i + 1}</span>
+                <h2>
+                  <span className="step-num" aria-hidden="true">
+                    {i + 1}
+                  </span>
                   {a.label}
-                </h3>
+                </h2>
                 <span className="meta">
                   {a.kind === 'problems' ? 'problems' : 'study'} · {p.label}
                 </span>
               </div>
               <p className="meta blurb">{a.blurb}</p>
-              <Bar value={p.pct} />
+              <Bar value={p.pct} label={`${a.label} progress`} />
             </a>
           )
         })}
