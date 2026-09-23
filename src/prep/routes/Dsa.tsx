@@ -4,9 +4,37 @@ import { useAppSelector } from '../store'
 import { ProblemRow } from '../components/ui'
 import { NotFound, BackLink } from '../components/nav'
 import { Input } from '../ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
-const SELECT =
-  'h-11 px-3 text-sm bg-transparent border border-input text-foreground focus-visible:outline-2 focus-visible:outline-ring'
+/** One reusable filter dropdown — same shape for every facet. */
+function Filter({
+  value,
+  onChange,
+  label,
+  options,
+  className,
+}: {
+  value: string
+  onChange: (v: string) => void
+  label: string
+  options: { value: string; label: string }[]
+  className?: string
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger aria-label={label} className={className}>
+        <SelectValue placeholder={label} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
 
 export function DsaList() {
   const area = AREAS.find((a) => a.key === 'dsa')
@@ -31,29 +59,57 @@ export function DsaList() {
     <div className="max-w-3xl">
       <BackLink href="#/">Home</BackLink>
       <h1>DSA</h1>
-      <div className="flex flex-wrap gap-2 mt-8 mb-6">
-        <Input className="flex-1 min-w-50 h-11" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search problems" />
-        <select className={SELECT} value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Topic">
-          <option value="all">Any topic</option>
-          {topics.map((t) => <option key={t} value={t}>{t}</option>)}
-        </select>
-        <select className={SELECT} value={diff} onChange={(e) => setDiff(e.target.value)} aria-label="Difficulty">
-          <option value="all">Any difficulty</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-        <select className={SELECT} value={st} onChange={(e) => setSt(e.target.value)} aria-label="Status">
-          <option value="all">Any status</option>
-          <option value="none">Untouched</option>
-          <option value="attempted">Attempted</option>
-          <option value="solved">Solved</option>
-          <option value="revisit">Revisit</option>
-        </select>
+
+      <div className="flex flex-wrap gap-3 mt-8 mb-6">
+        <Input
+          className="flex-1 min-w-52"
+          placeholder="Search…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Search problems"
+        />
+        <Filter
+          label="Topic"
+          value={topic}
+          onChange={setTopic}
+          className="w-52"
+          options={[
+            { value: 'all', label: 'Any topic' },
+            ...topics.map((t) => ({ value: t, label: t })),
+          ]}
+        />
+        <Filter
+          label="Difficulty"
+          value={diff}
+          onChange={setDiff}
+          className="w-40"
+          options={[
+            { value: 'all', label: 'Any difficulty' },
+            { value: 'easy', label: 'Easy' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'hard', label: 'Hard' },
+          ]}
+        />
+        <Filter
+          label="Status"
+          value={st}
+          onChange={setSt}
+          className="w-40"
+          options={[
+            { value: 'all', label: 'Any status' },
+            { value: 'none', label: 'Untouched' },
+            { value: 'attempted', label: 'Attempted' },
+            { value: 'solved', label: 'Solved' },
+            { value: 'revisit', label: 'Revisit' },
+          ]}
+        />
       </div>
+
       <div className="border-t border-border">
-        {drills.map((d) => <ProblemRow key={d.id} drill={d} />)}
-        {drills.length === 0 && <p className="py-6 text-sm text-muted-foreground">No match.</p>}
+        {drills.map((d) => (
+          <ProblemRow key={d.id} drill={d} />
+        ))}
+        {drills.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">No match.</p>}
       </div>
     </div>
   )

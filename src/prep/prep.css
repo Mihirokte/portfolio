@@ -9,41 +9,15 @@
    Every value below is a token; components never hard-code colour or spacing.
    ========================================================================== */
 
-:root {
+/* Dark is the only scene this portal ships. :root and .dark carry the same
+   values so the theme holds even if the root class is missing. */
+:root,
+.dark {
   --radius: 0rem; /* Swiss: no rounded corners */
-
-  --background: oklch(0.985 0.001 106.42); /* stone-50  */
-  --foreground: oklch(0.216 0.006 56.04); /* stone-900 */
-  --card: oklch(0.985 0.001 106.42);
-  --card-foreground: oklch(0.216 0.006 56.04);
-  --popover: oklch(0.985 0.001 106.42);
-  --popover-foreground: oklch(0.216 0.006 56.04);
-
-  /* primary = ink (Swiss buttons are solid black, not coloured) */
-  --primary: oklch(0.216 0.006 56.04);
-  --primary-foreground: oklch(0.985 0.001 106.42);
-  --secondary: oklch(0.97 0.001 106.42); /* stone-100 */
-  --secondary-foreground: oklch(0.216 0.006 56.04);
-  --muted: oklch(0.97 0.001 106.42);
-  --muted-foreground: oklch(0.444 0.005 56.04); /* passes AA on stone-50 */
-  --accent: oklch(0.923 0.003 48.72); /* stone-200 hover wash */
-  --accent-foreground: oklch(0.216 0.006 56.04);
-
-  /* the single brand accent: Swiss poster red */
-  --brand: oklch(0.513 0.196 21.55); /* ~#c8102e */
-  --brand-foreground: oklch(0.985 0.001 106.42);
-  --destructive: oklch(0.513 0.196 21.55);
-  --destructive-foreground: oklch(0.985 0.001 106.42);
-
-  --border: oklch(0.869 0.005 56.37); /* stone-300 hairline */
-  --input: oklch(0.709 0.01 56.26); /* control border, ≥3:1 */
-  --ring: oklch(0.513 0.196 21.55); /* focus ring = brand */
 
   --font-sans: 'IBM Plex Sans', 'Hanken Grotesk', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-}
 
-.dark {
   --background: oklch(0.147 0.004 49.25); /* stone-950 */
   --foreground: oklch(0.985 0.001 106.42);
   --card: oklch(0.147 0.004 49.25);
@@ -65,8 +39,8 @@
   --destructive: oklch(0.704 0.191 22.22);
   --destructive-foreground: oklch(0.147 0.004 49.25);
 
-  --border: oklch(0.374 0.01 67.56); /* stone-700 */
-  --input: oklch(0.444 0.011 73.64);
+  --border: oklch(0.48 0.01 67.56); /* 3.0:1 on stone-950 — rules stay visible */
+  --input: oklch(0.52 0.011 73.64); /* control borders, >3:1 */
   --ring: oklch(0.704 0.191 22.22);
 }
 
