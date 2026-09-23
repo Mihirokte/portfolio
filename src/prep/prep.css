@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* The standalone prep build (vite.prep.config.ts) roots at `prep/`, so
+   Tailwind's automatic source detection never sees the components in
+   `src/prep/`. Declare them explicitly or the utilities are not generated. */
+@source './**/*.{ts,tsx}';
+@source '../../prep/index.html';
+
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================================
