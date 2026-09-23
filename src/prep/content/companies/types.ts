@@ -1,17 +1,29 @@
 // Company Research content model.
 //
-// Public-facing, neutral company interview data: what they ask, and what to
-// prepare. Each company is one data file under this directory, registered in
+// Public-facing, neutral company interview data: what they ask, a short answer
+// sketch for each, and the variants an interviewer could form from the same
+// question. Each company is one data file under this directory, registered in
 // `index.ts` — adding a company requires no component changes.
 //
 // Provenance note: source URLs are kept as CODE COMMENTS inside each company
 // file and are never rendered. The page presents company data only.
 
+export interface AskedQuestion {
+  /** The question as reported, lightly normalised for grammar only. */
+  q: string
+  /**
+   * Short answer sketch — enough to understand the question and answer it well,
+   * not a full essay. Reference material, not a reported candidate answer.
+   */
+  answer: string
+  /** Variants an interviewer could form from the same question. */
+  related?: string[]
+}
+
 export interface QuestionGroup {
   /** Round or theme these questions belong to, e.g. 'DSA', 'LLD / machine coding' */
   round: string
-  /** Questions as reported, lightly normalised for grammar only. */
-  questions: string[]
+  questions: AskedQuestion[]
 }
 
 export interface PrepTopic {
