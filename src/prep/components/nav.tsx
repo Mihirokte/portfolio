@@ -7,7 +7,7 @@ export function TopBar() {
         prep
       </a>
       <a className="home-link" href={HOME}>
-        ← site
+        Back to site
       </a>
     </header>
   )
@@ -18,7 +18,7 @@ export function NotFound() {
     <div className="page">
       <h1>nothing here</h1>
       <a className="crumb" href="#/">
-        ← home
+        Home
       </a>
     </div>
   )

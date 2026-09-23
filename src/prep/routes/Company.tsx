@@ -18,9 +18,8 @@ export function CompanyIndex() {
   return (
     <div className="page companies">
       <a className="crumb" href="#/">
-        ← home
+        Home
       </a>
-      <p className="eyebrow alt">company research</p>
       <h1>Interview processes, by company</h1>
       <p className="sub measure">
         What companies ask: the reported interview questions, and the topics their low-level design
@@ -28,7 +27,7 @@ export function CompanyIndex() {
       </p>
       <div className="list">
         {COMPANIES.map((c) => (
-          <a key={c.key} className="list-row glass-card company-row" href={`#/company/${c.key}`}>
+          <a key={c.key} className="list-row company-row" href={`#/company/${c.key}`}>
             <span className="row-title">{c.name}</span>
             <span className="meta">{countQuestions(c)} questions</span>
             <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
@@ -56,9 +55,8 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
   return (
     <div className="page companies">
       <a className="crumb" href="#/companies">
-        ← company research
+        Company research
       </a>
-      <p className="eyebrow alt">company research</p>
       <h1>{c.name}</h1>
       <p className="sub measure">{c.descriptor}</p>
 
@@ -122,7 +120,7 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
       {tab === 'prep' && (
         <section id="panel-prep" role="tabpanel" aria-labelledby="tab-prep" className="prep-grid">
           {c.lldPrep.map((p) => (
-            <article key={p.topic} className="glass-card prep-card">
+            <article key={p.topic} className="prep-card">
               <h2>{p.topic}</h2>
               <p>{p.why}</p>
             </article>

@@ -28,7 +28,7 @@ export function DsaList() {
   return (
     <div className="page">
       <a className="crumb" href="#/">
-        ← home
+        Home
       </a>
       <h1>DSA</h1>
       <p className="sub">

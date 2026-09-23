@@ -112,13 +112,11 @@ export function LessonNotes({ id, initial }: { id: string; initial?: string }) {
 export function ProblemRow({ drill }: { drill: Drill }) {
   const status = useAppSelector((s) => s.progress.problems[drill.id]?.status ?? 'none')
   return (
-    <a className="list-row glass-card" href={`#/drill/${drill.id}`}>
+    <a className="list-row" href={`#/drill/${drill.id}`}>
       <StatusDot status={status} />
       <span className="row-title">{drill.title}</span>
       {isRunnable(drill.id) && (
-        <span className="runnable">
-          <span aria-hidden="true">▶</span> editor
-        </span>
+        <span className="runnable">editor</span>
       )}
       <span className={`pill ${drill.difficulty.toLowerCase()}`}>{drill.difficulty}</span>
       <span className="meta topic">{drill.topic}</span>
@@ -140,7 +138,7 @@ export function LessonRow({
 }) {
   const read = useAppSelector((s) => s.progress.lessons[lessonId]?.status === 'read')
   return (
-    <a className="list-row glass-card" href={`#/study/${courseKey}/${lessonId}`}>
+    <a className="list-row" href={`#/study/${courseKey}/${lessonId}`}>
       <StatusDot status={read ? 'read' : 'unread'} />
       <span className="row-title">{title}</span>
       <span className="meta">{minutes} min</span>

@@ -15,7 +15,7 @@ export function CoursePage({ courseKey }: { courseKey: string }) {
   return (
     <div className="page">
       <a className="crumb" href="#/">
-        ← home
+        Home
       </a>
       <h1>{course.label}</h1>
       <p className="sub">{course.blurb}</p>

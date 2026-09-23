@@ -19,17 +19,16 @@ export function LessonPage({ courseKey, lessonId }: { courseKey: string; lessonI
   const read = entry?.status === 'read'
 
   return (
-    <div className="page wide lesson-page">
+    <div className="page lesson-page">
       <a className="crumb" href={`#/study/${course.key}`}>
-        ← {course.label}
+        {course.label} — {chapter.title}
       </a>
-      <p className="eyebrow">{chapter.title}</p>
       <h1>{lesson.title}</h1>
       <Markdown body={lesson.body} />
 
       {lesson.deeper && (
         <details className="deeper">
-          <summary>Go deeper — mechanism, numbers & follow-ups</summary>
+          <summary>Go deeper — mechanism, numbers and follow-ups</summary>
           <Markdown body={lesson.deeper} />
         </details>
       )}
@@ -40,20 +39,20 @@ export function LessonPage({ courseKey, lessonId }: { courseKey: string; lessonI
 
       <div className="lesson-foot">
         <button
-          className={`cta ${read ? 'done' : 'run'}`}
+          className={`cta ${read ? 'done' : ''}`}
           onClick={() => dispatch(setLessonStatus({ id: lessonId, status: read ? 'unread' : 'read' }))}
         >
-          {read ? '✓ marked read — undo' : 'mark as read'}
+          {read ? 'Marked read — undo' : 'Mark as read'}
         </button>
-        <div className="row gap">
+        <div className="lesson-nav">
           {prev && (
             <a className="chip" href={`#/study/${course.key}/${prev}`}>
-              ← prev
+              Previous
             </a>
           )}
           {next && (
             <a className="chip" href={`#/study/${course.key}/${next}`}>
-              next →
+              Next
             </a>
           )}
         </div>

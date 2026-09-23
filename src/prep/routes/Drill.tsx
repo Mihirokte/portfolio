@@ -62,12 +62,12 @@ function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
         <div className="run-row">
           <button className="cta run" onClick={check} disabled={busy || state !== 'ready'}>
             {busy
-              ? 'checking…'
+              ? 'Checking…'
               : state === 'booting'
-                ? 'loading python…'
+                ? 'Loading Python…'
                 : state === 'failed'
-                  ? 'python failed to load'
-                  : 'check syntax'}
+                  ? 'Python failed to load'
+                  : 'Check syntax'}
           </button>
           <button
             className="chip"
@@ -77,7 +77,7 @@ function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
               dispatch(setProblemCode({ id: problem.id, code: problem.starter_code }))
             }}
           >
-            reset code
+            Reset code
           </button>
         </div>
         {outcome?.status === 'ok' && <div className="verdict good">✓ {outcome.message}</div>}
@@ -106,7 +106,7 @@ function ProblemView({ problem, drill }: { problem: Problem; drill: Drill }) {
 function DrillView({ drill }: { drill: Drill }) {
   const [showSolution, setShowSolution] = useState(false)
   return (
-    <div className="drill-detail glass-card">
+    <div className="drill-detail">
       <pre className="desc">{mdLite(drill.prompt)}</pre>
       {drill.notes && <p className="meta">{drill.notes}</p>}
       {drill.link && (
@@ -145,7 +145,7 @@ export function DrillPage({ id }: { id: string }) {
   return (
     <div className="page wide">
       <a className="crumb" href={back.href}>
-        ← {back.label}
+        {back.label}
       </a>
       <div className="drill-title-row">
         <h1>{drill.title}</h1>

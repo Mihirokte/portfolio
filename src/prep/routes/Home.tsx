@@ -13,12 +13,16 @@ export default function Home() {
   const dispatch = useAppDispatch()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const areaProgress = (key: string, kind: string): { label: string; pct: number } => {
+  const stat = (key: string, kind: string) => {
+    if (kind === 'companies') {
+      return { count: `${COMPANIES.length}`, kind: 'companies', pct: -1 }
+    }
     if (kind === 'problems') {
       const drills = AREAS.find((a) => a.key === key)?.drills ?? []
       const solved = drills.filter((d) => progress.problems[d.id]?.status === 'solved').length
       return {
-        label: `${solved}/${drills.length} solved`,
+        count: `${solved}/${drills.length}`,
+        kind: 'solved',
         pct: drills.length ? Math.round((solved / drills.length) * 100) : 0,
       }
     }
@@ -29,57 +33,51 @@ export default function Home() {
         (m, ch) => m + ch.lessons.filter((l) => progress.lessons[l.id]?.status === 'read').length,
         0,
       ) ?? 0
-    return { label: `${read}/${total} lessons read`, pct: total ? Math.round((read / total) * 100) : 0 }
+    return {
+      count: `${read}/${total}`,
+      kind: 'lessons read',
+      pct: total ? Math.round((read / total) * 100) : 0,
+    }
   }
+
+  const totalProblems = AREAS.reduce((n, a) => n + a.drills.length, 0)
 
   return (
     <div className="page">
-      <h1>prep</h1>
+      <h1>Everything worth knowing, in the order worth learning it.</h1>
       <p className="sub">
-        Pick an area. DSA goes straight to problems; the rest teach the concepts first, then their
-        practice. Everything — what you've read, solved, and noted — is saved in this browser only.
+        Six study tracks and {totalProblems} problems. Progress, code and notes stay in this
+        browser — nothing is uploaded.
       </p>
 
-      <div className="area-grid">
+      <nav className="index" aria-label="Study areas">
         {HOME_AREAS.map((a, i) => {
-          if (a.kind === 'companies') {
-            return (
-              <a key={a.key} className="glass-card area-card co-card" href={a.href}>
-                <div className="card-head">
-                  <h2>{a.label}</h2>
-                  <span className="meta">reference · {COMPANIES.length} companies</span>
-                </div>
-                <p className="meta blurb">{a.blurb}</p>
-              </a>
-            )
-          }
-          const p = areaProgress(a.key, a.kind)
+          const s = stat(a.key, a.kind)
           return (
-            <a key={a.key} className="glass-card area-card" href={a.href}>
-              <div className="card-head">
-                <h2>
-                  <span className="step-num" aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  {a.label}
-                </h2>
-                <span className="meta">
-                  {a.kind === 'problems' ? 'problems' : 'study'} · {p.label}
-                </span>
-              </div>
-              <p className="meta blurb">{a.blurb}</p>
-              <Bar value={p.pct} label={`${a.label} progress`} />
+            <a key={a.key} className="index-row" href={a.href}>
+              <span className="index-num" aria-hidden="true">
+                {a.kind === 'companies' ? '—' : String(i + 1).padStart(2, '0')}
+              </span>
+              <span className="index-body">
+                <h2>{a.label}</h2>
+                <p>{a.blurb}</p>
+              </span>
+              <span className="index-stat">
+                <span className="count">{s.count}</span>
+                <span className="kind">{s.kind}</span>
+                {s.pct >= 0 && <Bar value={s.pct} label={`${a.label} progress`} />}
+              </span>
             </a>
           )
         })}
-      </div>
+      </nav>
 
       <div className="data-row">
-        <button className="cta" onClick={() => exportProgress(progress)}>
-          export progress
+        <button className="cta" data-variant="quiet" onClick={() => exportProgress(progress)}>
+          Export progress
         </button>
-        <button className="cta" onClick={() => fileRef.current?.click()}>
-          import progress
+        <button className="cta" data-variant="quiet" onClick={() => fileRef.current?.click()}>
+          Import progress
         </button>
         <input
           ref={fileRef}
@@ -91,8 +89,8 @@ export default function Home() {
             if (f) readProgressFile(f).then((p) => dispatch(importAll(p)))
           }}
         />
-        <span className="meta count-note">
-          {COURSES.length} study areas · {AREAS.reduce((n, a) => n + a.drills.length, 0)} problems
+        <span className="meta count-note num">
+          {COURSES.length} study areas · {totalProblems} problems
         </span>
       </div>
     </div>
