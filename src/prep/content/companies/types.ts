@@ -1,20 +1,11 @@
 // Company Research content model.
 //
-// Public-facing, neutral company interview data. Each company is one data file
-// under this directory, registered in `index.ts` — adding a company requires no
-// component changes.
+// Public-facing, neutral company interview data: what they ask, and what to
+// prepare. Each company is one data file under this directory, registered in
+// `index.ts` — adding a company requires no component changes.
 //
 // Provenance note: source URLs are kept as CODE COMMENTS inside each company
 // file and are never rendered. The page presents company data only.
-
-export interface InterviewRound {
-  /** e.g. 'Online assessment', 'Machine coding', 'Hiring manager' */
-  name: string
-  /** Format/duration where reported, e.g. '90 min, live shared editor' */
-  format?: string
-  /** What this round covers, in a sentence or two. */
-  focus: string
-}
 
 export interface QuestionGroup {
   /** Round or theme these questions belong to, e.g. 'DSA', 'LLD / machine coding' */
@@ -38,8 +29,6 @@ export interface Company {
   rolesCovered?: string
   /** How well-documented this company's process is publicly. */
   coverage: 'good' | 'moderate' | 'thin'
-  /** The round sequence, in order. */
-  process: InterviewRound[]
   /** Every concrete question found, grouped by round. */
   questions: QuestionGroup[]
   /** Must-prep topics specifically for LLD and machine-coding rounds. */

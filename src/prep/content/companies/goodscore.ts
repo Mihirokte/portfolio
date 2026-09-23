@@ -34,37 +34,6 @@ export const goodscore: Company = {
   coverage: 'thin',
   updated: '2026-09-23',
 
-  process: [
-    {
-      name: 'Recruiter screen',
-      focus:
-        'Background, education, and compensation expectations. Reported across tracks; end-to-end processes typically close in under two weeks.',
-    },
-    {
-      name: 'DSA round',
-      format: 'Live coding, conducted on the LeetCode platform',
-      focus:
-        'Standard data-structures and algorithms problem solving. Scheduling and interviewing for this round has been reported as outsourced to a third-party interviewing service (InterviewVector), with the interviewer selecting problems the candidate has not already solved on their LeetCode profile.',
-    },
-    {
-      name: 'LLD / machine coding',
-      format: 'Live design-and-implement exercise',
-      focus:
-        'Object-oriented design plus working code for a small system, followed by a concurrency discussion. On the frontend track this round is instead a UI build against a supplied design.',
-    },
-    {
-      name: 'HLD / system design',
-      format: 'Live discussion',
-      focus:
-        'Distributed-systems design. Reported at the SDE-2 level on the backend track; not reported for junior roles.',
-    },
-    {
-      name: 'Hiring manager round',
-      focus:
-        'Language and framework fundamentals with live debugging, plus a discussion of prior work experience. Reported on the frontend track; a work-experience discussion also appears in backend reports.',
-    },
-  ],
-
   questions: [
     {
       round: 'DSA',

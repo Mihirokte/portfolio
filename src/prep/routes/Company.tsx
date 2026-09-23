@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { COMPANIES, findCompany } from '../content/companies'
 import { NotFound } from '../components/nav'
+import type { Company } from '../content/companies/types'
 
 // Company Research — public-facing, neutral company interview data.
 // Rendered entirely from the COMPANIES registry; no per-company components.
@@ -10,6 +12,8 @@ const COVERAGE_LABEL: Record<string, string> = {
   thin: 'limited public data',
 }
 
+const countQuestions = (c: Company) => c.questions.reduce((n, g) => n + g.questions.length, 0)
+
 export function CompanyIndex() {
   return (
     <div className="page companies">
@@ -18,15 +22,15 @@ export function CompanyIndex() {
       </a>
       <p className="eyebrow alt">company research</p>
       <h1>Interview processes, by company</h1>
-      <p className="sub">
-        What companies ask: round structure, reported interview questions, and the topics their
-        low-level design and machine-coding rounds expect.
+      <p className="sub measure">
+        What companies ask: the reported interview questions, and the topics their low-level design
+        and machine-coding rounds expect.
       </p>
       <div className="list">
         {COMPANIES.map((c) => (
           <a key={c.key} className="list-row glass-card company-row" href={`#/company/${c.key}`}>
             <span className="row-title">{c.name}</span>
-            <span className="meta">{c.questions.reduce((n, g) => n + g.questions.length, 0)} questions</span>
+            <span className="meta">{countQuestions(c)} questions</span>
             <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
           </a>
         ))}
@@ -35,9 +39,20 @@ export function CompanyIndex() {
   )
 }
 
+type Tab = 'questions' | 'prep' | 'notes'
+
 export function CompanyPage({ companyKey }: { companyKey: string }) {
   const c = findCompany(companyKey)
+  const [tab, setTab] = useState<Tab>('questions')
   if (!c) return <NotFound />
+
+  const qCount = countQuestions(c)
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: 'questions', label: 'Questions', count: qCount },
+    { key: 'prep', label: 'LLD prep', count: c.lldPrep.length },
+    { key: 'notes', label: 'Notes', count: c.specialNotes.length },
+  ]
+
   return (
     <div className="page companies">
       <a className="crumb" href="#/companies">
@@ -45,62 +60,85 @@ export function CompanyPage({ companyKey }: { companyKey: string }) {
       </a>
       <p className="eyebrow alt">company research</p>
       <h1>{c.name}</h1>
-      <p className="sub">{c.descriptor}</p>
-      <div className="co-meta">
-        {c.rolesCovered && <span className="meta">{c.rolesCovered}</span>}
-        <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
+      <p className="sub measure">{c.descriptor}</p>
+
+      {/* at-a-glance orientation, so the page opens with facts not a wall of text */}
+      <dl className="co-stats">
+        <div>
+          <dt>Questions</dt>
+          <dd>{qCount}</dd>
+        </div>
+        <div>
+          <dt>Prep topics</dt>
+          <dd>{c.lldPrep.length}</dd>
+        </div>
+        <div>
+          <dt>Rounds covered</dt>
+          <dd>{c.questions.length}</dd>
+        </div>
+        <div className="co-stats-cov">
+          <dt>Data</dt>
+          <dd>
+            <span className={`pill cov-${c.coverage}`}>{COVERAGE_LABEL[c.coverage]}</span>
+          </dd>
+        </div>
+      </dl>
+      {c.rolesCovered && <p className="meta roles">{c.rolesCovered}</p>}
+
+      <div className="co-tabs" role="tablist" aria-label="Company data sections">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            role="tab"
+            id={`tab-${t.key}`}
+            aria-selected={tab === t.key}
+            aria-controls={`panel-${t.key}`}
+            className={`co-tab ${tab === t.key ? 'on' : ''}`}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label} <span className="co-tab-count">{t.count}</span>
+          </button>
+        ))}
       </div>
 
-      <section className="co-section">
-        <h2>Interview process</h2>
-        <div className="list">
-          {c.process.map((r, i) => (
-            <div key={r.name} className="glass-card round-card">
-              <div className="round-head">
-                <span className="step-num">{i + 1}</span>
-                <h3>{r.name}</h3>
-                {r.format && <span className="meta">{r.format}</span>}
-              </div>
-              <p>{r.focus}</p>
-            </div>
+      {tab === 'questions' && (
+        <section id="panel-questions" role="tabpanel" aria-labelledby="tab-questions">
+          {c.questions.map((g, i) => (
+            <details key={g.round} className="qblock" open={i === 0}>
+              <summary>
+                <span className="qblock-round">{g.round}</span>
+                <span className="qblock-count">{g.questions.length}</span>
+              </summary>
+              <ol className="qlist">
+                {g.questions.map((q) => (
+                  <li key={q}>{q}</li>
+                ))}
+              </ol>
+            </details>
           ))}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="co-section">
-        <h2>Reported questions</h2>
-        {c.questions.map((g) => (
-          <div key={g.round} className="qgroup">
-            <p className="section-label">{g.round}</p>
-            <ul className="qlist">
-              {g.questions.map((q) => (
-                <li key={q}>{q}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
-
-      <section className="co-section">
-        <h2>Must-prep for LLD &amp; machine coding</h2>
-        <div className="list">
+      {tab === 'prep' && (
+        <section id="panel-prep" role="tabpanel" aria-labelledby="tab-prep" className="prep-grid">
           {c.lldPrep.map((p) => (
-            <div key={p.topic} className="glass-card prep-card">
-              <h3>{p.topic}</h3>
+            <article key={p.topic} className="glass-card prep-card">
+              <h2>{p.topic}</h2>
               <p>{p.why}</p>
-            </div>
+            </article>
           ))}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="co-section">
-        <h2>Special notes</h2>
-        <ul className="notes-list">
-          {c.specialNotes.map((n) => (
-            <li key={n}>{n}</li>
-          ))}
-        </ul>
-      </section>
+      {tab === 'notes' && (
+        <section id="panel-notes" role="tabpanel" aria-labelledby="tab-notes">
+          <ul className="notes-list measure">
+            {c.specialNotes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <p className="meta updated">Last compiled {c.updated}.</p>
     </div>

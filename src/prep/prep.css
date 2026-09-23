@@ -226,25 +226,69 @@ details summary { font-family: 'IBM Plex Mono', monospace; font-size: 13px; colo
 .deeper > summary { color: var(--gold); font-weight: 600; }
 .deeper .md { margin-top: var(--s3); }
 
-/* ---- Company Research (website-facing section, slightly distinct accent) ---- */
+/* ---- Company Research (website-facing section) ---------------------------- */
 .companies { --accent: var(--mint); }
 .eyebrow.alt { color: var(--accent); letter-spacing: 0.26em; }
+/* keep body prose inside a comfortable 45-75ch measure */
+.measure { max-width: 68ch; }
 .co-card:hover { border-color: var(--mint); }
-.co-meta { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; margin-bottom: var(--s5); }
-.co-section { margin: var(--s6) 0; }
-.co-section > h2 { font-family: Orbitron, sans-serif; font-size: 19px; margin: 0 0 var(--s4); padding-bottom: var(--s2); border-bottom: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); }
 .company-row:hover { border-color: var(--mint); }
-.round-card, .prep-card { padding: var(--s4); }
-.round-card p, .prep-card p { margin: var(--s2) 0 0; line-height: 1.6; color: color-mix(in srgb, var(--cream) 82%, transparent); font-size: 14.5px; }
-.round-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
-.round-head h3 { margin: 0; font-family: Orbitron, sans-serif; font-size: 16px; }
-.prep-card h3 { margin: 0; font-size: 15.5px; color: var(--gold); }
-.qgroup { margin-bottom: var(--s5); }
-.qlist { margin: 0; padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s2); }
-.qlist li { line-height: 1.6; font-size: 14.5px; }
+.roles { margin: calc(-1 * var(--s2)) 0 var(--s5); }
+
+/* at-a-glance stats strip */
+.co-stats { display: flex; flex-wrap: wrap; gap: var(--s5); margin: var(--s5) 0 var(--s3); padding: var(--s4) 0; border-top: var(--border); border-bottom: var(--border); }
+.co-stats > div { display: flex; flex-direction: column; gap: var(--s1); }
+.co-stats dt { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: color-mix(in srgb, var(--cream) 62%, transparent); }
+.co-stats dd { margin: 0; font-family: Orbitron, sans-serif; font-size: 22px; line-height: 1.1; color: var(--cream); }
+.co-stats-cov dd { font-size: 13px; }
+
+/* tabs — real buttons, 44px min target, visible focus */
+.co-tabs { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s5) 0 var(--s4); }
+.co-tab { min-height: 44px; padding: var(--s2) var(--s4); border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: transparent; color: color-mix(in srgb, var(--cream) 78%, transparent); border: 1px solid color-mix(in srgb, var(--cream) 22%, transparent); transition: border-color 160ms ease-out, color 160ms ease-out, background-color 160ms ease-out; }
+.co-tab:hover { border-color: var(--mint); color: var(--mint); }
+.co-tab.on { background: var(--mint); border-color: var(--mint); color: var(--space); }
+.co-tab-count { display: inline-block; margin-left: var(--s2); padding: 0 var(--s2); border-radius: 999px; font-size: 11px; background: color-mix(in srgb, var(--cream) 14%, transparent); }
+.co-tab.on .co-tab-count { background: color-mix(in srgb, var(--space) 18%, transparent); }
+
+/* questions — collapsible per round so the page opens scannable */
+.qblock { border: var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--purple) 16%, transparent); margin-bottom: var(--s2); }
+.qblock > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 48px; padding: var(--s2) var(--s4); cursor: pointer; list-style: none; }
+.qblock > summary::-webkit-details-marker { display: none; }
+.qblock-round { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent); }
+.qblock-count { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: color-mix(in srgb, var(--cream) 60%, transparent); border: 1px solid color-mix(in srgb, var(--cream) 18%, transparent); border-radius: 999px; padding: 1px var(--s2); }
+.qblock[open] > summary { border-bottom: var(--border); }
+.qlist { margin: 0; padding: var(--s3) var(--s5) var(--s4); display: flex; flex-direction: column; gap: var(--s3); max-width: 72ch; }
+.qlist li { line-height: 1.6; font-size: 14.5px; color: color-mix(in srgb, var(--cream) 90%, transparent); }
+
+/* prep topics — two-up grid, heading carries the scan */
+.prep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--s3); }
+.prep-card { padding: var(--s4); }
+.prep-card h2 { margin: 0 0 var(--s2); font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15.5px; line-height: 1.35; color: var(--gold); }
+.prep-card p { margin: 0; line-height: 1.6; font-size: 14px; color: color-mix(in srgb, var(--cream) 82%, transparent); }
+
+/* notes */
 .notes-list { margin: 0; padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
-.notes-list li { line-height: 1.6; font-size: 14.5px; }
+.notes-list li { line-height: 1.65; font-size: 14.5px; color: color-mix(in srgb, var(--cream) 88%, transparent); }
+
 .pill.cov-good { color: var(--mint); border-color: color-mix(in srgb, var(--mint) 50%, transparent); }
 .pill.cov-moderate { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
 .pill.cov-thin { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 50%, transparent); }
-.updated { margin-top: var(--s6); }
+.updated { margin-top: var(--s6); padding-top: var(--s4); border-top: var(--border); }
+
+/* accessibility: visible focus for every interactive element in the portal */
+a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible,
+input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+@media (max-width: 720px) {
+  .co-stats { gap: var(--s4); }
+  .co-stats dd { font-size: 19px; }
+  .prep-grid { grid-template-columns: 1fr; }
+}
