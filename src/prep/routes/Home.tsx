@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { AREAS } from '../data/drills'
 import { COURSES, findCourse } from '../content'
+import { COMPANIES } from '../content/companies'
 import { HOME_AREAS } from '../areas'
 import { exportProgress, readProgressFile } from '../storage'
 import { importAll } from '../store/progressSlice'
@@ -41,6 +42,17 @@ export default function Home() {
 
       <div className="area-grid">
         {HOME_AREAS.map((a, i) => {
+          if (a.kind === 'companies') {
+            return (
+              <a key={a.key} className="glass-card area-card co-card" href={a.href}>
+                <div className="card-head">
+                  <h3>{a.label}</h3>
+                  <span className="meta">reference · {COMPANIES.length} companies</span>
+                </div>
+                <p className="meta blurb">{a.blurb}</p>
+              </a>
+            )
+          }
           const p = areaProgress(a.key, a.kind)
           return (
             <a key={a.key} className="glass-card area-card" href={a.href}>

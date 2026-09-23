@@ -225,3 +225,26 @@ details summary { font-family: 'IBM Plex Mono', monospace; font-size: 13px; colo
 .deeper { margin-top: var(--s5); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent); border-radius: 12px; padding: var(--s3) var(--s4); background: color-mix(in srgb, var(--gold) 6%, transparent); }
 .deeper > summary { color: var(--gold); font-weight: 600; }
 .deeper .md { margin-top: var(--s3); }
+
+/* ---- Company Research (website-facing section, slightly distinct accent) ---- */
+.companies { --accent: var(--mint); }
+.eyebrow.alt { color: var(--accent); letter-spacing: 0.26em; }
+.co-card:hover { border-color: var(--mint); }
+.co-meta { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; margin-bottom: var(--s5); }
+.co-section { margin: var(--s6) 0; }
+.co-section > h2 { font-family: Orbitron, sans-serif; font-size: 19px; margin: 0 0 var(--s4); padding-bottom: var(--s2); border-bottom: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); }
+.company-row:hover { border-color: var(--mint); }
+.round-card, .prep-card { padding: var(--s4); }
+.round-card p, .prep-card p { margin: var(--s2) 0 0; line-height: 1.6; color: color-mix(in srgb, var(--cream) 82%, transparent); font-size: 14.5px; }
+.round-head { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.round-head h3 { margin: 0; font-family: Orbitron, sans-serif; font-size: 16px; }
+.prep-card h3 { margin: 0; font-size: 15.5px; color: var(--gold); }
+.qgroup { margin-bottom: var(--s5); }
+.qlist { margin: 0; padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s2); }
+.qlist li { line-height: 1.6; font-size: 14.5px; }
+.notes-list { margin: 0; padding-left: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
+.notes-list li { line-height: 1.6; font-size: 14.5px; }
+.pill.cov-good { color: var(--mint); border-color: color-mix(in srgb, var(--mint) 50%, transparent); }
+.pill.cov-moderate { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
+.pill.cov-thin { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 50%, transparent); }
+.updated { margin-top: var(--s6); }

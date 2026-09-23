@@ -8,7 +8,7 @@ export interface HomeArea {
   label: string
   blurb: string
   href: string
-  kind: 'problems' | 'study'
+  kind: 'problems' | 'study' | 'companies'
 }
 
 // Explicit learning sequence by course key. DSA first, then the study areas
@@ -35,5 +35,14 @@ export const HOME_AREAS: HomeArea[] = (() => {
   // area can never silently vanish from the home grid.
   const seen = new Set(ORDER)
   for (const c of COURSES) if (!seen.has(c.key)) ordered.push(toCard(c.key))
+  // Company Research sits last: reference data rather than a study track.
+  ordered.push({
+    key: 'companies',
+    label: 'Company Research',
+    blurb:
+      'What specific companies ask: round structure, reported questions, and what their LLD and machine-coding rounds expect.',
+    href: '#/companies',
+    kind: 'companies',
+  })
   return ordered
 })()
