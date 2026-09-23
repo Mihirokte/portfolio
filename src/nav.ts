@@ -1,32 +1,21 @@
-import { EXPERIENCE, PROJECTS } from './content'
+export type SceneId = 'about' | 'work' | 'skills' | 'projects' | 'contact'
+export type Scene = { id: SceneId; label: string }
 
-export type NavItem = { id: string; label: string; children?: NavItem[] }
+/** The ring of scenes, in stage order. */
+export const SCENES: Scene[] = [
+  { id: 'about', label: 'about' },
+  { id: 'work', label: 'work' },
+  { id: 'skills', label: 'skills' },
+  { id: 'projects', label: 'projects' },
+  { id: 'contact', label: 'contact' },
+]
+
+export const SCENE_IDS = SCENES.map((s) => s.id)
+
+export const isSceneId = (s: string): s is SceneId => (SCENE_IDS as string[]).includes(s)
 
 export const slug = (s: string) =>
   s
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
-
-export const NAV: NavItem[] = [
-  {
-    id: 'about',
-    label: 'About',
-    children: [
-      { id: 'about-story', label: 'story' },
-      { id: 'about-focus', label: 'what i do' },
-      { id: 'about-accolades', label: 'accolades' },
-    ],
-  },
-  { id: 'work', label: 'Work', children: EXPERIENCE.map((j) => ({ id: `work-${slug(j.company)}`, label: j.company.toLowerCase() })) },
-  { id: 'skills', label: 'Skills' },
-  { id: 'projects', label: 'Projects', children: PROJECTS.map((p) => ({ id: `project-${slug(p.name)}`, label: p.name.toLowerCase() })) },
-  { id: 'contact', label: 'Contact' },
-]
-
-export const ALL_IDS = NAV.flatMap((n) => [n.id, ...(n.children?.map((c) => c.id) ?? [])])
-
-export function parentOf(id: string): string {
-  for (const n of NAV) if (n.id === id || n.children?.some((c) => c.id === id)) return n.id
-  return NAV[0].id
-}

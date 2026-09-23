@@ -18,7 +18,6 @@ export default defineConfig({
         main: 'index.html',
         prep: 'prep/index.html',
       },
-      output: { manualChunks: { three: ['three'] } },
     },
   },
   plugins: [react(), tailwindcss()],

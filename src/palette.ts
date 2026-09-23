@@ -1,15 +1,11 @@
-// site palette
+// site palette — paper theatre (light only)
 export const PALETTE = {
-  cream: '#FFF8F0', // title front, body text, star core
-  gold: '#F4D06F', // title drop layer, marquee band, star mid
-  orange: '#FF8811', // title back layer, star edge, contrast ticks
-  mint: '#9DD9D2', // belt words, skills accent
-  purple: '#392F5A', // space base, marquee text
-  space: '#050507', // black space / body background
-  white: '#FFFFFF',
-  // the star: blue → white
-  starCore: '#FFFFFF',
-  starMid: '#CFE3FF',
-  starEdge: '#4F8CFF',
-  starGlow: '#8FB8FF',
+  paper: '#F6F2E8', // base sheet; matches the cat animation's paper exactly
+  sheet1: '#FBF8F1', // front-most layer
+  sheet2: '#EFE9DC',
+  sheet3: '#E6DFCF', // deepest layer
+  ink: '#3A3A40', // 10.2:1 on paper
+  ink2: '#6B6B73', // 5.0:1 on paper
+  accent: '#B5482F', // pencil red, 5.3:1 on paper — links, active tab, focus
+  shadow: 'rgba(58, 58, 64, 0.16)',
 } as const
