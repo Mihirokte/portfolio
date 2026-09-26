@@ -48,6 +48,7 @@ export const goodscore: Company = {
             'Some steps are broken and cannot be used — count the valid paths.',
             'Count paths through an m×n grid moving only right or down (the 2-D version of the same recurrence).',
           ],
+          patterns: ['linear-dp'],
         },
         {
           q: 'Topic areas reported for this round: arrays, matrices, strings, sorting, hashing, and linked lists.',
@@ -58,6 +59,14 @@ export const goodscore: Company = {
             'Reverse a linked list, then detect a cycle in one.',
             'Rotate a matrix in place by 90 degrees.',
             'Group anagrams, or find the first non-repeating character.',
+          ],
+          patterns: [
+            'hashing',
+            'two-pointers',
+            'sliding-window',
+            'inplace-linkedlist-reversal',
+            'fast-slow-pointers',
+            'matrix',
           ],
         },
       ],
@@ -242,6 +251,49 @@ export const goodscore: Company = {
           ],
         },
       ],
+    },
+  ],
+
+  // Pattern mapping: `reported` is anchored to the Climbing Stairs question found
+  // in the AmbitionBox report; every `implied` entry is derived ONLY from the
+  // topic list that same report gives for the round (arrays, matrices, strings,
+  // sorting, hashing, linked lists). No pattern is listed that the reported
+  // topics do not name.
+  dsaPatterns: [
+    {
+      key: 'linear-dp',
+      basis: 'reported',
+      why: 'The one verbatim question found — count the ways to climb n stairs taking 1 or 2 steps — is this pattern exactly: one index, a fixed-size lookback, answer built forward. Rolling two variables for O(1) space is the expected finish.',
+    },
+    {
+      key: 'hashing',
+      basis: 'implied',
+      why: 'Hashing is named directly in the round\u2019s reported topic list. At this difficulty it is the workhorse: seen-before lookups, frequency counts, grouping by a derived key, and turning an O(n\u00b2) scan into one pass.',
+    },
+    {
+      key: 'two-pointers',
+      basis: 'implied',
+      why: 'Arrays and sorting are both named, and sorted input with a pair-or-triple target is where this pattern applies. The discriminator to state aloud: sorted input, or indices irrelevant, means two pointers at O(1) space rather than a hash map.',
+    },
+    {
+      key: 'sliding-window',
+      basis: 'implied',
+      why: 'Arrays and strings are both named, and contiguous-subarray or substring questions at this level almost always want a window with a counter rather than a nested loop.',
+    },
+    {
+      key: 'inplace-linkedlist-reversal',
+      basis: 'implied',
+      why: 'Linked lists are named, and pointer rewiring in place is the standard ask — three-pointer reversal, reversing a sublist, and the reorder problems built on top of it.',
+    },
+    {
+      key: 'fast-slow-pointers',
+      basis: 'implied',
+      why: 'The other half of a linked-list round: cycle detection, the middle node, and k-th from the end, all in O(1) space. Worth having ready because the O(n)-space visited-set answer is the one interviewers push back on.',
+    },
+    {
+      key: 'matrix',
+      basis: 'implied',
+      why: 'Matrices are named as a distinct topic. At this level these are traversal and in-place transformation questions — spiral order, rotate by 90 degrees, set zeroes — geometry rather than dynamic programming.',
     },
   ],
 

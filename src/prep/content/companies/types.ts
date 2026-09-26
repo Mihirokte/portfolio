@@ -18,6 +18,26 @@ export interface AskedQuestion {
   answer: string
   /** Variants an interviewer could form from the same question. */
   related?: string[]
+  /**
+   * Pattern keys (see content/patterns) this question exercises. Rendered as
+   * links to the pattern card, so a question leads straight to its drill set.
+   */
+  patterns?: string[]
+}
+
+/** A coding pattern mapped onto a company's algorithm round. */
+export interface RoundPattern {
+  /** Pattern key from content/patterns. */
+  key: string
+  /**
+   * `reported` — a question found for this company is exactly this pattern.
+   * `implied`  — the round's reported topic list points here, but no specific
+   *              question was found. Kept distinct so nothing reads as evidence
+   *              it is not.
+   */
+  basis: 'reported' | 'implied'
+  /** What in the reported round points at this pattern. */
+  why: string
 }
 
 export interface QuestionGroup {
@@ -43,6 +63,11 @@ export interface Company {
   coverage: 'good' | 'moderate' | 'thin'
   /** Every concrete question found, grouped by round. */
   questions: QuestionGroup[]
+  /**
+   * Patterns to expect in the algorithm round, ordered reported-first. Each key
+   * resolves to a pattern card with its cues, template, pitfalls and drill set.
+   */
+  dsaPatterns?: RoundPattern[]
   /** Must-prep topics specifically for LLD and machine-coding rounds. */
   lldPrep: PrepTopic[]
   /** Company-specific nuances worth knowing. */
