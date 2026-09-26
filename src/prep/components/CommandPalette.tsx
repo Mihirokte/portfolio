@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { COURSES } from '../content'
 import { COMPANIES } from '../content/companies'
+import { PATTERNS } from '../content/patterns'
 import { AREAS } from '../data/drills'
 import { HOME_AREAS } from '../areas'
 import {
@@ -34,6 +35,8 @@ function buildIndex(): Entry[] {
       out.push({ id: `d-${d.id}`, label: d.title, group: `${a.label} problems`, href: `#/drill/${d.id}` })
   for (const co of COMPANIES)
     out.push({ id: `c-${co.key}`, label: co.name, group: 'Companies', href: `#/company/${co.key}` })
+  for (const pat of PATTERNS)
+    out.push({ id: `p-${pat.key}`, label: pat.name, group: 'Patterns', href: `#/pattern/${pat.key}` })
   return out
 }
 

@@ -9,6 +9,8 @@ import Editor from '../components/Editor'
 import Markdown from '../components/Markdown'
 import { ProblemNotes, ProblemStatusBar } from '../components/ui'
 import { NotFound, BackLink } from '../components/nav'
+import { PatternChips } from './Patterns'
+import { relatedProblems } from '../content/patterns'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
@@ -122,17 +124,44 @@ export function DrillPage({ id }: { id: string }) {
     for (const a of AREAS) if (a.drills.some((d) => d.id === id)) return a.key
     return undefined
   }, [id])
+  const similar = useMemo(() => relatedProblems(id, 6), [id])
   if (!drill) return <NotFound />
   const problem = PACKS[id]
   const back = areaKey === 'dsa' ? { href: '#/dsa', label: 'DSA' } : areaKey ? { href: `#/study/${areaKey}`, label: 'Course' } : { href: '#/', label: 'Home' }
   return (
     <div>
       <BackLink href={back.href}>{back.label}</BackLink>
-      <div className="flex flex-wrap items-baseline gap-4 mb-8">
+      <div className="flex flex-wrap items-baseline gap-4 mb-5">
         <h1>{drill.title}</h1>
         <Badge variant="outline" className="uppercase text-[0.6875rem]">{drill.difficulty}</Badge>
       </div>
+      <div className="mb-8">
+        <PatternChips problemId={id} />
+      </div>
       {problem ? <ProblemView problem={problem} /> : <DrillView drill={drill} />}
+      {similar.length > 0 && (
+        <section className="mt-16 max-w-3xl">
+          <h2 className="pb-2 border-b border-foreground text-base font-medium tracking-normal">
+            Similar problems
+          </h2>
+          <div className="border-b border-border">
+            {similar.map((sid) => {
+              const d = drillById(sid)
+              if (!d) return null
+              return (
+                <a
+                  key={sid}
+                  href={`#/drill/${sid}`}
+                  className="flex items-center gap-4 min-h-14 px-4 py-4 border-b border-border last:border-b-0 no-underline text-foreground transition-colors hover:bg-secondary group"
+                >
+                  <span className="flex-1 transition-colors group-hover:text-brand">{d.title}</span>
+                  <Badge variant="outline" className="uppercase text-[0.6875rem]">{d.difficulty}</Badge>
+                </a>
+              )
+            })}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

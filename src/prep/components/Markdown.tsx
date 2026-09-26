@@ -2,6 +2,27 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import SequenceDiagram from './SequenceDiagram'
 
+/** One line of markdown with no block wrapper — for list items and labels that
+ *  carry **bold** or `code` but must stay inline. */
+export function InlineMarkdown({ body }: { body: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        p: ({ children }) => <>{children}</>,
+        strong: ({ children }) => <strong className="font-medium text-foreground">{children}</strong>,
+        code: ({ children }) => (
+          <code className="font-mono text-[0.875em] bg-secondary px-1.5 py-0.5">{children}</code>
+        ),
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener" className="text-brand underline">{children}</a>
+        ),
+      }}
+    >
+      {body}
+    </ReactMarkdown>
+  )
+}
+
 // Lesson prose. Tailwind classes are applied per element so the markdown
 // inherits the same tokens as the rest of the app.
 export default function Markdown({ body }: { body: string }) {

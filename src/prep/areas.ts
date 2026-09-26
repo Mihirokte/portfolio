@@ -8,7 +8,7 @@ export interface HomeArea {
   label: string
   blurb: string
   href: string
-  kind: 'problems' | 'study' | 'companies'
+  kind: 'problems' | 'study' | 'companies' | 'patterns'
 }
 
 // Explicit learning sequence by course key. DSA first, then the study areas
@@ -31,6 +31,14 @@ export const HOME_AREAS: HomeArea[] = (() => {
     return { key: c.key, label: c.label, blurb: c.blurb, href: `#/study/${c.key}`, kind: 'study' }
   }
   const ordered = ORDER.map(toCard)
+  // Patterns sits directly after DSA: it is the lens on the same problem set.
+  ordered.splice(1, 0, {
+    key: 'patterns',
+    label: 'Patterns',
+    blurb: 'The recurring shapes behind the problems — recognition cues, templates, and every problem each one solves.',
+    href: '#/patterns',
+    kind: 'patterns',
+  })
   // Safety net: surface any registered course the ORDER list forgot, so a new
   // area can never silently vanish from the home grid.
   const seen = new Set(ORDER)
