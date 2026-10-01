@@ -1,0 +1,144 @@
+{
+ "figure": {
+  "w": 42,
+  "h": 125,
+  "frames": 12,
+  "rows": 3,
+  "dx": 7,
+  "dy": -3
+ },
+ "football": {
+  "w": 24,
+  "h": 22,
+  "frames": 12,
+  "rows": 1,
+  "dx": -2,
+  "dy": 0
+ },
+ "toolbox": {
+  "w": 45,
+  "h": 30,
+  "frames": 1,
+  "rows": 1,
+  "dx": -1,
+  "dy": 0
+ },
+ "boxes": {
+  "w": 57,
+  "h": 83,
+  "frames": 1,
+  "rows": 1,
+  "dx": -28,
+  "dy": -79
+ },
+ "mailbox": {
+  "w": 27,
+  "h": 40,
+  "frames": 1,
+  "rows": 1,
+  "dx": 0,
+  "dy": -1
+ },
+ "door": {
+  "w": 49,
+  "h": 123,
+  "frames": 1,
+  "rows": 1,
+  "dx": 0,
+  "dy": -15
+ },
+ "frame_medal": {
+  "w": 21,
+  "h": 17,
+  "frames": 1,
+  "rows": 1,
+  "dx": 0,
+  "dy": 0
+ },
+ "frame_star": {
+  "w": 21,
+  "h": 17,
+  "frames": 1,
+  "rows": 1,
+  "dx": 0,
+  "dy": 0
+ },
+ "tapestry": {
+  "w": 82,
+  "h": 96,
+  "frames": 12,
+  "rows": 1,
+  "dx": -1,
+  "dy": 0
+ },
+ "window_d": {
+  "w": 90,
+  "h": 70,
+  "frames": 12,
+  "rows": 1,
+  "dx": -3,
+  "dy": 0
+ },
+ "window_m": {
+  "w": 56,
+  "h": 50,
+  "frames": 12,
+  "rows": 1,
+  "dx": -3,
+  "dy": 0
+ },
+ "shelf_d": {
+  "w": 76,
+  "h": 30,
+  "frames": 12,
+  "rows": 1,
+  "dx": 0,
+  "dy": -17
+ },
+ "shelf_m": {
+  "w": 52,
+  "h": 30,
+  "frames": 12,
+  "rows": 1,
+  "dx": 0,
+  "dy": -17
+ },
+ "cat": {
+  "w": 33,
+  "h": 17,
+  "frames": 12,
+  "rows": 2,
+  "dx": -6,
+  "dy": -3
+ },
+ "plant": {
+  "w": 30,
+  "h": 45,
+  "frames": 12,
+  "rows": 1,
+  "dx": -3,
+  "dy": -44
+ },
+ "rug_d": {
+  "w": 127,
+  "h": 38,
+  "frames": 1,
+  "rows": 1,
+  "dx": -1,
+  "dy": 0
+ },
+ "rug_m": {
+  "w": 113,
+  "h": 42,
+  "frames": 1,
+  "rows": 1,
+  "dx": -1,
+  "dy": 0
+ },
+ "_hand": {
+  "w": 27,
+  "h": 33,
+  "hotx": 9,
+  "hoty": 0
+ }
+}

@@ -101,3 +101,10 @@ export const CONTACT = [
   { label: 'linkedin', href: 'https://linkedin.com/in/mihirokte', text: 'linkedin.com/in/mihirokte' },
   { label: 'github', href: 'https://github.com/Mihirokte', text: 'github.com/Mihirokte' },
 ]
+
+export type Hobby = { name: string; line: string }
+export const HOBBIES: Hobby[] = [
+  { name: 'football', line: 'On the pitch, most weeks. Midfield, mostly running.' },
+  { name: 'fifa', line: 'Off the pitch, on a controller. Still midfield.' },
+  { name: 'cooking', line: 'Something slow on a weeknight. Spice is not optional.' },
+]
