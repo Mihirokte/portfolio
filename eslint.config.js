@@ -1,29 +1,12 @@
 import js from '@eslint/js'
 import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default tseslint.config([
-  globalIgnores(['dist', 'docs', 'dist-prep']),
+export default defineConfig([
+  globalIgnores(['docs', 'node_modules', '.kiro']),
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
-    ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-  },
-  {
-    // Vendored shadcn/ui primitives: they intentionally co-export cva variants
-    // alongside components, which the react-refresh rule flags.
-    files: ['src/prep/ui/**/*.tsx'],
-    rules: { 'react-refresh/only-export-components': 'off' },
+    files: ['**/*.js'],
+    extends: [js.configs.recommended],
+    languageOptions: { ecmaVersion: 2023, sourceType: 'module', globals: globals.browser },
   },
 ])

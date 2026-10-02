@@ -531,7 +531,7 @@ function redTube(inner) {
   const y = 25.6, x = 0.75;                                                                               // 1.5 m red LED tube over the door
   rodZ(inner, 17.4, 34.0, x, y, .3, emissive(mat('#FF8A62', { roughness: .3 }), '#FF4A22', 1.6, 6.5), { cast: false });
   for (const z of [16.9, 34.0]) rodZ(inner, z, z + .5, x, y, .36, M.black, { cast: false });
-  for (const z of [19, 25.7, 32.4]) rodZ(inner, 0, x, x / 2, y, .07, M.metal, { cast: false }).rotation.set(0, Math.PI / 2, 0);
+  for (const z of [19, 25.7, 32.4]) rodX(inner, 0, x, y, z, .07, M.metal, { cast: false });                              // wall brackets
   // the tube is a line source: three points along it stand in for it
   for (const z of [20.2, 25.7, 31.2]) point(inner, 2.4, y - .3, z, '#FF5A2A', 2.6, 24, 30);
   for (const z of [19.5, 25.7, 31.9]) glow(inner, 1.4, y, z, 7, '#FF6A3A', 0, .12);
