@@ -99,13 +99,67 @@ export function sphere(g, x, y, z, r, material, o = {}) {
   return m;
 }
 
-/** Capsule between two points: arms, legs, tripod legs. */
+/** Capsule between two points: arms, legs, tripod legs. Pass o.rb to taper from radius r at `a` to rb at `b`. */
 export function limb(g, a, b, r, material, o = {}) {
   const dir = new THREE.Vector3().subVectors(b, a);
+  if (o.rb !== undefined && o.rb !== r) {
+    const rb = o.rb, L = dir.length();
+    const grp = new THREE.Group();
+    grp.position.copy(a);
+    grp.quaternion.setFromUnitVectors(UP, dir.clone().normalize());
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(rb, r, L, 20, 1, true), material);
+    body.position.y = L / 2;
+    const ca = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), material);
+    const cb = new THREE.Mesh(new THREE.SphereGeometry(rb, 20, 14), material);
+    cb.position.y = L;
+    for (const m of [body, ca, cb]) grp.add(finish(m, o));
+    g.add(grp);
+    return grp;
+  }
   const len = Math.max(0.01, dir.length() - 2 * r);
   const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 8, 20), material);
   m.position.copy(a).addScaledVector(dir, 0.5);
   m.quaternion.setFromUnitVectors(UP, dir.normalize());
+  g.add(finish(m, o));
+  return m;
+}
+
+/**
+ * Smooth organic solid lofted through horizontal cross-sections (a torso, a pelvis, a neck): each section
+ * is { y, w, d, x = 0, z = 0, n = 2.3 } — half-width along x, half-depth along z, centre offset, and the
+ * superellipse exponent (2 = ellipse, higher = squarer). Sections are joined by a Catmull-Rom spline along
+ * y and the surface is closed at both ends, so sections that taper to a point give a rounded end. One
+ * mesh, smooth normals, no seam.
+ */
+export function loft(g, sections, material, o = {}) {
+  const around = o.seg ?? 36, along = o.rings ?? 32;
+  const A = new THREE.CatmullRomCurve3(sections.map((s) => new THREE.Vector3(s.y, s.w, s.d)), false, 'centripetal');
+  const B = new THREE.CatmullRomCurve3(sections.map((s) => new THREE.Vector3(s.x ?? 0, s.z ?? 0, s.n ?? 2.3)), false, 'centripetal');
+  const pos = [], idx = [];
+  const a = new THREE.Vector3(), b = new THREE.Vector3();
+  for (let i = 0; i <= along; i++) {
+    A.getPoint(i / along, a); B.getPoint(i / along, b);
+    const e = 2 / b.z;
+    for (let j = 0; j < around; j++) {
+      const th = j / around * Math.PI * 2, c = Math.cos(th), s = Math.sin(th);
+      pos.push(b.x + a.y * Math.sign(c) * Math.pow(Math.abs(c), e), a.x, b.y + a.z * Math.sign(s) * Math.pow(Math.abs(s), e));
+    }
+  }
+  for (let i = 0; i < along; i++) for (let j = 0; j < around; j++) {
+    const a0 = i * around + j, a1 = i * around + (j + 1) % around, b0 = a0 + around, b1 = a1 + around;
+    idx.push(a0, b0, a1, a1, b0, b1);
+  }
+  const n0 = pos.length / 3; A.getPoint(0, a); B.getPoint(0, b); pos.push(b.x, a.x, b.y);        // bottom cap centre
+  const n1 = n0 + 1; A.getPoint(1, a); B.getPoint(1, b); pos.push(b.x, a.x, b.y);                // top cap centre
+  for (let j = 0; j < around; j++) {
+    idx.push(n0, j, (j + 1) % around);
+    idx.push(n1, along * around + (j + 1) % around, along * around + j);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, material);
   g.add(finish(m, o));
   return m;
 }
@@ -213,10 +267,10 @@ function radialTex() {
   });
 }
 
-/** Soft radial halo at a light source: the glare the eye (and a camera) sees looking at an emitter. Faint by day, present at night. */
-export function glow(g, x, y, z, size, color, day = 0.5, night = day) {
-  const m = new THREE.SpriteMaterial({ map: radialTex(), color, transparent: true, opacity: day, depthWrite: false, blending: THREE.AdditiveBlending });
-  themed(m, 'opacity', day, night);
+/** Soft radial halo at a light source: the glare the eye (and a camera) sees looking at an emitter. Gone by day, present at night. */
+export function glow(g, x, y, z, size, color, night) {
+  const m = new THREE.SpriteMaterial({ map: radialTex(), color, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  themed(m, 'opacity', 0, night);
   const s = new THREE.Sprite(m);
   s.position.set(x, y, z);
   s.scale.set(size, size, 1);
@@ -246,22 +300,29 @@ export function applyTheme(t) {
 const col = (c) => new THREE.Color(c);
 
 /**
- * A real point light in physical units (candela, inverse-square falloff) with a day and a night
- * intensity. `distance` is a soft cutoff so a small source does not shade the far side of the room.
+ * A real point light in physical units (candela, inverse-square falloff). Every light in the room is
+ * switched off by day (the sun does the lighting) and comes on at night at `night` candela. `distance` is
+ * a soft cutoff so a small source does not shade the far side of the room.
  */
-export function point(g, x, y, z, color, day, night, distance = 0) {
-  const l = new THREE.PointLight(color, day, distance, 2);
+export function point(g, x, y, z, color, night, distance = 0) {
+  const l = new THREE.PointLight(color, 0, distance, 2);
   l.position.set(x, y, z);
-  themed(l, 'intensity', day, night);
+  themed(l, 'intensity', 0, night);
   g.add(l);
   return l;
 }
 
-/** A themed emissive strength on a material (the lamp shade, the bulb, the LED tube). */
-export function emissive(m, color, day, night) {
+/**
+ * A light-emitting object: off by day, when it is just the pale translucent thing it is made of (a frosted
+ * bulb, a milky diffuser tube, a fabric shade), glowing `color` at `night` strength after dark. The base
+ * colour drops to `dark` at night so the lit material does not wash out the glow.
+ */
+export function emissive(m, color, night, o = {}) {
   m.emissive = col(color);
-  m.emissiveIntensity = day;
-  themed(m, 'emissiveIntensity', day, night);
+  m.emissiveIntensity = 0;
+  themed(m, 'emissiveIntensity', 0, night);
+  if (o.dark) themed(m, 'color', m.color.clone(), col(o.dark));
+  if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; themed(m, 'opacity', o.opacity, o.nightOpacity ?? 1); }
   return m;
 }
 

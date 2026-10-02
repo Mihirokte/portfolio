@@ -1,26 +1,16 @@
-// main.js — the room, taken apart, in 3D.
-// One WebGL canvas fixed behind the page. At rest the room fills the window (the slab, the bed's front and
-// the ground shadow overflow out of the bottom). Scroll pulls the four pieces apart radially while the
-// camera pulls back, and pushes them together again. Pointers anchored to the geometry grow into in-place
-// modals. Rendering is on demand: a frame is drawn only when something moved.
+// main.js — the room, in 3D.
+// One WebGL canvas fixed behind the page. The room fills the window (the slab, the bed's front and the
+// ground shadow overflow out of the bottom). Pointers anchored to the geometry grow into in-place modals;
+// hovering near his head makes him look back. Rendering is on demand: a frame is drawn only when
+// something moved (the look-back, the day/night tween, a resize).
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { buildRoom, PINS, ROOM, setWindow } from './room.js';
+import { buildRoom, PINS, ROOM } from './room.js';
 import { lerp, clamp, easeInOut, canvasTex, themed, applyTheme } from './helpers.js';
 
-const SECTIONS = ['about', 'work', 'projects', 'skills', 'hobbies', 'contact'];
+const SECTIONS = ['about', 'work', 'projects', 'skills', 'contact'];
 const PAPER = '#F3EEE4';
-// where each piece travels when the room comes apart: an isometric cardinal direction, a distance and a
-// lift. The side pieces travel far and the back/front ones little, so the exploded room spreads WIDE and
-// fills a 16:9 frame instead of stacking up the screen.
-const TRAVEL = {
-  battle: { dir: [-1, -1], dist: 24, lift: 12 },
-  rack:   { dir: [1, -1],  dist: 46, lift: 2 },
-  door:   { dir: [-1, 1],  dist: 46, lift: 2 },
-  bed:    { dir: [1, 1],   dist: 22, lift: -3 },
-};
-const TILT = 0.035;                                   // radians of outward tilt when apart
-const FRAME = 16 / 9;                                 // the exploded artwork is composed inside a 16:9 frame
+const FRAME = 16 / 9;                                 // the room is composed inside a 16:9 frame
 const FOV = 20;
 const AZ = THREE.MathUtils.degToRad(43), EL = THREE.MathUtils.degToRad(26);
 // The window shows the room itself: the two wall ends span the width, the wall tops sit just under the top
@@ -32,11 +22,10 @@ const TOP_MARGIN = 0.04;                              // fraction of the height 
 const MAX_OVERFLOW = 1.42;                            // the room may be this many viewport heights tall before we stop zooming in
 const PIN_EDGE = 150;                                 // a label this close to a side edge flips to the other side
 const LOOK_RADIUS = 0.09;                             // fraction of the height: the pointer this close to his head makes him look back
-const LOOK_YAW = -2.0, LOOK_TWIST = -0.3;             // head yaw and torso twist (radians) when he looks back over his right shoulder
+const LOOK_YAW = -2.0, LOOK_TWIST = -0.42;            // head yaw and torso twist (radians) when he looks back over his right shoulder
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const q = new URLSearchParams(location.search);
-const pinnedP = q.has('p') ? clamp(+q.get('p')) : null;     // ?p=0.5 pins the explode progress (screenshots)
 const still = q.has('still');                               // screenshots: no fade-in, no loader hold
 const pinnedLook = q.has('look') ? clamp(+q.get('look')) : null;   // ?look=1 pins the look-back (screenshots)
 if (still) document.body.classList.add('still');
@@ -46,9 +35,6 @@ const stage = $('stage');
 const canvas = $('view');
 const pinsEl = $('pins');
 const centre = stage.querySelector('.centre');
-const hint = $('hint');
-const thumb = $('thumb');
-const track = $('track');
 const loader = $('loader');
 const root = $('modal-root');
 const modal = $('modal');
@@ -91,11 +77,12 @@ const dirCam = new THREE.Vector3(Math.sin(AZ) * Math.cos(EL), Math.sin(EL), Math
 // ------------------------------------------------------------------ lights ----
 // Two states of one room. DAY: the sun comes in through the window on the front wall (the wall the camera
 // looks through — see WINDOW in room.js), so the floor and the door wall carry a window-shaped patch of
-// light and everything else is lit by sky and bounce. NIGHT: the sun is a thin blue moon through the same
-// window, the sky is near black, and the room's own sources — the lamp, the line light, the red tube, the
-// sign, the screens, the candle — are what you see by. No painted light anywhere: every pool on a surface
-// comes from a light that is really there, in physical units with inverse-square falloff. applyTheme(t)
-// moves every registered value between the two readings.
+// light and everything else is lit by sky and bounce; every light in the room is switched off and is just
+// the pale object it is made of. NIGHT: the sun is a thin blue moon through the same window, the sky is
+// near black, and the room's own sources — the lamp, the line light, the red tube, the sign, the screens,
+// the candle — are what you see by. No painted light anywhere: every pool on a surface comes from a light
+// that is really there, in physical units with inverse-square falloff. applyTheme(t) moves every
+// registered value between the two readings.
 if (GL) {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -130,14 +117,6 @@ fill.position.set(22 + 80, 24, 22 + 50);
 themed(fill, 'intensity', 0.22, 0);
 scene.add(fill);
 
-// paper ground: shows only the shadows the floating pieces cast (hidden while the window wall is up, since
-// the wall would shadow all of it; gone at night)
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: 0 }));
-ground.rotation.x = -Math.PI / 2;
-ground.position.set(22, -ROOM.SLAB - 4, 22);
-ground.receiveShadow = true;
-scene.add(ground);
-
 // ------------------------------------------------------------------ room ----
 const { pieces, figure } = GL ? await buildRoom(scene) : { pieces: {}, figure: null };
 const pieceList = Object.values(pieces);
@@ -147,13 +126,8 @@ const contactTex = canvasTex(256, 256, (ctx, w, h) => {
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 }, { q: 1 });
 for (const p of pieceList) {
-  p.g.userData.piece = p.name;
-  const tr = TRAVEL[p.name];
-  p.dir = new THREE.Vector3(tr.dir[0], 0, tr.dir[1]).normalize();
-  p.dist = tr.dist; p.liftApart = tr.lift;
-  p.axis = new THREE.Vector3(-p.dir.z, 0, p.dir.x);                  // tilt axis, perpendicular to the travel
   const [x0, x1, z0, z1] = p.rect;
-  // a soft contact shadow that travels with the piece (the darkening under a thing standing on paper)
+  // the soft shadow on the paper under the room (the darkening under a thing standing on a table)
   const shm = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, opacity: .5 });
   themed(shm, 'opacity', .5, .12);
   const sh = new THREE.Mesh(new THREE.PlaneGeometry((x1 - x0) * 1.5 + 8, (z1 - z0) * 1.5 + 8), shm);
@@ -161,8 +135,6 @@ for (const p of pieceList) {
   sh.position.set((x0 + x1) / 2 - p.centre.x - 2, -ROOM.SLAB - 1.2, (z0 + z1) / 2 - p.centre.z - 2);
   p.g.add(sh);
 }
-const pickables = [];
-for (const p of pieceList) p.inner.traverse((o) => { if (o.isMesh && !o.userData.noPick && !(o.material.isMeshBasicMaterial && o.material.transparent)) pickables.push(o); });
 
 // ------------------------------------------------------------------ pins ----
 const pinEls = (GL ? PINS : []).map((pin) => {
@@ -183,13 +155,11 @@ document.body.appendChild(mnav);
 
 // ------------------------------------------------------------------ state ----
 let W = 0, H = 0, compact = false;
-let target = 0, cur = 0, open = null, origin = null, pendingHash = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : null;
-let fit0 = null, fit1 = null;
-let hovered = null, pointerMoved = false, pointerIn = false, forceRender = true;
+let open = null, origin = null, pendingHash = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : null;
+let pointerIn = false, forceRender = true;
 let look = 0, lookGoal = 0, closeTimer = 0, swapTimer = 0;
-const ndc = new THREE.Vector2(), px = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
-const _v = new THREE.Vector3(), _t = new THREE.Vector3(), _right = new THREE.Vector3(), _up = new THREE.Vector3();
+const px = new THREE.Vector2();
+const _t = new THREE.Vector3(), _right = new THREE.Vector3(), _up = new THREE.Vector3();
 
 // theme: 0 = day, 1 = night. Night is the default; the choice is kept in localStorage (the inline script in
 // the head applies it before first paint) and the scene tweens between the two readings in the loop.
@@ -207,10 +177,6 @@ function setTheme(n, persist = true) {
 setTheme(night, false);
 themeBtn.addEventListener('click', () => setTheme(night ? 0 : 1));
 applyTheme(theme);
-
-function offsetAt(p, e) {                              // where a piece sits at explode progress e (eased)
-  return _v.copy(p.centre).addScaledVector(p.dir, p.dist * e).setY(p.liftApart * e);
-}
 
 function aimCamera(aim, d) {
   camera.position.copy(aim).addScaledVector(dirCam, d);
@@ -265,11 +231,11 @@ function fitRoom(d) {
   return { d, aim, fov: camera.fov };
 }
 
-function cornersAt(e) {
+/** The eight corners of every piece's bounds: what the contain fit frames. */
+function corners() {
   const pts = [];
   for (const p of pieceList) {
-    const o = offsetAt(p, e).clone().sub(p.centre);
-    const b = p.box0.clone().translate(o);
+    const b = p.box0;
     for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z));
   }
   return pts;
@@ -284,33 +250,13 @@ function measure() {
   H = Math.round(rect.height) || H;
   renderer.setSize(W, H, false);
   camera.clearViewOffset();
-  const rest = compact ? fit(cornersAt(0), 0.94, W / (H * 0.62)) : fit(cornersAt(0), 0.88);
-  fit0 = compact ? rest : fitRoom(rest.d);
-  fit1 = compact ? rest : fit(cornersAt(1), 0.9);
-  forceRender = true;
-}
-
-function layout() {
-  const e = easeInOut(cur);
-  for (const p of pieceList) {
-    p.g.position.copy(offsetAt(p, e));
-    p.g.position.y += p.lift;
-    p.g.quaternion.setFromAxisAngle(p.axis, -TILT * e);
-  }
-  // the window wall opens as the room comes apart, so the floating pieces stand in full sun; the paper
-  // ground shows the pieces' shadows only once the wall no longer shadows all of it
-  const gw = clamp((e - 0.06) / 0.5), open_ = gw * gw * (3 - 2 * gw);
-  setWindow(open_);
-  ground.material.opacity = lerp(0.1, 0, theme) * open_;
-  camera.fov = lerp(fit0.fov, fit1.fov, e);
+  // phones: the whole room contained in the upper part of the screen; desktop: the room fills the window
+  const f = compact ? fit(corners(), 0.94, W / (H * 0.62)) : fitRoom(fit(corners(), 0.88).d);
+  camera.fov = f.fov;
   camera.aspect = W / H;
   camera.updateProjectionMatrix();
-  _t.copy(fit0.aim).lerp(fit1.aim, e);
-  aimCamera(_t, lerp(fit0.d, fit1.d, e));
-  centre.style.opacity = compact ? 0 : clamp((e - .55) / .45).toFixed(3);
-  centre.style.transform = `translate(-50%, ${(-50 + (1 - e) * 6).toFixed(2)}%)`;
-  hint.style.opacity = (1 - clamp(e * 3)).toFixed(3);
-  thumb.style.transform = `translateX(${Math.round(cur * (track.clientWidth - 8) / 2) * 2}px)`;
+  aimCamera(f.aim, f.d);
+  forceRender = true;
 }
 
 function placePins() {
@@ -329,17 +275,6 @@ function placePins() {
   }
 }
 
-function pick() {
-  raycaster.setFromCamera(ndc, camera);
-  const hit = raycaster.intersectObjects(pickables, false)[0];
-  let p = null;
-  if (hit) { let o = hit.object; while (o && !o.userData.piece) o = o.parent; p = o ? pieces[o.userData.piece] : null; }
-  if (p !== hovered) {
-    hovered = p;
-    for (const q of pieceList) q.liftGoal = q === p ? 0.9 : 0;
-  }
-}
-
 /** He looks back over his shoulder when the pointer comes near his head, and for as long as About is open. */
 function aimLook() {
   if (!figure) return;
@@ -351,9 +286,11 @@ function aimLook() {
   lookGoal = Math.hypot(px.x - hx, px.y - hy) < LOOK_RADIUS * H ? 1 : 0;
 }
 
+/** The look-back: the head turns, the torso twists a little with it, and the arms re-solve so the hands stay on the keys. */
 function poseLook(e) {
   figure.head.rotation.set(0.1 * e, LOOK_YAW * e, -0.05 * e);
   figure.torso.rotation.y = LOOK_TWIST * e;
+  figure.solveArms();
 }
 
 // ------------------------------------------------------------------ modal ----
@@ -401,7 +338,6 @@ function show(section, from) {
   pinEls.forEach(({ el }) => el.toggleAttribute('aria-current', el.dataset.section === section));
   mnav.querySelectorAll('button').forEach((b) => b.toggleAttribute('aria-current', b.textContent === section));
   document.body.classList.add('modal-open');
-  document.documentElement.style.overflow = 'hidden'; // the page scroll (= the explode) is parked while reading
   history.replaceState(null, '', '#' + section);
   modal.focus({ preventScroll: true });
 }
@@ -419,18 +355,11 @@ function hide() {
   pinEls.forEach(({ el }) => el.removeAttribute('aria-current'));
   mnav.querySelectorAll('button').forEach((b) => b.removeAttribute('aria-current'));
   document.body.classList.remove('modal-open');
-  document.documentElement.style.overflow = '';
   history.replaceState(null, '', location.pathname + location.search);
   from?.focus?.({ preventScroll: true });
 }
 
 // ------------------------------------------------------------------ chrome ----
-function onScroll() {
-  if (pinnedP !== null || compact || open) return;
-  const max = document.documentElement.scrollHeight - innerHeight;
-  target = max > 0 ? clamp(scrollY / max) : 0;
-}
-
 const clockFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false });
 function tick() { $('clock-time').textContent = clockFmt.format(new Date()); }
 tick(); setInterval(tick, 15000);
@@ -448,25 +377,15 @@ function dismissLoader() {
 }
 
 root.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', hide));
-$('mark').addEventListener('click', (e) => { e.preventDefault(); hide(); scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }); });
-track.addEventListener('click', (e) => {
-  if (compact) return;
-  const r = track.getBoundingClientRect();
-  const max = document.documentElement.scrollHeight - innerHeight;
-  scrollTo({ top: clamp((e.clientX - r.left) / r.width) * max, behavior: reduced ? 'auto' : 'smooth' });
-});
+$('mark').addEventListener('click', (e) => { e.preventDefault(); hide(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
-addEventListener('scroll', onScroll, { passive: true });
 addEventListener('resize', measure);
 stage.addEventListener('pointermove', (e) => {
   const r = canvas.getBoundingClientRect();
   px.set(e.clientX - r.left, e.clientY - r.top);
-  ndc.set((px.x / r.width) * 2 - 1, -(px.y / r.height) * 2 + 1);
-  pointerMoved = true; pointerIn = true;
+  pointerIn = true;
 });
-stage.addEventListener('pointerleave', () => { hovered = null; pointerIn = false; for (const p of pieceList) p.liftGoal = 0; });
-
-
+stage.addEventListener('pointerleave', () => { pointerIn = false; });
 
 // ------------------------------------------------------------------ loop ----
 let last = performance.now();
@@ -474,12 +393,7 @@ function frame(t) {
   if (!GL) return;
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
-  const k = reduced ? 1 : 1 - Math.pow(1 - 0.085, dt * 60);       // the slow part: the room never snaps
   let dirty = forceRender;
-  const goal = pinnedP !== null ? pinnedP : compact ? 0 : target;
-  if (cur !== goal) { cur = Math.abs(goal - cur) < 0.0006 ? goal : lerp(cur, goal, k); dirty = true; }
-  for (const p of pieceList) if (p.lift !== p.liftGoal) { p.lift = Math.abs(p.liftGoal - p.lift) < 0.004 ? p.liftGoal : lerp(p.lift, p.liftGoal, 1 - Math.pow(1 - 0.12, dt * 60)); dirty = true; }
-  if (pointerMoved) { pointerMoved = false; pick(); }
   // the look back: a slow ease out and back (about 0.7 s), never a snap
   aimLook();
   if (figure && look !== lookGoal) {
@@ -495,7 +409,6 @@ function frame(t) {
   }
   if (dirty) {
     forceRender = false;
-    layout();
     renderer.render(scene, camera);
     placePins();
     if (!document.body.classList.contains('ready')) { document.body.classList.add('ready'); dismissLoader(); }
@@ -504,9 +417,8 @@ function frame(t) {
 }
 
 measure();
-if (pinnedP !== null) cur = pinnedP; else onScroll();
 if (pinnedLook !== null && figure) { look = pinnedLook; poseLook(easeInOut(look)); }
 // compile every program before the first frame (in parallel where the driver allows) instead of stalling
 // the first render for seconds; the loader keeps animating meanwhile
-if (GL) { layout(); try { await renderer.compileAsync(scene, camera); } catch (err) { console.warn('shader precompile skipped', err); } }
+if (GL) { try { await renderer.compileAsync(scene, camera); } catch (err) { console.warn('shader precompile skipped', err); } }
 frame(performance.now());                                       // the first frame now; the loop schedules the rest

@@ -1,12 +1,12 @@
-// room.js — Mihir's room as four 3D pieces that assemble into one cutaway.
+// room.js — Mihir's room as one cutaway, built in four groups (the desk corner, the rack, the door wall, the bed).
 // 1 unit = 9 cm. Room 44 x 44 (3.96 m square), walls 32 (2.9 m): every object below is sized from
 // real dimensions (desk 75 cm, chair seat 45 cm, mug 9 cm) so the room reads at normal proportions.
 // The camera looks in from the bed side, so the two back walls are the DOOR wall (plane x = 0, runs
 // along z) and the S wall (plane z = 0, runs along x). The wall desk and the monitor desk meet as an L
-// in the inner corner, the S light hangs above the end of the monitor desk, the guitar over the
+// in the inner corner, the line light hangs above the end of the monitor desk, the guitar over the
 // monitor, the shelves and clothes rack continue along the S wall, the bed runs along the open front.
 import * as THREE from 'three';
-import { mat, flat, box, cyl, rodX, rodZ, sphere, limb, ring, tube, plane, hinge, instanced, glow, contact, point, emissive, themed } from './helpers.js';
+import { UP, mat, flat, box, cyl, rodX, rodZ, sphere, limb, loft, ring, tube, plane, hinge, instanced, glow, contact, point, emissive, themed, clamp } from './helpers.js';
 import * as T from './textures.js';
 
 export const ROOM = { L: 44, H: 32, SLAB: 5, CENTRE: new THREE.Vector3(22, 10, 22) };
@@ -30,8 +30,7 @@ export const PINS = [
   { section: 'projects', piece: 'battle', at: [0.9, 10.3, 7.5], side: 'left' },      // the MacBook on the wall desk: side projects
   { section: 'work',     piece: 'battle', at: [7.75, 10.9, 1.75], side: 'top' },     // the work laptop on the riser, editor open
   { section: 'skills',   piece: 'battle', at: [13.5, 11.8, 3.6], side: 'right' },    // the monitor: code, terminal, metrics
-  { section: 'about',    piece: 'battle', at: [15.45, 11.05, 12.65], side: 'bottom' }, // Mihir: his right shoulder
-  { section: 'hobbies',  piece: 'rack',   at: [29.5, 2.6, 11.5], side: 'bottom' },   // the football
+  { section: 'about',    piece: 'battle', at: [15.75, 12.35, 13.0], side: 'bottom' }, // Mihir: his right shoulder
   { section: 'contact',  piece: 'bed',    at: [18.4, 7.05, 32.6], side: 'right' },   // his phone, face up on the pillow
 ];
 
@@ -68,14 +67,15 @@ function materials(tex) {
     mesh: mat('#3C3C44', { roughness: .95 }),
     metal: mat('#8A8A90', { metalness: .85, roughness: .28, env: 1 }),
     chrome: mat('#D9DBE0', { metalness: 1, roughness: .18, env: 1.2 }),
-    skin: mat('#C68B5E', { roughness: .78 }),
-    skinShade: mat('#B87F55', { roughness: .8 }),
-    hair: mat('#2A1B14', { roughness: .82, env: .25 }),
-    beard: mat('#2B1C15', { roughness: .95, side: THREE.DoubleSide }),
-    eyeWhite: mat('#F4F0E8', { roughness: .3, env: .6 }),
-    iris: mat('#3A2418', { roughness: .25, env: .8 }),
+    skin: mat('#C9A078', { roughness: .66, env: .3 }),
+    skinShade: mat('#BA9069', { roughness: .7 }),
+    hair: mat('#26190F', { roughness: .72, env: .3 }),
+    beard: mat('#2A1C14', { roughness: .9, side: THREE.DoubleSide }),
+    eyeWhite: mat('#F2EEE6', { roughness: .3, env: .6 }),
+    iris: mat('#2E1C12', { roughness: .25, env: .8 }),
     lip: mat('#8A4A48', { roughness: .8 }),
-    rim: mat('#62636A', { metalness: .7, roughness: .35, env: 1 }),
+    rim: mat('#8D9096', { roughness: .3, transparent: true, opacity: .82, env: .9 }),
+    lens: mat('#E6EEF5', { roughness: .05, transparent: true, opacity: .22, env: 1.4, side: THREE.DoubleSide }),
     jersey: mat('#F6F4EE', { roughness: .9 }),
     maroon: mat('#8A1F2E', { roughness: .85 }),
     jeans: mat('#3A4A6B', { roughness: 1 }),
@@ -91,10 +91,11 @@ function materials(tex) {
     doorFrame: mat('#EFE6D2', { roughness: .7 }),
     door: mat('#F3ECDC', { roughness: .6, env: .3 }),
     corridorFloor: mat('#D9CDB3'),
-    shadeFabric: emissive(mat('#F5DDB6', { roughness: .95 }), '#FFB45A', .3, 2.4),
-    bulb: emissive(mat('#FFF4D6'), '#FFE2A8', 1.2, 7),
+    // the light sources, switched off by day: fabric, frosted glass, a flame that is not there
+    shadeFabric: emissive(mat('#F7EBD8', { roughness: .95 }), '#FFB45A', 2.4),
+    bulb: emissive(mat('#F4F1EA', { roughness: .3, env: .6 }), '#FFE2A8', 7, { opacity: .85 }),
     candle: mat('#F5F4EF'),
-    flame: emissive(mat('#FFD27A', { roughness: 1 }), '#FFB040', 1.5, 6),
+    flame: emissive(mat('#FFD27A', { roughness: 1 }), '#FFB040', 6, { opacity: 0 }),
     weave: mat('#FFFFFF', { map: tex.weave, roughness: 1 }),
     rubik: ['#D8402A', '#F28C28', '#F2F2F2', '#F2C230', '#2D63B8', '#3DA35A'].map((c) => mat(c, { roughness: .35, env: .6 })),
     shirt: { grey: mat('#9A9CA2', { roughness: 1 }), navy: mat('#2B3A5C', { roughness: 1 }), red: mat('#B3312E', { roughness: 1 }), hoodie: mat('#3A3A40', { roughness: 1 }), spain: mat('#F3F1EA', { roughness: 1 }) },
@@ -168,7 +169,7 @@ function laptop(g, { x, y, z, yaw = 0, w, d, lid, body, screen, deck = null, til
   box(h, -w / 2, w / 2, -.16, 0, 0, lid, body, { r });
   plane(h, '+z', .006, -w / 2 + .14, w / 2 - .14, .14, lid - .14, flat('#FFFFFF', { map: screen }));
   // the screen throws a little warm light onto the deck (the main light on the desk at night)
-  point(h, 0, lid * .5, .9, '#FFE2C0', .8, 3.2, 6);
+  point(h, 0, lid * .5, .9, '#FFE2C0', 3.2, 6);
   return grp;
 }
 
@@ -199,30 +200,38 @@ function neonSign(inner, tex) {
   const [z0, z1, y0] = [10.7, 13.7, 8.5];                               // a 27 x 17 cm light box leaning on the wall
   box(inner, 0.12, 0.62, z0, z1, y0, y0 + 1.9, M.black, { r: .05 });
   box(inner, 0.62, 0.72, z0 + .15, z1 - .15, y0 + .15, y0 + 1.75, M.white, { sharp: true, cast: false });
-  plane(inner, '+x', 0.73, z0 + .2, z1 - .2, y0 + .2, y0 + 1.7, flat('#FFFFFF', { map: tex.neon }));
-  point(inner, 1.4, y0 + 1.0, 12.2, '#FFC46A', 2.0, 12, 11);
-  glow(inner, 0.9, y0 + .95, 12.2, 2.6, '#FFD48A', 0, .22);
+  // the face: a milky white panel with the line in grey by day; at night the panel lights up amber
+  const face = mat('#FFFFFF', { map: tex.neonOff, roughness: .25, env: .5, emissiveMap: tex.neon, emissive: '#FFFFFF', emissiveIntensity: 0 });
+  emissive(face, '#FFFFFF', 1.3, { dark: '#17130F' });
+  plane(inner, '+x', 0.73, z0 + .2, z1 - .2, y0 + .2, y0 + 1.7, face);
+  point(inner, 1.4, y0 + 1.0, 12.2, '#FFC46A', 12, 11);
+  glow(inner, 0.9, y0 + .95, 12.2, 2.6, '#FFD48A', .22);
 }
 
 /**
  * The line light on the wall: not an S but a snake, an LED line that curls at the head, undulates and
- * trails off, no two bends alike. Drawn unlit and untone-mapped in a saturated amber so it stays yellow
- * (an emissive strip under ACES goes white), with a brighter core along the side the camera sees and
- * standoffs into the wall. Four point lights along the curve are the light it actually throws.
+ * trails off, no two bends alike. By day it is what it is made of — a milky white diffuser tube on
+ * standoffs. At night it glows a saturated amber (drawn untone-mapped so it stays yellow; an emissive
+ * strip under ACES goes white), with a brighter core along the side the camera sees. Four point lights
+ * along the curve are the light it actually throws.
  */
 function sLight(inner) {
   // tall like the S was (y 12.5 to 24.5, x 0.8 to 6.8): a curl at the head, then four bends of unequal reach down the wall
   const ctrl = [[0.42, 0.11], [0.58, 0.03], [0.76, 0.10], [0.74, 0.24], [0.56, 0.28], [0.34, 0.30], [0.16, 0.40], [0.22, 0.52],
     [0.50, 0.58], [0.78, 0.64], [0.84, 0.76], [0.66, 0.86], [0.40, 0.90], [0.20, 0.97], [0.08, 1.0]];
   const pts = ctrl.map(([u, w]) => v(0.8 + u * 6.0, 24.5 - w * 12.0, 0.55));
-  const amber = flat('#FFAE1E', { toneMapped: false });
-  const core = flat('#FFE59A', { toneMapped: false });
+  const led = (glowColor) => {
+    const m = mat('#F4F2EE', { roughness: .35, env: .6 });
+    m.toneMapped = false;
+    return emissive(m, glowColor, 1, { dark: '#0A0702', opacity: .8 });
+  };
+  const amber = led('#FFAE1E'), core = led('#FFE59A');
   const { curve } = tube(inner, pts, 0.17, amber, { seg: 260, radial: 12, cast: false });
   tube(inner, pts.map((p) => v(p.x + .03, p.y + .02, p.z + .1)), 0.075, core, { seg: 260, radial: 8, cast: false });
   for (const t of [0, 1]) { const p = curve.getPoint(t); sphere(inner, p.x, p.y, p.z, 0.17, amber, { cast: false, seg: 12 }); }
   for (const t of [0.07, 0.3, 0.52, 0.74, 0.95]) { const p = curve.getPoint(t); rodZ(inner, 0, p.z, p.x, p.y, 0.06, M.metal, { cast: false, seg: 8 }); }
-  for (const t of [0.12, 0.4, 0.65, 0.9]) { const p = curve.getPoint(t); point(inner, p.x, p.y, 1.7, '#FFB236', 1.4, 15, 22); }
-  for (const t of [0.08, 0.26, 0.44, 0.62, 0.8, 0.96]) { const p = curve.getPoint(t); glow(inner, p.x, p.y, p.z + .4, 2.4, '#FFB030', 0, .14); }
+  for (const t of [0.12, 0.4, 0.65, 0.9]) { const p = curve.getPoint(t); point(inner, p.x, p.y, 1.7, '#FFB236', 15, 22); }
+  for (const t of [0.08, 0.26, 0.44, 0.62, 0.8, 0.96]) { const p = curve.getPoint(t); glow(inner, p.x, p.y, p.z + .4, 2.4, '#FFB030', .14); }
 }
 
 function monitorDesk(inner, tex) {
@@ -247,7 +256,7 @@ function monitorDesk(inner, tex) {
   box(inner, mx - 3.65, mx + 3.65, 3.2, 3.55, top + 1.2, top + 5.45, M.black, { r: .08 });
   plane(inner, '+z', 3.56, mx - 3.45, mx + 3.45, top + 1.4, top + 5.25, flat('#FFFFFF', { map: tex.dev }));
   box(inner, mx - 2.2, mx + 2.2, 2.9, 3.2, top + 2.0, top + 4.6, M.darkm, { r: .1 });            // the back housing
-  point(inner, mx, top + 3.3, 5.6, '#FFDDB0', 2.4, 9, 13);                                        // the monitor lights the desk and him
+  point(inner, mx, top + 3.3, 5.6, '#FFDDB0', 9, 13);                                             // the monitor lights the desk and him
   keyboard(inner, 10.6, 15.5, 5.45, 7.0, top);
   box(inner, 16.4, 17.5, 5.6, 6.6, top, top + .4, M.grey, { r: .22 });                           // mouse
   rodZ(inner, 3.6, 5.5, 17.0, top + .08, .05, M.black, { cast: false });                          // mouse cable
@@ -260,7 +269,7 @@ function monitorDesk(inner, tex) {
   tube(inner, [v(8.4, .3, 1.5), v(6.2, .3, 1.7), v(5.6, 2.0, 1.9), v(5.8, top - .95, 2.6)], .08, M.black, { seg: 30, radial: 6, cast: false });
 }
 
-/** PS5, standing on its stand against the wall: black body between two white plates that flare at the top, a warm power light. */
+/** PS5, standing on its stand against the wall: black body between two white plates that flare at the top. */
 function ps5(inner, x, z, top) {
   const H = 4.3, D = 2.9;                                                                        // 39 x 26 x 10.4 cm
   cyl(inner, x, z, 1.05, top, top + .12, M.psBlack, { seg: 36 });                                 // stand
@@ -270,10 +279,15 @@ function ps5(inner, x, z, top) {
     box(g, s > 0 ? 0 : -.17, s > 0 ? .17 : 0, -D / 2, D / 2, 0, H - .12, M.psWhite, { r: .1 });
     box(g, s > 0 ? -.02 : -.15, s > 0 ? .15 : .02, -D / 2 + .3, D / 2 - .3, H - .12, H + .1, M.psWhite, { r: .08 });   // the taller lip
   }
-  box(inner, x - .3, x + .3, z - D / 2 + .35, z + D / 2 - .35, top + H - .35, top + H - .31, flat('#FFE6C2', { toneMapped: false }), { sharp: true, cast: false });  // power light along the top, warm
   box(inner, x - .2, x + .2, z + D / 2 - .14, z + D / 2 - .02, top + 1.2, top + 1.45, M.darkm, { sharp: true, cast: false });       // disc slot
-  point(inner, x + .9, top + 2.4, z, '#FFE0B8', .5, 1.8, 5);
   contact(inner, x - 1.1, x + 1.1, z - 1.1, z + 1.1, .22, top + .01);
+}
+
+/** A small LED strip: white plastic by day, lit warm at night. */
+function ledStrip(inner, x0, x1, z0, z1, y0, y1) {
+  const m = flat('#E9E7E2', { toneMapped: false });
+  themed(m, 'color', new THREE.Color('#E9E7E2'), new THREE.Color('#FFE6C2'));
+  return box(inner, x0, x1, z0, z1, y0, y1, m, { sharp: true, cast: false });
 }
 
 /** DualSense on the desk: white body, black face plate and touchpad, two sticks, two grips. */
@@ -285,7 +299,7 @@ function dualsense(inner, x, z, top) {
     limb(inner, v(x + s * .72, top + .25, z + .2), v(x + s * .95, top + .22, z + 1.15), .28, M.psWhite);     // grips
     cyl(inner, x + s * .42, z + .3, .13, top + .56, top + .8, M.psBlack, { seg: 14, cast: false });         // sticks
   }
-  box(inner, x - .34, x + .34, z - .55, z - .4, top + .5, top + .62, flat('#FFE6C2', { toneMapped: false }), { sharp: true, cast: false });   // light bar
+  ledStrip(inner, x - .34, x + .34, z - .55, z - .4, top + .5, top + .62);                                     // light bar
   contact(inner, x - 1.1, x + 1.1, z - .7, z + 1.3, .2, top + .01);
 }
 
@@ -353,80 +367,131 @@ function gamingChairWithMihir(inner) {
     box(inner, sx + .15, sx + .55, cz - .6, cz + .4, 5.2, 7.4, M.black, { r: .08 });
     box(inner, sx, sx + .75, cz - 1.8, cz + 1.0, 7.4, 7.85, M.black, { r: .2 });
   }
-  // Mihir. Seat surface 5.7 (51 cm); shoulders 10.9; head top 14.75 (1.33 m seated). He faces the monitor
-  // (-z); the camera sees his back and right side. `torso` and `head` are groups so he can look back.
-  const S = 5.7, hipY = S + .9;
-  for (const sx of [-1, 1]) {
-    const hx = cx + sx * .75;
-    limb(inner, v(hx, hipY, cz + .6), v(hx + sx * .1, hipY + .1, cz - 3.0), .68, M.jeans);       // thigh
-    sphere(inner, hx + sx * .1, hipY + .05, cz - 3.0, .6, M.jeans, { seg: 16 });                 // knee
-    limb(inner, v(hx + sx * .1, hipY, cz - 3.0), v(hx + sx * .15, .9, cz - 2.6), .48, M.jeans);  // shin
-    const fx = hx + sx * .15;
-    box(inner, fx - .6, fx + .6, cz - 5.0, cz - 1.9, .3, 1.05, M.white, { r: .3 });               // trainer
-    box(inner, fx - .62, fx + .62, cz - 5.05, cz - 1.85, 0, .32, M.darkm, { r: .12, cast: false });
-    box(inner, fx - .3, fx + .3, cz - 4.6, cz - 2.6, 1.05, 1.12, M.maroon, { sharp: true, cast: false });   // laces
-  }
-  // torso: waist narrower than the chest, shoulder caps, the maroon trims as patches over the caps, collar, neck
+  // Mihir, at the proportions of a 1.75 m man of a stocky build: seat 51 cm; hips 36 cm wide; 53 cm across
+  // the shoulders; a 20 x 23 cm head on a thick neck; sitting height 91 cm. He faces the monitor (-z); the
+  // camera sees his back and right side. `torso` and `head` are groups so he can look back. The arms are
+  // solved every pose from the shoulders (which turn with the torso) to the hands, which stay on the keys.
   const torso = new THREE.Group(); torso.position.set(cx, 0, cz + .5); inner.add(torso);
-  box(torso, -1.5, 1.5, -.8, .8, S + .9, S + 3.7, M.jersey, { r: .6 });
-  box(torso, -1.85, 1.85, -.95, .95, S + 3.2, S + 5.65, M.jersey, { r: .8 });
+  sphere(torso, 0, 6.55, .15, 1, M.jeans, { scale: [2.0, .95, 1.45], seg: 28 });                 // hips, on the seat
+  loft(torso, [                                                                                   // the jersey: hem over the hips, waist, chest, the slope of the shoulders into the collar
+    { y: 6.45, w: 2.08, d: 1.5, z: .12 }, { y: 7.3, w: 1.98, d: 1.34, z: .06 }, { y: 8.5, w: 1.9, d: 1.26 },
+    { y: 9.8, w: 2.04, d: 1.3 }, { y: 11.0, w: 2.3, d: 1.38 }, { y: 11.9, w: 2.42, d: 1.32 },
+    { y: 12.45, w: 1.95, d: 1.1 }, { y: 12.9, w: 1.05, d: .86, z: -.04 }, { y: 13.1, w: .8, d: .74, z: -.04 },
+  ], M.jersey);
+  const SH = [2.28, 12.05, .05];                                                                  // the shoulder joint (torso-local, mirrored in x)
   for (const sx of [-1, 1]) {
-    sphere(torso, sx * 1.9, S + 5.1, 0, .64, M.jersey, { seg: 20 });
-    sphere(torso, sx * 1.9, S + 5.1, 0, .665, M.maroon, { seg: 20, thetaLength: .7, cast: false });
+    sphere(torso, sx * SH[0], SH[1], SH[2], .68, M.jersey, { scale: [1, .95, .95], seg: 22 });    // deltoid under the sleeve cap
+    sphere(torso, sx * SH[0], SH[1], SH[2], .70, M.maroon, { scale: [1, .95, .95], seg: 22, thetaLength: .75, cast: false });   // the maroon trim over it
   }
-  cyl(torso, 0, -.05, .84, S + 5.55, S + 5.95, M.maroon, { rTop: .76 });
-  cyl(torso, 0, -.1, .5, S + 5.6, S + 6.95, M.skin);
-  // arms: short sleeves with a maroon cuff, upper arms hanging beside the body, elbows just behind the desk
-  // edge, forearms level onto the keys, hands with fingers on the keyboard
+  cyl(torso, 0, -.04, .86, 12.95, 13.25, M.maroon, { rTop: .8 });                                 // collar
+  cyl(torso, 0, -.04, .74, 12.5, 13.75, M.skin);                                                  // neck
+  // legs: thighs level to the knees under the desk edge, shins down to the trainers, jeans to the shoe
   for (const sx of [-1, 1]) {
-    const sh = v(cx + sx * 1.9, S + 5.1, cz + .5), el = v(cx + sx * 2.05, 8.6, cz - 1.0), ha = v(cx + sx * .95, 9.2, 6.75);
-    const dir = el.clone().sub(sh).normalize(), cuff = sh.clone().lerp(el, .42);
-    limb(inner, sh, cuff, .5, M.jersey);
-    limb(inner, cuff.clone().addScaledVector(dir, -.1), cuff.clone().addScaledVector(dir, .1), .52, M.maroon, { cast: false });
-    limb(inner, cuff, el, .4, M.skin);
-    sphere(inner, el.x, el.y, el.z, .42, M.skin, { seg: 16 });
-    limb(inner, el, ha, .34, M.skin);
-    sphere(inner, ha.x, ha.y - .05, ha.z - .35, .5, M.skin, { scale: [1.0, .5, 1.3], seg: 16 });                          // palm
-    for (let i = 0; i < 4; i++) limb(inner, v(ha.x + (i - 1.5) * .24, ha.y - .08, ha.z - .75), v(ha.x + (i - 1.5) * .26, ha.y - .3, ha.z - 1.3), .1, M.skin);
-    limb(inner, v(ha.x - sx * .4, ha.y - .1, ha.z - .3), v(ha.x - sx * .8, ha.y - .3, ha.z - .65), .11, M.skin);           // thumb, toward the middle
+    const hip = v(cx + sx * 1.0, 6.5, cz + .6), knee = v(cx + sx * 1.25, 6.3, cz - 4.4), ankle = v(cx + sx * 1.3, 1.05, cz - 4.1);
+    limb(inner, hip, knee, .9, M.jeans, { rb: .74 });
+    sphere(inner, knee.x, knee.y, knee.z, .76, M.jeans, { seg: 18 });
+    limb(inner, knee, ankle, .7, M.jeans, { rb: .5 });
+    const shoe = new THREE.Group(); shoe.position.set(ankle.x, 0, ankle.z); inner.add(shoe);      // trainer: heel behind the ankle, toe 25 cm forward
+    box(shoe, -.62, .62, -2.25, .85, .3, 1.1, M.white, { r: .34 });
+    box(shoe, -.64, .64, -2.3, .9, 0, .32, M.darkm, { r: .12, cast: false });
+    box(shoe, -.3, .3, -1.6, -.1, 1.1, 1.17, M.maroon, { sharp: true, cast: false });
   }
-  // head group, hinged at the top of the neck; the face is on the -z side
-  const head = new THREE.Group(); head.position.set(cx, S + 6.9, cz + .4); head.rotation.order = 'YXZ'; inner.add(head);
-  const hy = .9;
-  sphere(head, 0, hy, 0, 1.25, M.skin);
-  for (const sx of [-1, 1]) sphere(head, sx * 1.22, hy - .1, -.05, .3, M.skin, { seg: 12, scale: [.6, 1, .8] });        // ears
+  // arms: upper arm (sleeve, cuff, skin, elbow) and forearm (to the wrist) as groups aimed by solveArms;
+  // the hands are fixed on the keyboard: palms behind its near edge, fingers on the home row, thumbs in
+  const L1 = 3.85, L2 = 3.2, arms = [];
   for (const sx of [-1, 1]) {
-    sphere(head, sx * .43, hy + .15, -1.13, .17, M.eyeWhite, { seg: 14 });
-    sphere(head, sx * .43, hy + .15, -1.27, .085, M.iris, { seg: 12 });
-    box(head, sx * .43 - .27, sx * .43 + .27, -1.2, -1.08, hy + .5, hy + .6, M.hair, { r: .04, cast: false }).rotation.z = sx * .14;   // brow
-    ring(head, sx * .45, hy + .13, -1.3, .34, .035, M.rim, { axis: 'z', seg: 32, cast: false });                           // round rim
-    limb(head, v(sx * .79, hy + .13, -1.26), v(sx * 1.22, hy + .08, -.1), .03, M.rim, { cast: false });                    // temple
+    const upper = new THREE.Group(); inner.add(upper);
+    cyl(upper, 0, 0, .6, 0, L1 * .52, M.jersey, { rTop: .56 });
+    cyl(upper, 0, 0, .58, L1 * .52 - .18, L1 * .52 + .04, M.maroon, { cast: false });
+    cyl(upper, 0, 0, .55, L1 * .52, L1, M.skin, { rTop: .48 });
+    sphere(upper, 0, L1, 0, .5, M.skin, { seg: 18 });
+    const fore = new THREE.Group(); inner.add(fore);
+    cyl(fore, 0, 0, .49, 0, L2, M.skin, { rTop: .4 });
+    sphere(fore, 0, L2, 0, .4, M.skin, { seg: 16 });
+    const wrist = v(cx + sx * 1.15, 9.4, 7.9);
+    sphere(inner, wrist.x - sx * .05, wrist.y - .12, wrist.z - .68, 1, M.skin, { scale: [.5, .2, .62], seg: 18 });   // palm: 9 x 4 x 11 cm
+    for (let i = 0; i < 4; i++) {
+      const fx = wrist.x - sx * .05 + (i - 1.5) * .25, k = v(fx, 9.26, 6.68), t = v(fx + (i - 1.5) * .02, 8.98, 6.1);
+      limb(inner, k, t, .115, M.skin, { rb: .1 });
+    }
+    limb(inner, v(wrist.x - sx * .42, 9.28, 7.4), v(wrist.x - sx * .88, 9.03, 6.95), .13, M.skin, { rb: .11 });   // thumb, toward the middle
+    arms.push({ upper, fore, shoulder: v(sx * SH[0], SH[1], SH[2]), wrist, pole: v(sx * .55, -1, .25).normalize() });
   }
-  rodX(head, -.11, .11, hy + .18, -1.3, .03, M.rim, { cast: false });                                                     // bridge
-  limb(head, v(0, hy + .05, -1.2), v(0, hy - .22, -1.34), .14, M.skinShade);                                              // nose
-  // the trimmed beard: a thin shell on the lower face, sideburns up to the hair, the moustache, the mouth
-  const FRONT = Math.PI * 1.5;                                                                                            // phi of the -z face
-  sphere(head, 0, hy, 0, 1.275, M.beard, { seg: 40, phiStart: FRONT - 1.25, phiLength: 2.5, thetaStart: 1.83, thetaLength: .86, cast: false });
-  for (const s of [-1, 1]) sphere(head, 0, hy, 0, 1.275, M.beard, { seg: 24, phiStart: FRONT + (s > 0 ? 1.25 : -1.55), phiLength: .3, thetaStart: 1.42, thetaLength: .5, cast: false });
-  limb(head, v(-.32, hy - .33, -1.25), v(.32, hy - .33, -1.25), .075, M.beard, { cast: false });
-  limb(head, v(-.2, hy - .5, -1.27), v(.2, hy - .5, -1.27), .035, M.lip, { cast: false });
-  // hair: a cap with its rim tilted (high on the forehead, low on the nape) and the curls as instanced spheres
-  // hugging the cap so the silhouette is a textured dome, not a bunch of grapes; it flares over the ears
-  const HR = 1.55, HC = v(0, hy + .12, .2), TILT = .52, CUT = 1.48;
-  sphere(head, HC.x, HC.y, HC.z, HR, M.hair, { seg: 40, thetaLength: CUT, rot: [TILT, 0, 0] });
-  const curls = instanced(head, new THREE.SphereGeometry(1, 10, 8), M.hair, 80);
-  const rnd = seeded(17), axis = v(0, Math.cos(TILT), Math.sin(TILT));
-  for (let i = 0, n = 110; i < n; i++) {
-    const yy = 1 - (i + .5) / n * 2, rr = Math.sqrt(1 - yy * yy), ph = i * 2.399963;
+  const _s = new THREE.Vector3(), _u = new THREE.Vector3(), _p = new THREE.Vector3(), _e = new THREE.Vector3(), _f = new THREE.Vector3();
+  /** Two-bone solve per arm: shoulder (moves with the torso) to wrist (fixed), elbow bent down and out. */
+  function solveArms() {
+    torso.updateMatrix();
+    for (const a of arms) {
+      _s.copy(a.shoulder).applyMatrix4(torso.matrix);
+      _u.subVectors(a.wrist, _s);
+      const d = Math.min(_u.length(), L1 + L2 - .02); _u.normalize();
+      const cosA = clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1), sinA = Math.sqrt(1 - cosA * cosA);
+      _p.copy(a.pole).addScaledVector(_u, -a.pole.dot(_u)).normalize();
+      _e.copy(_s).addScaledVector(_u, L1 * cosA).addScaledVector(_p, L1 * sinA);
+      a.upper.position.copy(_s); a.upper.quaternion.setFromUnitVectors(UP, _f.subVectors(_e, _s).normalize());
+      _f.subVectors(a.wrist, _e); const fl = _f.length();
+      a.fore.position.copy(_e); a.fore.quaternion.setFromUnitVectors(UP, _f.normalize()); a.fore.scale.set(1, fl / L2, 1);
+    }
+  }
+  solveArms();
+  // head group, hinged at the top of the neck; the face is on the -z side. 20 wide x 23 tall x 21 deep.
+  const head = new THREE.Group(); head.position.set(cx, 13.6, cz + .45); head.rotation.order = 'YXZ'; inner.add(head);
+  const hy = 1.08, HR = 1.12, HS = [1, 1.14, 1.05];
+  sphere(head, 0, hy, 0, HR, M.skin, { scale: HS, seg: 40 });
+  for (const sx of [-1, 1]) sphere(head, sx * 1.1, hy - .02, -.02, .32, M.skin, { seg: 14, scale: [.42, 1, .78] });    // ears
+  for (const sx of [-1, 1]) {
+    sphere(head, sx * .42, hy + .1, -1.0, .15, M.eyeWhite, { seg: 14, scale: [1, .8, .7] });
+    sphere(head, sx * .42, hy + .1, -1.1, .075, M.iris, { seg: 12 });
+    limb(head, v(sx * .18, hy + .5, -1.06), v(sx * .74, hy + .46, -.9), .07, M.hair, { rb: .05, cast: false });     // thick brow, above the frame
+    // round frames in translucent grey, a faint lens, the temple back to the ear
+    const rim = ring(head, sx * .47, hy + .09, -1.2, .33, .032, M.rim, { axis: 'z', seg: 40, cast: false }); rim.scale.set(1, .94, 1);
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(.31, 32), M.lens); lens.position.set(sx * .47, hy + .09, -1.2); lens.scale.set(1, .94, 1); head.add(lens);
+    limb(head, v(sx * .8, hy + .12, -1.17), v(sx * 1.12, hy + .16, -.2), .03, M.rim, { cast: false });
+  }
+  rodX(head, -.15, .15, hy + .14, -1.22, .03, M.rim, { cast: false });                                                 // bridge
+  limb(head, v(0, hy + .12, -1.12), v(0, hy - .2, -1.3), .1, M.skinShade, { rb: .14, cast: false });                  // nose
+  // the beard: short and full, following the jaw; up the cheeks to the cheekbone line at the sides, below
+  // the mouth at the front; the moustache joins it at the corners
+  const FRONT = Math.PI * 1.5, BR = HR + .045;                                                                         // phi of the -z face
+  sphere(head, 0, hy, 0, BR, M.beard, { scale: HS, seg: 40, phiStart: FRONT - .78, phiLength: 1.56, thetaStart: 2.0, thetaLength: .82, cast: false });
+  for (const s of [-1, 1]) sphere(head, 0, hy, 0, BR, M.beard, { scale: HS, seg: 24, phiStart: FRONT + (s > 0 ? .62 : -1.72), phiLength: 1.1, thetaStart: 1.72, thetaLength: 1.0, cast: false });
+  for (const s of [-1, 1]) limb(head, v(0, hy - .3, -1.17), v(s * .4, hy - .42, -1.06), .09, M.beard, { rb: .07, cast: false });
+  limb(head, v(-.2, hy - .46, -1.13), v(.2, hy - .46, -1.13), .03, M.lip, { cast: false });
+  // the hair: a wolf cut. A close cap tilted to sit high on the forehead and low on the nape; the top
+  // textured with layered clumps that run from the crown out; a fringe falling over the forehead; pieces
+  // over the ears; and the shag at the back, longer layers tapering down the nape to the collar.
+  const HC = v(0, hy + .08, .08), TILT = .48, CAP = 1.72;
+  const capGeo = new THREE.SphereGeometry(HR + .09, 40, 28, 0, Math.PI * 2, 0, CAP); capGeo.rotateX(TILT);
+  const cap = new THREE.Mesh(capGeo, M.hair); cap.position.copy(HC); cap.scale.set(...HS); cap.castShadow = cap.receiveShadow = true; head.add(cap);
+  const clumps = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 7), M.hair, 120);
+  clumps.castShadow = clumps.receiveShadow = true; head.add(clumps);
+  const rnd = seeded(23), pole = v(0, Math.cos(TILT), Math.sin(TILT)), crown = v(0, .8, .6).normalize();
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), qz = new THREE.Quaternion(), scl = new THREE.Vector3(), nrm = new THREE.Vector3(), flow = new THREE.Vector3(), side = new THREE.Vector3();
+  let n = 0;
+  for (let i = 0; i < 300 && n < 120; i++) {
+    const yy = 1 - (i + .5) / 300 * 2, rr = Math.sqrt(1 - yy * yy), ph = i * 2.399963;
     const d = v(Math.cos(ph) * rr, yy, Math.sin(ph) * rr);
-    if (d.angleTo(axis) > CUT * .97) continue;                                                                           // on the cap only
-    const r = .3 + rnd() * .16, p = HC.clone().addScaledVector(d, HR - r * .4);
-    curls.place(p.x, p.y, p.z, r, r, r);
+    if (d.angleTo(pole) > CAP * .95) continue;
+    nrm.set(d.x / HS[0], d.y / HS[1], d.z / HS[2]).normalize();
+    flow.subVectors(d, crown); flow.addScaledVector(nrm, -flow.dot(nrm));
+    if (flow.lengthSq() < 1e-4) continue;
+    flow.normalize(); side.crossVectors(flow, nrm).normalize();
+    q.setFromRotationMatrix(m4.makeBasis(side, flow, nrm)).multiply(qz.setFromAxisAngle(new THREE.Vector3(0, 0, 1), (rnd() - .5) * .9));
+    const p = v(d.x * HS[0], d.y * HS[1], d.z * HS[2]).multiplyScalar(HR + .1).add(HC);
+    clumps.setMatrixAt(n++, m4.compose(p, q, scl.set(.17 + rnd() * .08, .34 + rnd() * .22, .12 + rnd() * .06)));
   }
-  for (const sx of [-1, 1]) for (const [dy, dz, r] of [[.3, -.35, .42], [.05, .15, .46], [.35, .55, .4]]) curls.place(sx * 1.45, hy + dy, dz, r, r, r);   // over the ears
-  curls.done();
+  clumps.count = n; clumps.instanceMatrix.needsUpdate = true;
+  const zf = (x, dy) => -1.176 * Math.sqrt(Math.max(0, 1 - (x / 1.12) ** 2 - (dy / 1.28) ** 2));                     // the face surface
+  for (const [x0, len, dx] of [[-.62, .36, -.12], [-.38, .64, -.08], [-.14, .74, -.03], [.1, .5, .06], [.34, .66, .1], [.56, .4, .15]])     // the fringe, uneven
+    limb(head, v(x0, hy + .62, zf(x0, .62) + .04), v(x0 + dx, hy + .62 - len, zf(x0 + dx, .62 - len) + .12), .11, M.hair, { rb: .07, cast: false });
+  for (const sx of [-1, 1]) for (const [dz, len] of [[-.42, .6], [-.1, .7], [.2, .55]])                                   // over the ears
+    limb(head, v(sx * 1.02, hy + .3, dz), v(sx * 1.2, hy + .3 - len, dz + .02), .13, M.hair, { rb: .08, cast: false });
+  for (const [x, len, z] of [[-.9, .9, .62], [-.62, 1.15, .82], [-.32, 1.35, .95], [0, 1.45, 1.0], [.3, 1.35, .95], [.6, 1.2, .82], [.88, .95, .62]])   // the nape, long
+    limb(head, v(x, hy - .45, z + .12), v(x * 1.05, hy - .45 - len, .88), .2, M.hair, { rb: .09 });
+  for (const [x, len, z] of [[-.78, .62, .74], [-.42, .78, .96], [0, .85, 1.04], [.42, .78, .96], [.78, .62, .74]])      // the layer over it
+    limb(head, v(x, hy - .22, z + .16), v(x * 1.05, hy - .22 - len, z + .06), .18, M.hair, { rb: .1, cast: false });
   contact(inner, cx - 2.6, cx + 2.6, cz - 2.6, cz + 2.6, .16);
-  return { head, torso, at: v(cx, S + 7.8, cz + .4) };
+  return { head, torso, solveArms, at: v(cx, 14.65, cz + .45) };
 }
 
 // ---------------------------------------------------------------- the rack ----
@@ -443,9 +508,9 @@ function wallShelves(inner) {
   for (const [dx, dy, dz] of [[0, 1.5, 0], [.45, 1.0, .2], [-.4, 1.1, -.1], [.1, .7, .45]]) sphere(inner, 26.6 + dx, 18.1 + dy, 1.2 + dz, .36, M.green, { seg: 12, scale: [1.3, .8, 1] });
   box(inner, 25.0, 25.6, 0.5, 1.7, 17.0, 18.6, M.white, { r: .04 });                                      // a small frame
   cyl(inner, 24.0, 1.1, .45, 22.0, 24.2, M.candle);                                                       // candle
-  sphere(inner, 24.0, 24.45, 1.1, .12, M.flame, { cast: false, seg: 8 });
-  point(inner, 24.0, 24.7, 1.3, '#FFA040', .25, 3.5, 9);                                                   // the candle
-  glow(inner, 24.0, 24.5, 1.4, 1.2, '#FFB060', 0, .12);
+  sphere(inner, 24.0, 24.45, 1.1, .12, M.flame, { cast: false, seg: 8 });                                   // lit at night only
+  point(inner, 24.0, 24.7, 1.3, '#FFA040', 3.5, 9);                                                        // the candle
+  glow(inner, 24.0, 24.5, 1.4, 1.2, '#FFB060', .12);
   cyl(inner, 26.4, 1.1, .7, 22.0, 23.7, M.white, { rTop: .62 });                                          // jar
   box(inner, 25.0, 25.7, 1.3, 1.6, 22.0, 23.4, M.darkm, { r: .04 });
 }
@@ -529,12 +594,14 @@ function collage(inner, zc, yc, tex, seed) {
 
 function redTube(inner) {
   const y = 25.6, x = 0.75;                                                                               // 1.5 m red LED tube over the door
-  rodZ(inner, 17.4, 34.0, x, y, .3, emissive(mat('#FF8A62', { roughness: .3 }), '#FF4A22', 1.6, 6.5), { cast: false });
+  // a milky diffuser tube by day; at night it is the red light over the door
+  const tubeMat = emissive(mat('#F4F1EC', { roughness: .3, env: .6 }), '#FF4A22', 6.5, { dark: '#3A0E06', opacity: .8 });
+  rodZ(inner, 17.4, 34.0, x, y, .3, tubeMat, { cast: false });
   for (const z of [16.9, 34.0]) rodZ(inner, z, z + .5, x, y, .36, M.black, { cast: false });
   for (const z of [19, 25.7, 32.4]) rodX(inner, 0, x, y, z, .07, M.metal, { cast: false });                              // wall brackets
   // the tube is a line source: three points along it stand in for it
-  for (const z of [20.2, 25.7, 31.2]) point(inner, 2.4, y - .3, z, '#FF5A2A', 2.6, 24, 30);
-  for (const z of [19.5, 25.7, 31.9]) glow(inner, 1.4, y, z, 7, '#FF6A3A', 0, .12);
+  for (const z of [20.2, 25.7, 31.2]) point(inner, 2.4, y - .3, z, '#FF5A2A', 24, 30);
+  for (const z of [19.5, 25.7, 31.9]) glow(inner, 1.4, y, z, 7, '#FF6A3A', .12);
 }
 
 function lamp(inner) {
@@ -562,19 +629,19 @@ function lamp(inner) {
   sphere(inner, cxl, 19.6, czl, .55, M.bulb, { cast: false, seg: 16 });
   // the bulb: a spot down through the open bottom of the shade (this one casts shadows: the shelf frame
   // and whatever stands near it draw on the floor and the wall), a spot up through the open top, and a
-  // dimmer all-round point for what comes through the fabric
-  const down = new THREE.SpotLight('#FFB85A', 40, 70, 1.25, .55, 2);
+  // dimmer all-round point for what comes through the fabric. All of it off by day.
+  const down = new THREE.SpotLight('#FFB85A', 0, 70, 1.25, .55, 2);
   down.position.set(cxl, 19.4, czl); down.target.position.set(cxl, 0, czl);
   down.castShadow = true; down.shadow.mapSize.set(1024, 1024); down.shadow.bias = -.003; down.shadow.normalBias = .04;
   down.shadow.camera.near = 2; down.shadow.camera.far = 60;
-  themed(down, 'intensity', 40, 420);
+  themed(down, 'intensity', 0, 420);
   inner.add(down, down.target);
-  const up = new THREE.SpotLight('#FFC070', 14, 40, 1.1, .6, 2);
+  const up = new THREE.SpotLight('#FFC070', 0, 40, 1.1, .6, 2);
   up.position.set(cxl, 19.8, czl); up.target.position.set(cxl, 40, czl);
-  themed(up, 'intensity', 14, 160);
+  themed(up, 'intensity', 0, 160);
   inner.add(up, up.target);
-  point(inner, cxl, 19.6, czl, '#FFB85A', 8, 90, 40);
-  glow(inner, cxl, 19.6, czl, 7, '#FFC46A', .03, .2);
+  point(inner, cxl, 19.6, czl, '#FFB85A', 90, 40);
+  glow(inner, cxl, 19.6, czl, 7, '#FFC46A', .2);
 }
 
 function roundRug(inner, tex) {
@@ -597,7 +664,7 @@ function bed(inner, tex) {
   const g = new THREE.Group(); g.position.set(18.4, 6.8, 32.6); g.rotation.y = -.22; inner.add(g);
   box(g, -.8, .8, -1.6, 1.6, 0, .2, M.psBlack, { r: .08 });
   plane(g, '+y', .205, -.7, .7, -1.5, 1.5, flat('#FFFFFF', { map: tex.phone }));
-  point(g, 0, .8, 0, '#FFD9A8', 1.0, 4.0, 7);
+  point(g, 0, .8, 0, '#FFD9A8', 4.0, 7);
 }
 
 function meshChair(inner) {
@@ -638,8 +705,7 @@ function floorBits(inner) {
 // --------------------------------------------------------------- the window ----
 // The sun enters only through the window: a shadow-only front wall (never drawn, never picked) with the
 // window cut out of it, built from four strips around the hole plus a mullion and a transom, so the light
-// on the floor has the shape of the window. As the room comes apart the hole opens — setWindow(g), g = 0
-// the window, g = 1 no wall at all — and the floating pieces stand in full sun.
+// on the floor has the shape of the window.
 let win = null;
 function windowWall(inner) {
   const m = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, side: THREE.DoubleSide });
@@ -653,8 +719,8 @@ function windowWall(inner) {
   setWindow(0);
 }
 
-
-export function setWindow(g) {
+/** Lays out the window wall: g = 0 is the wall with its window, g = 1 no wall at all. */
+function setWindow(g) {
   if (!win) return;
   const { x0, x1, y0, y1 } = WINDOW;
   const z = WINDOW.z + 0.6;                                          // just outside the slab and wall faces at 44, so they never z-fight with it
@@ -681,7 +747,7 @@ export async function buildRoom(scene) {
   const tex = {
     tiles: T.tiles(), tilesBump: T.tilesBump(), plaster: T.plasterBump(), carbon: T.carbon(), wood: T.wood(), woodLight: T.wood('#CDAE7E', '#A98755'),
     quilt: T.quilt(), weave: T.weave(), mac: T.macScreen(), deck: T.macDeck(), code: T.codeScreen(), dev: T.devScreen(), phone: T.phoneScreen(),
-    snoopy: T.snoopyPrint(), neon: T.neonSign(), rug: T.rug(), ball: T.football(), corridor: T.corridor(),
+    snoopy: T.snoopyPrint(), neon: T.neonSign(), neonOff: T.neonSign(true), rug: T.rug(), ball: T.football(), corridor: T.corridor(),
     photos: Array.from({ length: 12 }, (_, i) => T.photoPrint(i)),
     shadeV1: T.shade('v1', .3), shadeU0: T.shade('u0', .3),
   };

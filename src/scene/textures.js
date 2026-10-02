@@ -295,14 +295,14 @@ export function photoPrint(i) {
   });
 }
 
-/** The little warm neon sign under the print. */
-export function neonSign() {
+/** The little neon sign under the print: the warm lit face, or (off = true) the same panel switched off — milky white, the tube a pale grey line. */
+export function neonSign(off = false) {
   return canvasTex(256, 160, (ctx, w, h) => {
     const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#FFE2AE'); g.addColorStop(1, '#FFB764');
+    if (off) { g.addColorStop(0, '#F6F4F0'); g.addColorStop(1, '#E9E6E0'); } else { g.addColorStop(0, '#FFE2AE'); g.addColorStop(1, '#FFB764'); }
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = '#FFF4DE'; ctx.lineWidth = 8; rr(ctx, w * .08, h * .12, w * .84, h * .76, 22); ctx.stroke();
-    ctx.strokeStyle = '#7A3C1C'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.strokeStyle = off ? '#FDFCFA' : '#FFF4DE'; ctx.lineWidth = 8; rr(ctx, w * .08, h * .12, w * .84, h * .76, 22); ctx.stroke();
+    ctx.strokeStyle = off ? '#B9B6B0' : '#7A3C1C'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(w * .2, h * .58); ctx.lineTo(w * .32, h * .4); ctx.lineTo(w * .42, h * .62); ctx.lineTo(w * .52, h * .38); ctx.lineTo(w * .62, h * .62); ctx.lineTo(w * .72, h * .42); ctx.lineTo(w * .8, h * .56); ctx.stroke();
   });
 }

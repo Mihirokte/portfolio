@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>mihir okte</title>
-<meta name="description" content="Mihir Okte — software engineer at Amazon, Bengaluru. My room, taken apart: follow a pointer.">
+<meta name="description" content="Mihir Okte — software engineer at Amazon, Bengaluru. My room, in 3D: follow a pointer.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#121216" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
@@ -17,8 +17,8 @@
   document.documentElement.dataset.theme = (q || s) === 'day' ? 'day' : 'night';
 })();
 </script>
-  <script type="module" crossorigin src="/assets/index-C81trjfW.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DFaWcjxh.css">
+  <script type="module" crossorigin src="/assets/index-B42p8YNH.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-ufomWWaN.css">
 </head>
 <body>
 
@@ -29,11 +29,8 @@
   <p class="caps">setting up the room</p>
 </div>
 
-<!-- the only thing the document scroll does is pull the room apart -->
-<div class="scroller" aria-hidden="true"></div>
-
 <main class="stage" id="stage">
-  <canvas id="view" aria-label="my room, as a 3D cutaway: the desk corner with the yellow S light, the clothes rack, the door wall with the lamp, and the bed"></canvas>
+  <canvas id="view" aria-label="my room, as a 3D cutaway: the desk corner with the line light, the clothes rack, the door wall with the lamp, and the bed"></canvas>
 
   <div class="pins" id="pins"></div>
 
@@ -50,15 +47,6 @@
     <button class="theme caps" id="theme" type="button" aria-label="switch to day"><i class="glyph" aria-hidden="true"></i><span>night</span></button>
     <p class="clock caps" id="clock" aria-label="local time in bengaluru"><i class="blink" aria-hidden="true"></i><span>bengaluru</span><time id="clock-time">--:--</time></p>
   </div>
-
-  <div class="chrome tape" id="tape">
-    <span class="caps hint" id="hint"><i class="px-down" aria-hidden="true"></i>scroll</span>
-    <div class="row">
-      <span class="caps">together</span>
-      <button class="track" id="track" type="button" aria-label="scroll position: together or apart"><i id="thumb"></i></button>
-      <span class="caps">apart</span>
-    </div>
-  </div>
 </main>
 
 <!-- ===================== modal: grows out of the pointer that opened it ===================== -->
@@ -74,18 +62,14 @@
       <div class="modal-scroll" id="modal-scroll">
 
         <section data-panel="about" data-title="about" data-ico="0">
-          <p class="caps">kvpy 2018 · air 233 &nbsp;/&nbsp; ntse 2017 · national scholar</p>
-          <p>I'm a software engineer at Amazon in Bengaluru. My team owns the services that take and refund orders for Amazon's Global Stores, so most of my job is keeping systems a lot of people depend on running quietly, and changing them without anyone noticing.</p>
-          <p>Over the last year the way I work has changed more than the work itself. I use AI for most of the day: to plan, to write the first draft of code, to read logs I would never get through on my own. The chat window is the least interesting part. Things get interesting when a model has real access to a system. At work I connected our production logs to agents that diagnose problems, and later ran the first release in my org where an agent did the engineering end to end and people reviewed it. I think that is where software is going, and I want to be good at it early.</p>
-          <p>Before Amazon I was the first engineer at a small ad-tech startup. I built their product from nothing, which is the fastest way I know to learn how much of software is everything around the code.</p>
-          <p>On the side I'm building Helio, a personal assistant that lives in Telegram. I made it because I wanted one that keeps working when my phone loses signal, and because building an assistant is the best way to find out what agents can and cannot do yet.</p>
-          <p>Away from work: football, on the pitch and on FIFA, and cooking. I studied Mathematics and Computing at IIT Delhi, and I still like a problem with a clean answer.</p>
-          <h3>what i do</h3>
+          <figure class="photo"><img src="/img/mihir.jpg" width="480" height="600" alt="Mihir Okte, at a restaurant table, smiling at the camera" loading="lazy"></figure>
+          <p>I'm Mihir Okte, a software engineer at Amazon in Bengaluru. I work on the systems that take and refund orders for Amazon's Global Stores.</p>
+          <p>I studied Mathematics and Computing at IIT Delhi, class of 2023. My final-year project was a Rubik's cube solver; the cube is still on the shelf behind me.</p>
+          <p>Outside work I play football most weeks, usually in midfield, and FIFA on the PS5 when I can't get to a pitch. I cook on weeknights, slow dishes, with spice.</p>
+          <h3>accolades</h3>
           <ul class="rows">
-            <li>migrations nobody notices</li>
-            <li>agents that work on production systems</li>
-            <li>products that replace manual setup</li>
-            <li>the unglamorous reliability work in between</li>
+            <li>KVPY 2018, All India Rank 233. A national science scholarship exam run by the Department of Science and Technology.</li>
+            <li>NTSE 2017 scholar. A top-1000 rank in the national talent search, out of more than a million candidates.</li>
           </ul>
         </section>
 
@@ -124,20 +108,20 @@
         <section data-panel="projects" data-title="projects" data-ico="2">
           <article class="job">
             <header><h3>Prep</h3><span class="caps">2026 — now</span></header>
-            <p>My personal problem gym. Coding problems run and get graded right here in the browser, no accounts, no servers, and it remembers where I left off.</p>
+            <p>A Mac app I use to study for interviews. It has courses, drills and coding problems, and it checks my answers on the laptop itself, with no account and no internet needed.</p>
+            <a class="link" href="https://github.com/Mihirokte/prep">github.com/Mihirokte/prep<span class="px-arrow" aria-hidden="true"></span></a>
           </article>
           <article class="job">
             <header><h3>Helio</h3><span class="caps">2025 — now</span></header>
-            <p>A personal assistant that lives in Telegram, with the brain on a server so it keeps working when my phone has no signal. I use it every day.</p>
-            <a class="link" href="https://github.com/Mihirokte">on github<span class="px-arrow" aria-hidden="true"></span></a>
+            <p>A personal assistant that lives inside Telegram. It runs on a server, so it keeps working when my phone has no signal. I use it every day.</p>
           </article>
           <article class="job">
-            <header><h3>Group theory vs the cube</h3><span class="caps">b.tech thesis</span></header>
-            <p>Model the Rubik's cube as a permutation group, treat moves as edges in a graph, and search. It solves any scramble in under two seconds.</p>
+            <header><h3>Rubik's cube solver</h3><span class="caps">b.tech thesis</span></header>
+            <p>Treats the cube as a maths object, turns each move into a step on a map, and searches for the shortest route to solved. Any scramble in under two seconds.</p>
           </article>
           <article class="job">
             <header><h3>Speech-to-animation</h3><span class="caps">storyprocess</span></header>
-            <p>Speak a pitch into a microphone and get a short animation back. Built so a small team could produce pitches in bulk.</p>
+            <p>Speak a pitch into a microphone and get a short animated video back. Built so a small team could make many pitches quickly.</p>
           </article>
         </section>
 
@@ -148,12 +132,6 @@
             <dt class="caps">cloud</dt><dd>AWS · GCP · Docker · CI/CD · GitHub Actions</dd>
             <dt class="caps">ai &amp; agents</dt><dd>LangChain · LangGraph · MCP · Context engineering · Fine-tuning · Claude Code · Cursor · Kiro</dd>
           </dl>
-        </section>
-
-        <section data-panel="hobbies" data-title="hobbies" data-ico="4">
-          <article class="job"><header><h3>football</h3></header><p>On the pitch, most weeks. Midfield, mostly running.</p></article>
-          <article class="job"><header><h3>fifa</h3></header><p>Off the pitch, on a controller. Still midfield.</p></article>
-          <article class="job"><header><h3>cooking</h3></header><p>Something slow on a weeknight. Spice is not optional.</p></article>
         </section>
 
         <section data-panel="contact" data-title="say hi." data-ico="5">
