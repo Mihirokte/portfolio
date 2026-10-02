@@ -1,21 +1,176 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#F4EEE0" />
-    <meta name="color-scheme" content="light" />
-    <title>Mihir Okte</title>
-    <link rel="preload" as="image" href="/room/figure.png" />
-    <link rel="preload" as="image" href="/room/tapestry.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/main-B-ZX52jH.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/client-B8sU3Ijh.js">
-    <link rel="stylesheet" crossorigin href="/assets/main-1smEt4hb.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mihir okte</title>
+<meta name="description" content="Mihir Okte — software engineer at Amazon, Bengaluru. My room, taken apart: follow a pointer.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#121216" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" href="/img/wind.png">
+<script>
+// the theme before first paint: night unless the visitor chose day (or ?theme=day for screenshots)
+(function () {
+  var q = new URLSearchParams(location.search).get('theme'), s = null;
+  try { s = localStorage.getItem('theme'); } catch (e) { /* no storage */ }
+  document.documentElement.dataset.theme = (q || s) === 'day' ? 'day' : 'night';
+})();
+</script>
+  <script type="module" crossorigin src="/assets/main-LaINuO_S.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DFaWcjxh.css">
+</head>
+<body>
+
+<!-- loader: a gust of wind until the room has drawn its first frame (a sprite strip stepped by the
+     compositor, so it keeps moving even while the main thread is building the room) -->
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <div class="wind" aria-hidden="true"><i></i></div>
+  <p class="caps">setting up the room</p>
+</div>
+
+<!-- the only thing the document scroll does is pull the room apart -->
+<div class="scroller" aria-hidden="true"></div>
+
+<main class="stage" id="stage">
+  <canvas id="view" aria-label="my room, as a 3D cutaway: the desk corner with the yellow S light, the clothes rack, the door wall with the lamp, and the bed"></canvas>
+
+  <div class="pins" id="pins"></div>
+
+  <div class="centre" aria-hidden="true">
+    <h1>mihir okte</h1>
+    <p class="caps">software engineer · amazon · bengaluru</p>
+    <p class="lede">This is my room. Everything I do happens somewhere in it. Follow a pointer.</p>
+  </div>
+
+  <!-- corners -->
+  <a class="chrome mark" href="#" id="mark">mihir okte</a>
+
+  <div class="chrome topright">
+    <button class="theme caps" id="theme" type="button" aria-label="switch to day"><i class="glyph" aria-hidden="true"></i><span>night</span></button>
+    <p class="clock caps" id="clock" aria-label="local time in bengaluru"><i class="blink" aria-hidden="true"></i><span>bengaluru</span><time id="clock-time">--:--</time></p>
+  </div>
+
+  <div class="chrome tape" id="tape">
+    <span class="caps hint" id="hint"><i class="px-down" aria-hidden="true"></i>scroll</span>
+    <div class="row">
+      <span class="caps">together</span>
+      <button class="track" id="track" type="button" aria-label="scroll position: together or apart"><i id="thumb"></i></button>
+      <span class="caps">apart</span>
+    </div>
+  </div>
+</main>
+
+<!-- ===================== modal: grows out of the pointer that opened it ===================== -->
+<div class="modal-root" id="modal-root" hidden>
+  <div class="scrim" data-close></div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+    <div class="modal-box">
+      <header class="modal-head">
+        <i class="ico" id="modal-ico" aria-hidden="true"></i>
+        <h2 id="modal-title">about</h2>
+        <button class="x" type="button" data-close aria-label="close"><kbd class="caps">esc</kbd><i aria-hidden="true"></i></button>
+      </header>
+      <div class="modal-scroll" id="modal-scroll">
+
+        <section data-panel="about" data-title="about" data-ico="0">
+          <p class="caps">kvpy 2018 · air 233 &nbsp;/&nbsp; ntse 2017 · national scholar</p>
+          <p>I'm a software engineer at Amazon in Bengaluru. My team owns the services that take and refund orders for Amazon's Global Stores, so most of my job is keeping systems a lot of people depend on running quietly, and changing them without anyone noticing.</p>
+          <p>Over the last year the way I work has changed more than the work itself. I use AI for most of the day: to plan, to write the first draft of code, to read logs I would never get through on my own. The chat window is the least interesting part. Things get interesting when a model has real access to a system. At work I connected our production logs to agents that diagnose problems, and later ran the first release in my org where an agent did the engineering end to end and people reviewed it. I think that is where software is going, and I want to be good at it early.</p>
+          <p>Before Amazon I was the first engineer at a small ad-tech startup. I built their product from nothing, which is the fastest way I know to learn how much of software is everything around the code.</p>
+          <p>On the side I'm building Helio, a personal assistant that lives in Telegram. I made it because I wanted one that keeps working when my phone loses signal, and because building an assistant is the best way to find out what agents can and cannot do yet.</p>
+          <p>Away from work: football, on the pitch and on FIFA, and cooking. I studied Mathematics and Computing at IIT Delhi, and I still like a problem with a clean answer.</p>
+          <h3>what i do</h3>
+          <ul class="rows">
+            <li>migrations nobody notices</li>
+            <li>agents that work on production systems</li>
+            <li>products that replace manual setup</li>
+            <li>the unglamorous reliability work in between</li>
+          </ul>
+        </section>
+
+        <section data-panel="work" data-title="work" data-ico="1">
+          <article class="job">
+            <header><h3>Amazon</h3><span class="caps">aug 2024 — now</span></header>
+            <p class="role">Software Engineer, Global Stores</p>
+            <ul class="rows">
+              <li>Moved 19 ordering and refund services onto new infrastructure with no downtime, leading a team of 8 through the ten-month migration.</li>
+              <li>Connected legacy service logs to diagnosis agents, which cut the time to assess a risky change by 97%.</li>
+              <li>Ran my org's first release where an AI agent did the engineering end to end, on the system that updates customer orders.</li>
+              <li>Owned the health of three ordering services and handled 200+ production incidents along the way.</li>
+            </ul>
+          </article>
+          <article class="job">
+            <header><h3>YOptima</h3><span class="caps">jul 2023 — aug 2024</span></header>
+            <p class="role">Founding Engineer, CEO Office</p>
+            <ul class="rows">
+              <li>Built nYO, a self-serve platform for YouTube and DV360 ad campaigns. Client onboarding went from days to minutes.</li>
+              <li>Rebuilt overspend alerting on real-time signals: alerts in 10 minutes instead of 2 hours.</li>
+              <li>Fine-tuned Llama-2 on channel metadata to match ads to inventory. Live placement variance dropped 40%.</li>
+            </ul>
+          </article>
+          <article class="job">
+            <header><h3>E-Ring</h3><span class="caps">jun — jul 2022</span></header>
+            <p class="role">Software Engineer Intern (PPO)</p>
+            <ul class="rows"><li>Restructured the database behind a US property-tax appraisal system. Queries got 30% faster.</li></ul>
+          </article>
+          <article class="job">
+            <header><h3>Early startups</h3><span class="caps">2020 — 2023</span></header>
+            <p class="role">Materate · Pricing · StoryProcess</p>
+            <ul class="rows"><li>Built Materate's first dashboards and web app, and a tool for StoryProcess that turned a spoken pitch into a short animation.</li></ul>
+          </article>
+        </section>
+
+        <section data-panel="projects" data-title="projects" data-ico="2">
+          <article class="job">
+            <header><h3>Prep</h3><span class="caps">2026 — now</span></header>
+            <p>My personal problem gym. Coding problems run and get graded right here in the browser, no accounts, no servers, and it remembers where I left off.</p>
+            <a class="link" href="prep/">open prep<span class="px-arrow" aria-hidden="true"></span></a>
+          </article>
+          <article class="job">
+            <header><h3>Helio</h3><span class="caps">2025 — now</span></header>
+            <p>A personal assistant that lives in Telegram, with the brain on a server so it keeps working when my phone has no signal. I use it every day.</p>
+            <a class="link" href="https://github.com/Mihirokte">on github<span class="px-arrow" aria-hidden="true"></span></a>
+          </article>
+          <article class="job">
+            <header><h3>Group theory vs the cube</h3><span class="caps">b.tech thesis</span></header>
+            <p>Model the Rubik's cube as a permutation group, treat moves as edges in a graph, and search. It solves any scramble in under two seconds.</p>
+          </article>
+          <article class="job">
+            <header><h3>Speech-to-animation</h3><span class="caps">storyprocess</span></header>
+            <p>Speak a pitch into a microphone and get a short animation back. Built so a small team could produce pitches in bulk.</p>
+          </article>
+        </section>
+
+        <section data-panel="skills" data-title="skills" data-ico="3">
+          <dl class="groups">
+            <dt class="caps">languages</dt><dd>Python · TypeScript · JavaScript · SQL · C/C++ · Java</dd>
+            <dt class="caps">frameworks</dt><dd>React · Next.js · Node.js · Flask · FastAPI · REST APIs</dd>
+            <dt class="caps">cloud</dt><dd>AWS · GCP · Docker · CI/CD · GitHub Actions</dd>
+            <dt class="caps">ai &amp; agents</dt><dd>LangChain · LangGraph · MCP · Context engineering · Fine-tuning · Claude Code · Cursor · Kiro</dd>
+          </dl>
+        </section>
+
+        <section data-panel="hobbies" data-title="hobbies" data-ico="4">
+          <article class="job"><header><h3>football</h3></header><p>On the pitch, most weeks. Midfield, mostly running.</p></article>
+          <article class="job"><header><h3>fifa</h3></header><p>Off the pitch, on a controller. Still midfield.</p></article>
+          <article class="job"><header><h3>cooking</h3></header><p>Something slow on a weeknight. Spice is not optional.</p></article>
+        </section>
+
+        <section data-panel="contact" data-title="say hi." data-ico="5">
+          <dl class="groups">
+            <dt class="caps">email</dt><dd><a class="link" href="mailto:mihirokte77@gmail.com">mihirokte77@gmail.com</a></dd>
+            <dt class="caps">linkedin</dt><dd><a class="link" href="https://linkedin.com/in/mihirokte">linkedin.com/in/mihirokte</a></dd>
+            <dt class="caps">github</dt><dd><a class="link" href="https://github.com/Mihirokte">github.com/Mihirokte</a></dd>
+            <dt class="caps">resume</dt><dd><a class="link" href="https://resume.mihirokte.info">resume.mihirokte.info<span class="px-arrow" aria-hidden="true"></span></a></dd>
+          </dl>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
 </html>
