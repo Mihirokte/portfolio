@@ -6,7 +6,7 @@
 // in the inner corner, the line light hangs above the end of the monitor desk, the guitar over the
 // monitor, the shelves and clothes rack continue along the S wall, the bed runs along the open front.
 import * as THREE from 'three';
-import { UP, mat, flat, box, cyl, rodX, rodZ, sphere, limb, loft, ring, tube, plane, hinge, instanced, glow, contact, point, emissive, themed, clamp } from './helpers.js';
+import { UP, mat, flat, box, cyl, rodX, rodZ, sphere, limb, loft, ring, tube, plane, hinge, instanced, glow, contact, point, emissive, themed, clamp, LIGHT } from './helpers.js';
 import * as T from './textures.js';
 
 export const ROOM = { L: 44, H: 32, SLAB: 5, CENTRE: new THREE.Vector3(22, 10, 22) };
@@ -38,83 +38,76 @@ const v = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => { let s = seed * 9301 + 49297; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; };
 
 let M = null;
+// The palette: soft and warm, low in saturation, nothing fully black and nothing fully white. Each colour
+// is the flat fill of a thing; the three tones come from which way its faces point.
 function materials(tex) {
-  tex.plaster.repeat.set(4, 3);
-  tex.carbon.repeat.set(5, 2.5);
-  tex.wood.repeat.set(2, 1);
-  tex.woodLight.repeat.set(1.5, 1);
-  tex.quilt.repeat.set(4, 2.6);
   tex.weave.repeat.set(3, 2);
   return {
-    wall: mat('#F7F2E8', { roughness: .95, bumpMap: tex.plaster, bumpScale: .03, env: .25 }),
-    slab: mat('#CFC7B8', { roughness: .92 }),
-    slabBottom: mat('#B5AC9C'),
-    base: mat('#E6DFD2'), baseLip: mat('#F7F3EA'),
-    black: mat('#2A2A2F', { roughness: .55 }),
-    deskBlack: mat('#2E2E33', { roughness: .45, env: .5 }),
-    darkm: mat('#55555C', { roughness: .7 }),
-    grey: mat('#B9BBBE', { roughness: .7 }),
-    silver: mat('#CFD2D6', { metalness: .75, roughness: .3, env: 1 }),
-    white: mat('#F5F4EF', { roughness: .5, env: .5 }),
-    cream: mat('#EEE6D4'),
-    bedframe: mat('#FFFFFF', { map: tex.wood, roughness: .6, env: .4 }),
-    shelfWood: mat('#FFFFFF', { map: tex.woodLight, roughness: .65, env: .35 }),
-    sheet: mat('#F3E4DE', { roughness: 1 }),
-    blanket: mat('#9C9CA2', { roughness: 1, bumpMap: tex.quilt, bumpScale: .12 }),
-    pillow: mat('#FCFBF7', { roughness: 1 }),
-    leather: mat('#3E2B26', { roughness: .45, env: .6, physical: true, clearcoat: .25, clearcoatRoughness: .4 }),
-    leatherHi: mat('#5A3C34', { roughness: .5, env: .5 }),
-    mesh: mat('#3C3C44', { roughness: .95 }),
-    metal: mat('#8A8A90', { metalness: .85, roughness: .28, env: 1 }),
-    chrome: mat('#D9DBE0', { metalness: 1, roughness: .18, env: 1.2 }),
-    skin: mat('#C9A078', { roughness: .66, env: .3 }),
-    skinShade: mat('#BA9069', { roughness: .7 }),
-    hair: mat('#26190F', { roughness: .72, env: .3 }),
-    beard: mat('#2A1C14', { roughness: .9, side: THREE.DoubleSide }),
-    eyeWhite: mat('#F2EEE6', { roughness: .3, env: .6 }),
-    iris: mat('#2E1C12', { roughness: .25, env: .8 }),
-    lip: mat('#8A4A48', { roughness: .8 }),
-    rim: mat('#8D9096', { roughness: .3, transparent: true, opacity: .82, env: .9 }),
-    lens: mat('#E6EEF5', { roughness: .05, transparent: true, opacity: .22, env: 1.4, side: THREE.DoubleSide }),
-    jersey: mat('#F6F4EE', { roughness: .9 }),
-    maroon: mat('#8A1F2E', { roughness: .85 }),
-    jeans: mat('#3A4A6B', { roughness: 1 }),
-    psWhite: mat('#F2F1EC', { roughness: .32, env: .8, physical: true, clearcoat: .5, clearcoatRoughness: .25 }),
-    psBlack: mat('#15151A', { roughness: .4, env: .6 }),
-    maple: mat('#D6B076', { roughness: .5, env: .4 }),
-    fretboard: mat('#5A3E2A', { roughness: .6 }),
-    guitar: mat('#14141A', { roughness: .22, metalness: .1, env: 1, physical: true, clearcoat: .9, clearcoatRoughness: .12 }),
-    pickguard: mat('#F2F0EA', { roughness: .35, env: .6 }),
-    terracotta: mat('#C47A4A', { roughness: .9 }),
-    green: mat('#5F9E4E', { roughness: .8 }),
-    frameNavy: mat('#2E3A5E', { roughness: .6 }),
-    doorFrame: mat('#EFE6D2', { roughness: .7 }),
-    door: mat('#F3ECDC', { roughness: .6, env: .3 }),
-    corridorFloor: mat('#D9CDB3'),
+    wall: mat('#EFE7DB'),
+    slab: mat('#D6CCBC'),
+    slabBottom: mat('#C2B6A3'),
+    base: mat('#E3DBCD'), baseLip: mat('#F2ECE0'),
+    black: mat('#454552'),
+    deskBlack: mat('#4A4A58'),
+    darkm: mat('#6E6E7A'),
+    grey: mat('#B7B5B0'),
+    silver: mat('#CDCFD4'),
+    white: mat('#F3F0E8'),
+    cream: mat('#ECE4D3'),
+    bedframe: mat('#9E7E68'),
+    shelfWood: mat('#D6B993'),
+    sheet: mat('#F4E8E1'),
+    blanket: mat('#AEB3C1'),
+    pillow: mat('#FAF7F1'),
+    leather: mat('#6E4D47'),
+    leatherHi: mat('#846259'),
+    mesh: mat('#525262'),
+    metal: mat('#9A9CA6'),
+    chrome: mat('#C4C7CF'),
+    skin: mat('#D8B08C'),
+    skinShade: mat('#C9A07C'),
+    hair: mat('#3A2B22'),
+    beard: mat('#3E2E25', { side: THREE.DoubleSide }),
+    eyeWhite: mat('#F3EFE7'),
+    iris: mat('#3B2719'),
+    lip: mat('#9A5A58'),
+    rim: mat('#8D9096', { transparent: true, opacity: .82 }),
+    lens: mat('#E6EEF5', { transparent: true, opacity: .22, side: THREE.DoubleSide }),
+    jersey: mat('#F4F1EA'),
+    maroon: mat('#9A4652'),
+    jeans: mat('#5C6A8C'),
+    psWhite: mat('#F2F0EA'),
+    psBlack: mat('#3C3C48'),
+    maple: mat('#E0C494'),
+    fretboard: mat('#6E5240'),
+    guitar: mat('#34343F'),
+    pickguard: mat('#F0EEE8'),
+    terracotta: mat('#D29C78'),
+    green: mat('#8DB07E'),
+    frameNavy: mat('#4C5A7A'),
+    doorFrame: mat('#ECE3CF'),
+    door: mat('#F1EADB'),
+    corridorFloor: mat('#DCD1BA'),
     // the light sources, switched off by day: fabric, frosted glass, a flame that is not there
-    shadeFabric: emissive(mat('#F7EBD8', { roughness: .95 }), '#FFB45A', 2.4),
-    bulb: emissive(mat('#F4F1EA', { roughness: .3, env: .6 }), '#FFE2A8', 7, { opacity: .85 }),
-    candle: mat('#F5F4EF'),
-    flame: emissive(mat('#FFD27A', { roughness: 1 }), '#FFB040', 6, { opacity: 0 }),
-    weave: mat('#FFFFFF', { map: tex.weave, roughness: 1 }),
-    rubik: ['#D8402A', '#F28C28', '#F2F2F2', '#F2C230', '#2D63B8', '#3DA35A'].map((c) => mat(c, { roughness: .35, env: .6 })),
-    shirt: { grey: mat('#9A9CA2', { roughness: 1 }), navy: mat('#2B3A5C', { roughness: 1 }), red: mat('#B3312E', { roughness: 1 }), hoodie: mat('#3A3A40', { roughness: 1 }), spain: mat('#F3F1EA', { roughness: 1 }) },
-    key: mat('#FFFFFF', { roughness: .6 }),
-    book: mat('#FFFFFF', { roughness: .8 }),
+    shadeFabric: emissive(mat('#F6ECDB'), '#FFB45A', 1.6),
+    bulb: emissive(mat('#F4F1EA'), '#FFE2A8', 3, { opacity: .85 }),
+    candle: mat('#F4F2EC'),
+    flame: emissive(mat('#FFD27A'), '#FFB040', 3, { opacity: 0 }),
+    weave: mat('#FFFFFF', { map: tex.weave }),
+    rubik: ['#E07A66', '#F2A65A', '#F4F1EA', '#F0D070', '#6C8BC8', '#7FB58A'].map((c) => mat(c)),
+    shirt: { grey: mat('#A9A9B0'), navy: mat('#4F5D80'), red: mat('#C45B57'), hoodie: mat('#575762'), spain: mat('#F3F1EA') },
+    key: mat('#FFFFFF'),
+    book: mat('#FFFFFF'),
   };
 }
 
 // ------------------------------------------------------------------ shell ----
 function slab(inner, [x0, x1, z0, z1], tex) {
   const sx0 = x0 === 0 ? -2 : x0, sz0 = z0 === 0 ? -2 : z0;
-  const t = tex.tiles.clone(), b = tex.tilesBump.clone();
-  for (const k of [t, b]) { k.repeat.set((x1 - sx0) / TILE, (z1 - sz0) / TILE); k.offset.set(sx0 / TILE, -z1 / TILE); k.needsUpdate = true; }
-  const top = mat('#FFFFFF', { map: t, bumpMap: b, bumpScale: .05, roughness: .42, env: .7 });
+  const t = tex.tiles.clone();
+  t.repeat.set((x1 - sx0) / TILE, (z1 - sz0) / TILE); t.offset.set(sx0 / TILE, -z1 / TILE); t.needsUpdate = true;
+  const top = mat('#FFFFFF', { map: t });
   box(inner, sx0, x1, sz0, z1, -ROOM.SLAB, 0, [M.slab, M.slab, top, M.slabBottom, M.slab, M.slab], { sharp: true });
-  // the darkening where the floor meets a wall
-  const sh = (map) => { const m = new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false }); return m; };
-  if (z0 === 0) plane(inner, '+y', 0.012, Math.max(0, x0), x1, 0, 3.4, sh(tex.shadeV1), { renderOrder: 1 });
-  if (x0 === 0) plane(inner, '+y', 0.012, 0, 3.4, Math.max(0, z0), z1, sh(tex.shadeU0), { renderOrder: 1 });
 }
 
 function skirting(inner, axis, a0, a1) {
@@ -184,7 +177,7 @@ function wallDesk(inner, tex) {
   contact(inner, 0.4, 5.4, z0, z1, .18);
   // MacBook, screen facing into the room (+x), a notebook and pen, a mug
   laptop(inner, { x: 1.1, y: top, z: 7.5, yaw: Math.PI / 2, w: 3.45, d: 2.45, lid: 2.25, body: M.silver, screen: tex.mac, deck: tex.deck, r: .08 });
-  box(inner, 2.0, 4.6, 1.6, 4.4, top, top + .25, mat('#2B3A5C', { roughness: .8 }), { r: .06 });
+  box(inner, 2.0, 4.6, 1.6, 4.4, top, top + .25, mat('#4C5A7A'), { r: .06 });
   rodZ(inner, 1.9, 4.1, 3.4, top + .33, .09, M.black, { cast: false });
   cyl(inner, 4.3, 11.3, .48, top, top + 1.0, M.white);
   ring(inner, 4.3, top + .55, 11.95, .38, .08, M.white, { axis: 'x', seg: 20, cast: false });
@@ -193,7 +186,7 @@ function wallDesk(inner, tex) {
 function snoopyPicture(inner, tex) {
   const [z0, z1, y0, y1] = [2.6, 12.6, 12.8, 19.5];                    // 90 x 60 cm canvas, 1.15 m off the floor
   box(inner, 0, 0.45, z0, z1, y0, y1, M.frameNavy, { r: .03 });
-  plane(inner, '+x', 0.46, z0 + .35, z1 - .35, y0 + .35, y1 - .35, mat('#FFFFFF', { map: tex.snoopy, roughness: .75, env: .2 }));
+  plane(inner, '+x', 0.46, z0 + .35, z1 - .35, y0 + .35, y1 - .35, mat('#FFFFFF', { map: tex.snoopy }));
 }
 
 function neonSign(inner, tex) {
@@ -201,7 +194,7 @@ function neonSign(inner, tex) {
   box(inner, 0.12, 0.62, z0, z1, y0, y0 + 1.9, M.black, { r: .05 });
   box(inner, 0.62, 0.72, z0 + .15, z1 - .15, y0 + .15, y0 + 1.75, M.white, { sharp: true, cast: false });
   // the face: a milky white panel with the line in grey by day; at night the panel lights up amber
-  const face = mat('#FFFFFF', { map: tex.neonOff, roughness: .25, env: .5, emissiveMap: tex.neon, emissive: '#FFFFFF', emissiveIntensity: 0 });
+  const face = mat('#FFFFFF', { map: tex.neonOff, emissiveMap: tex.neon, emissive: '#FFFFFF', emissiveIntensity: 0 });
   emissive(face, '#FFFFFF', 1.3, { dark: '#17130F' });
   plane(inner, '+x', 0.73, z0 + .2, z1 - .2, y0 + .2, y0 + 1.7, face);
   point(inner, 1.4, y0 + 1.0, 12.2, '#FFC46A', 12, 11);
@@ -221,8 +214,7 @@ function sLight(inner) {
     [0.50, 0.58], [0.78, 0.64], [0.84, 0.76], [0.66, 0.86], [0.40, 0.90], [0.20, 0.97], [0.08, 1.0]];
   const pts = ctrl.map(([u, w]) => v(0.8 + u * 6.0, 24.5 - w * 12.0, 0.55));
   const led = (glowColor) => {
-    const m = mat('#F4F2EE', { roughness: .35, env: .6 });
-    m.toneMapped = false;
+    const m = mat('#F4F2EE');
     return emissive(m, glowColor, 1, { dark: '#0A0702', opacity: .8 });
   };
   const amber = led('#FFAE1E'), core = led('#FFE59A');
@@ -236,7 +228,7 @@ function sLight(inner) {
 
 function monitorDesk(inner, tex) {
   const [x0, x1, z0, z1, top] = [5.2, 21.2, 0.4, 8.2, 8.5];            // 1.44 m x 70 cm gaming desk
-  const carbon = mat('#FFFFFF', { map: tex.carbon, roughness: .32, env: .9, physical: true, clearcoat: .55, clearcoatRoughness: .22 });
+  const carbon = mat('#3E3E4A');
   box(inner, x0, x1, z0, z1, top - .5, top, carbon, { r: .14 });
   box(inner, x0 + .5, x1 - .5, z0 + .5, z1 - .5, top - .9, top - .5, M.black, { r: .06 });       // frame under the top
   for (const lx of [x0 + .6, x1 - 1.3]) {                                                        // T legs
@@ -285,7 +277,7 @@ function ps5(inner, x, z, top) {
 
 /** A small LED strip: white plastic by day, lit warm at night. */
 function ledStrip(inner, x0, x1, z0, z1, y0, y1) {
-  const m = flat('#E9E7E2', { toneMapped: false });
+  const m = flat('#E9E7E2');
   themed(m, 'color', new THREE.Color('#E9E7E2'), new THREE.Color('#FFE6C2'));
   return box(inner, x0, x1, z0, z1, y0, y1, m, { sharp: true, cast: false });
 }
@@ -575,7 +567,7 @@ function clothesRack(inner) {
 }
 
 function footballBall(inner, tex) {
-  const b = sphere(inner, 29.5, 1.22, 11.5, 1.22, mat('#FFFFFF', { map: tex.ball, roughness: .5, env: .45 }), { seg: 56 });
+  const b = sphere(inner, 29.5, 1.22, 11.5, 1.22, mat('#FFFFFF', { map: tex.ball }), { seg: 56 });
   b.rotation.set(.4, .6, .2);
   contact(inner, 28.4, 30.6, 10.4, 12.6, .3);
 }
@@ -587,7 +579,7 @@ function collage(inner, zc, yc, tex, seed) {
   let i = 0;
   for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++, i++) {
     const z = zc + (c - 1) * 1.55 + (rnd() - .5) * .3, y = yc + (1.5 - r) * 1.95 + (rnd() - .5) * .3;
-    const m = plane(inner, '+x', 0.06 + (i % 3) * .004, z - .55, z + .55, y - .72, y + .72, mat('#FFFFFF', { map: tex.photos[(i + seed) % 12], roughness: .5, env: .5 }));
+    const m = plane(inner, '+x', 0.06 + (i % 3) * .004, z - .55, z + .55, y - .72, y + .72, mat('#FFFFFF', { map: tex.photos[(i + seed) % 12] }));
     m.rotation.x = (rnd() - .5) * .14;
   }
 }
@@ -595,7 +587,7 @@ function collage(inner, zc, yc, tex, seed) {
 function redTube(inner) {
   const y = 25.6, x = 0.75;                                                                               // 1.5 m red LED tube over the door
   // a milky diffuser tube by day; at night it is the red light over the door
-  const tubeMat = emissive(mat('#F4F1EC', { roughness: .3, env: .6 }), '#FF4A22', 6.5, { dark: '#3A0E06', opacity: .8 });
+  const tubeMat = emissive(mat('#F4F1EC'), '#FF4A22', 2.2, { dark: '#5A2A20', opacity: .8 });
   rodZ(inner, 17.4, 34.0, x, y, .3, tubeMat, { cast: false });
   for (const z of [16.9, 34.0]) rodZ(inner, z, z + .5, x, y, .36, M.black, { cast: false });
   for (const z of [19, 25.7, 32.4]) rodX(inner, 0, x, y, z, .07, M.metal, { cast: false });                              // wall brackets
@@ -634,18 +626,18 @@ function lamp(inner) {
   down.position.set(cxl, 19.4, czl); down.target.position.set(cxl, 0, czl);
   down.castShadow = true; down.shadow.mapSize.set(1024, 1024); down.shadow.bias = -.003; down.shadow.normalBias = .04;
   down.shadow.camera.near = 2; down.shadow.camera.far = 60;
-  themed(down, 'intensity', 0, 420);
+  themed(down, 'intensity', 0, 420 * LIGHT);
   inner.add(down, down.target);
   const up = new THREE.SpotLight('#FFC070', 0, 40, 1.1, .6, 2);
   up.position.set(cxl, 19.8, czl); up.target.position.set(cxl, 40, czl);
-  themed(up, 'intensity', 0, 160);
+  themed(up, 'intensity', 0, 160 * LIGHT);
   inner.add(up, up.target);
   point(inner, cxl, 19.6, czl, '#FFB85A', 90, 40);
   glow(inner, cxl, 19.6, czl, 7, '#FFC46A', .2);
 }
 
 function roundRug(inner, tex) {
-  const m = new THREE.Mesh(new THREE.CircleGeometry(4.2, 64), mat('#FFFFFF', { map: tex.rug, roughness: 1, transparent: true }));
+  const m = new THREE.Mesh(new THREE.CircleGeometry(4.2, 64), mat('#FFFFFF', { map: tex.rug, transparent: true }));
   m.rotation.x = -Math.PI / 2; m.position.set(7.8, 0.05, 27.0); m.receiveShadow = true; inner.add(m);
 }
 
@@ -698,7 +690,7 @@ function floorBits(inner) {
   limb(inner, v(39.8, 5.4, 30.5), v(40.3, 6.6, 30.5), .12, M.darkm);
   limb(inner, v(41.8, 5.4, 30.5), v(41.3, 6.6, 30.5), .12, M.darkm);
   contact(inner, 39.6, 42.0, 29.6, 31.4, .3);
-  cyl(inner, 36.5, 24.0, .4, 0, 2.6, mat('#4F79B8', { roughness: .35, env: .8 }));                        // water bottle
+  cyl(inner, 36.5, 24.0, .4, 0, 2.6, mat('#6C8BC8'));                        // water bottle
   cyl(inner, 36.5, 24.0, .3, 2.6, 3.0, M.white);
 }
 
@@ -745,11 +737,9 @@ const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
 /** Builds the room a piece at a time, yielding a frame between pieces so the page stays responsive while it does. */
 export async function buildRoom(scene) {
   const tex = {
-    tiles: T.tiles(), tilesBump: T.tilesBump(), plaster: T.plasterBump(), carbon: T.carbon(), wood: T.wood(), woodLight: T.wood('#CDAE7E', '#A98755'),
-    quilt: T.quilt(), weave: T.weave(), mac: T.macScreen(), deck: T.macDeck(), code: T.codeScreen(), dev: T.devScreen(), phone: T.phoneScreen(),
+    tiles: T.tiles(), weave: T.weave(), mac: T.macScreen(), deck: T.macDeck(), code: T.codeScreen(), dev: T.devScreen(), phone: T.phoneScreen(),
     snoopy: T.snoopyPrint(), neon: T.neonSign(), neonOff: T.neonSign(true), rug: T.rug(), ball: T.football(), corridor: T.corridor(),
     photos: Array.from({ length: 12 }, (_, i) => T.photoPrint(i)),
-    shadeV1: T.shade('v1', .3), shadeU0: T.shade('u0', .3),
   };
   M = materials(tex);
   await nextFrame();

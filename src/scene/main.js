@@ -1,18 +1,19 @@
-// main.js — the room, in 3D.
+// main.js — the room, as a vector illustration.
 // One WebGL canvas fixed behind the page. The room fills the window (the slab, the bed's front and the
 // ground shadow overflow out of the bottom). Pointers anchored to the geometry grow into in-place modals;
 // hovering near his head makes him look back. Rendering is on demand: a frame is drawn only when
 // something moved (the look-back, the day/night tween, a resize).
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildRoom, PINS, ROOM } from './room.js';
-import { lerp, clamp, easeInOut, canvasTex, themed, applyTheme } from './helpers.js';
+import { lerp, clamp, easeInOut, themed, applyTheme } from './helpers.js';
 
 const SECTIONS = ['about', 'work', 'projects', 'skills', 'contact'];
 const PAPER = '#F3EEE4';
 const FRAME = 16 / 9;                                 // the room is composed inside a 16:9 frame
-const FOV = 20;
-const AZ = THREE.MathUtils.degToRad(43), EL = THREE.MathUtils.degToRad(26);
+// True isometric: the camera looks down the diagonal of the room (45 degrees round) at the angle that
+// makes the three axes foreshorten equally (35.264 degrees up), with no perspective at all.
+const AZ = THREE.MathUtils.degToRad(45), EL = Math.atan(1 / Math.SQRT2);
+const CAM_D = 400;                                    // the camera's distance from its aim: anything, in orthographic
 // The window shows the room itself: the two wall ends span the width, the wall tops sit just under the top
 // edge, and whatever is below (the bed's front, the slab, the ground shadow) overflows out of the bottom.
 // Walls are 2 units thick, so the outer wall faces are at -2.
@@ -64,42 +65,38 @@ if (!GL) {
 if (GL) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.type = THREE.PCFShadowMap;        // hard-edged: a shadow is one flat shape
+  renderer.toneMapping = THREE.NoToneMapping;          // the palette is the palette
   renderer.setClearColor(PAPER, 0);                   // transparent: the stage's dot grid shows around the room
 }
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 1200);
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1200);
 const dirCam = new THREE.Vector3(Math.sin(AZ) * Math.cos(EL), Math.sin(EL), Math.cos(AZ) * Math.cos(EL));
 
 // ------------------------------------------------------------------ lights ----
-// Two states of one room. DAY: the sun comes in through the window on the front wall (the wall the camera
-// looks through — see WINDOW in room.js), so the floor and the door wall carry a window-shaped patch of
-// light and everything else is lit by sky and bounce; every light in the room is switched off and is just
-// the pale object it is made of. NIGHT: the sun is a thin blue moon through the same window, the sky is
-// near black, and the room's own sources — the lamp, the line light, the red tube, the sign, the screens,
-// the candle — are what you see by. No painted light anywhere: every pool on a surface comes from a light
-// that is really there, in physical units with inverse-square falloff. applyTheme(t) moves every
-// registered value between the two readings.
-if (GL) {
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  pmrem.dispose();
-  themed(scene, 'environmentIntensity', 0.14, 0.08);         // reflections and the soft ambient they bring
-  themed(renderer, 'toneMappingExposure', 1.0, 0.92);
-}
-const sky = new THREE.HemisphereLight('#E4ECF5', '#C9BBA6', 0.72);
-themed(sky, 'intensity', 0.72, 0.16);
-themed(sky, 'color', new THREE.Color('#E4ECF5'), new THREE.Color('#2A3650'));
-themed(sky, 'groundColor', new THREE.Color('#C9BBA6'), new THREE.Color('#15120F'));
-scene.add(sky);
+// (Intensities look large because three.js's Lambert term divides every light by pi.)
+// Two states of one room, drawn flat. The KEY light is the illustrator's light: it never casts a shadow,
+// it only decides which of the three tones each face gets (tops lightest, the faces toward the door wall
+// mid, the faces toward the S wall darkest). DAY: a flat ambient, the key, and the sun through the window
+// on the front wall (see WINDOW in room.js), which lays one hard window-shaped patch on the floor. NIGHT:
+// ambient and key drop to a dim blue, and the room's own sources — the lamp, the line light, the red tube,
+// the sign, the screens, the candle — come on as flat pools. applyTheme(t) moves every registered value.
+const ambient = new THREE.AmbientLight('#FFF6EA', 0.95);
+themed(ambient, 'intensity', 0.95, 0.34);
+themed(ambient, 'color', new THREE.Color('#FFF6EA'), new THREE.Color('#5C6A8C'));
+scene.add(ambient);
+const key = new THREE.DirectionalLight('#FFFFFF', 2.0);
+key.position.set(-0.5, 0.85, 0.25).multiplyScalar(100).add(new THREE.Vector3(22, 0, 22));
+key.target.position.set(22, 0, 22);
+themed(key, 'intensity', 2.0, 0.46);
+themed(key, 'color', new THREE.Color('#FFFFFF'), new THREE.Color('#6E7A9A'));
+scene.add(key, key.target);
 // the sun: 25 degrees off the front wall toward the door side and 32 high, so the rays through the window
 // pass over the head of the bed and lay a window-shaped patch, glazing bars and all, on the open floor
-// between the two chairs; the same light is the moon at night
+// between the two chairs; the same light is a thin moon at night
 const SUN_DIR = new THREE.Vector3(-0.358, 0.530, 0.769);
-const sun = new THREE.DirectionalLight('#FFF0DA', 6.0);
+const sun = new THREE.DirectionalLight('#FFF0DA', 2.8);
 sun.position.copy(SUN_DIR).multiplyScalar(130).add(new THREE.Vector3(22, 0, 22));
 sun.target.position.set(22, 0, 22);
 sun.castShadow = true;
@@ -107,32 +104,24 @@ sun.shadow.mapSize.set(3072, 3072);
 Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 70, bottom: -70, near: 20, far: 320 });
 sun.shadow.bias = -0.0002;
 sun.shadow.normalBias = 0.04;
-sun.shadow.radius = 2;
-themed(sun, 'intensity', 6.0, 0.3);
+themed(sun, 'intensity', 2.8, 0.2);
 themed(sun, 'color', new THREE.Color('#FFF0DA'), new THREE.Color('#7E94C2'));
 scene.add(sun, sun.target);
-// bounce: daylight from the window side, low and soft, the way the sunlit wall and floor throw it back
-const fill = new THREE.DirectionalLight('#FFE6CE', 0.22);
-fill.position.set(22 + 80, 24, 22 + 50);
-themed(fill, 'intensity', 0.22, 0);
-scene.add(fill);
 
 // ------------------------------------------------------------------ room ----
 const { pieces, figure } = GL ? await buildRoom(scene) : { pieces: {}, figure: null };
 const pieceList = Object.values(pieces);
-const contactTex = canvasTex(256, 256, (ctx, w, h) => {
-  const g = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
-  g.addColorStop(0, 'rgba(40,30,20,.55)'); g.addColorStop(.6, 'rgba(40,30,20,.18)'); g.addColorStop(1, 'rgba(40,30,20,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-}, { q: 1 });
+// the room's shadow on the paper: one hard shape, the slab's footprint shifted down and to the right on
+// screen (toward +x and +z), the way every box in the house style carries its offset shadow
 for (const p of pieceList) {
   const [x0, x1, z0, z1] = p.rect;
-  // the soft shadow on the paper under the room (the darkening under a thing standing on a table)
-  const shm = new THREE.MeshBasicMaterial({ map: contactTex, transparent: true, depthWrite: false, opacity: .5 });
-  themed(shm, 'opacity', .5, .12);
-  const sh = new THREE.Mesh(new THREE.PlaneGeometry((x1 - x0) * 1.5 + 8, (z1 - z0) * 1.5 + 8), shm);
+  const sx0 = x0 === 0 ? -2 : x0, sz0 = z0 === 0 ? -2 : z0;
+  const shm = new THREE.MeshBasicMaterial({ color: '#2A2A30', transparent: true, depthWrite: false, opacity: .12 });
+  themed(shm, 'opacity', .12, .5);
+  themed(shm, 'color', new THREE.Color('#2A2A30'), new THREE.Color('#000000'));
+  const sh = new THREE.Mesh(new THREE.PlaneGeometry(x1 - sx0, z1 - sz0), shm);
   sh.rotation.x = -Math.PI / 2;
-  sh.position.set((x0 + x1) / 2 - p.centre.x - 2, -ROOM.SLAB - 1.2, (z0 + z1) / 2 - p.centre.z - 2);
+  sh.position.set((sx0 + x1) / 2 - p.centre.x + 2.6, -ROOM.SLAB - 0.6, (sz0 + z1) / 2 - p.centre.z + 2.6);
   p.g.add(sh);
 }
 
@@ -178,57 +167,51 @@ setTheme(night, false);
 themeBtn.addEventListener('click', () => setTheme(night ? 0 : 1));
 applyTheme(theme);
 
-function aimCamera(aim, d) {
-  camera.position.copy(aim).addScaledVector(dirCam, d);
+function aimCamera(aim) {
+  camera.position.copy(aim).addScaledVector(dirCam, CAM_D);
   camera.lookAt(aim);
   camera.updateMatrixWorld();
 }
 
+/** The extents of `points` in the camera's own frame (world units across and up the picture plane). */
 function extents(points) {
   let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-  for (const p of points) { _t.copy(p).project(camera); x0 = Math.min(x0, _t.x); x1 = Math.max(x1, _t.x); y0 = Math.min(y0, _t.y); y1 = Math.max(y1, _t.y); }
+  for (const p of points) { _t.copy(p).applyMatrix4(camera.matrixWorldInverse); x0 = Math.min(x0, _t.x); x1 = Math.max(x1, _t.x); y0 = Math.min(y0, _t.y); y1 = Math.max(y1, _t.y); }
   return { x0, x1, y0, y1 };
 }
 
-/** CONTAIN: camera distance + aim so that `points` fill `margin` of a frame (default 16:9) centred in the viewport (fov fixed). */
+/** Points the camera so that camera-space (cx, cy) sits at the centre of a view `hw` world units wide. */
+function frameView(aim0, cx, cy, hw) {
+  _right.setFromMatrixColumn(camera.matrixWorld, 0);
+  _up.setFromMatrixColumn(camera.matrixWorld, 1);
+  const aim = aim0.clone().addScaledVector(_right, cx).addScaledVector(_up, cy);
+  const hh = hw * H / W;
+  camera.left = -hw; camera.right = hw; camera.top = hh; camera.bottom = -hh;
+  camera.updateProjectionMatrix();
+  aimCamera(aim);
+}
+
+/** CONTAIN: `points` fill `margin` of a frame (default 16:9) centred in the viewport. Orthographic, so one pass is exact. */
 function fit(points, margin, frame = FRAME) {
-  camera.fov = FOV; camera.aspect = W / H; camera.updateProjectionMatrix();
-  const fw = Math.min(W, H * frame), fh = fw / frame;             // the artwork's frame, in CSS px
   const aim = new THREE.Vector3(22, 12, 22);
-  let d = 260;
-  for (let it = 0; it < 6; it++) {
-    aimCamera(aim, d);
-    const { x0, x1, y0, y1 } = extents(points);
-    const halfH = d * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    _right.setFromMatrixColumn(camera.matrixWorld, 0);
-    _up.setFromMatrixColumn(camera.matrixWorld, 1);
-    aim.addScaledVector(_right, (x0 + x1) / 2 * halfH * camera.aspect).addScaledVector(_up, (y0 + y1) / 2 * halfH);
-    d *= Math.max(((x1 - x0) / 2) / (margin * fw / W), ((y1 - y0) / 2) / (margin * fh / H));
-  }
-  return { d, aim, fov: camera.fov };
+  aimCamera(aim);
+  const { x0, x1, y0, y1 } = extents(points);
+  const fw = Math.min(W, H * frame), fh = fw / frame;             // the artwork's frame, in CSS px
+  const hw = Math.max(((x1 - x0) / 2) / (margin * fw / W), ((y1 - y0) / 2) / (margin * fh / H) * (W / H));
+  frameView(aim, (x0 + x1) / 2, (y0 + y1) / 2, hw);
 }
 
 /**
- * COVER: the room fills the window. The camera stays at distance `d` (the same perspective as the contain
- * fit) and the lens zooms: the wall ends span the width, the wall tops sit under the top edge, and the room
- * may run up to MAX_OVERFLOW viewport heights tall before the zoom stops (ultra-wide windows).
+ * COVER: the room fills the window. The wall ends span the width, the wall tops sit under the top edge, and
+ * the room may run up to MAX_OVERFLOW viewport heights tall before the zoom stops (ultra-wide windows).
  */
-function fitRoom(d) {
-  camera.fov = FOV; camera.aspect = W / H; camera.updateProjectionMatrix();
+function fitRoom() {
   const aim = new THREE.Vector3(22, 12, 22);
-  const yTop = 1 - 2 * TOP_MARGIN;
-  for (let it = 0; it < 8; it++) {
-    aimCamera(aim, d);
-    const { x0, x1, y0, y1 } = extents(ROOM_FRAME);
-    const halfH = d * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    _right.setFromMatrixColumn(camera.matrixWorld, 0);
-    _up.setFromMatrixColumn(camera.matrixWorld, 1);
-    const k = Math.max(((x1 - x0) / 2) / (1 - 2 * SIDE_MARGIN), ((y1 - y0) / 2) / MAX_OVERFLOW);
-    aim.addScaledVector(_right, (x0 + x1) / 2 * halfH * camera.aspect).addScaledVector(_up, (y1 - yTop * k) * halfH);
-    camera.fov = 2 * THREE.MathUtils.radToDeg(Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * k));
-    camera.updateProjectionMatrix();
-  }
-  return { d, aim, fov: camera.fov };
+  aimCamera(aim);
+  const { x0, x1, y0, y1 } = extents(ROOM_FRAME);
+  const hw = Math.max(((x1 - x0) / 2) / (1 - 2 * SIDE_MARGIN), ((y1 - y0) / 2) / MAX_OVERFLOW * (W / H));
+  const hh = hw * H / W;
+  frameView(aim, (x0 + x1) / 2, y1 - hh * (1 - 2 * TOP_MARGIN), hw);
 }
 
 /** The eight corners of every piece's bounds: what the contain fit frames. */
@@ -251,11 +234,7 @@ function measure() {
   renderer.setSize(W, H, false);
   camera.clearViewOffset();
   // phones: the whole room contained in the upper part of the screen; desktop: the room fills the window
-  const f = compact ? fit(corners(), 0.94, W / (H * 0.62)) : fitRoom(fit(corners(), 0.88).d);
-  camera.fov = f.fov;
-  camera.aspect = W / H;
-  camera.updateProjectionMatrix();
-  aimCamera(f.aim, f.d);
+  if (compact) fit(corners(), 0.94, W / (H * 0.62)); else fitRoom();
   forceRender = true;
 }
 

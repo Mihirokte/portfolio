@@ -16,25 +16,12 @@ function seeded(seed) {
 }
 
 // ------------------------------------------------------------------ surfaces ----
-/** One floor tile (repeats). Large vitrified tile, hairline grout, a little tone drift. */
+/** One floor tile (repeats): a flat fill with a hairline of grout on two edges. */
 export function tiles() {
   return canvasTex(512, 512, (ctx, w, h) => {
-    ctx.fillStyle = '#ECE7DD'; ctx.fillRect(0, 0, w, h);
-    const rnd = seeded(7);
-    for (let i = 0; i < 3000; i++) {
-      ctx.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,.16)' : 'rgba(120,100,80,.05)';
-      ctx.fillRect(rnd() * w, rnd() * h, 2, 2);
-    }
-    for (let i = 0; i < 9; i++) {                                 // faint marble veins
-      ctx.strokeStyle = `rgba(150,135,115,${0.05 + rnd() * 0.05})`; ctx.lineWidth = 1 + rnd() * 2;
-      ctx.beginPath(); let x = rnd() * w, y = rnd() * h; ctx.moveTo(x, y);
-      for (let k = 0; k < 6; k++) { x += (rnd() - .4) * 120; y += (rnd() - .5) * 90; ctx.lineTo(x, y); }
-      ctx.stroke();
-    }
-    ctx.fillStyle = '#CFC7B9';
+    ctx.fillStyle = '#E2D9CB'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#CFC5B5';
     ctx.fillRect(0, 0, w, 6); ctx.fillRect(0, 0, 6, h);            // grout (top + left edge of each tile)
-    ctx.fillStyle = 'rgba(255,255,255,.4)';
-    ctx.fillRect(6, 6, w - 6, 2); ctx.fillRect(6, 6, 2, h - 6);
   }, { repeat: true, anisotropy: 16 });
 }
 

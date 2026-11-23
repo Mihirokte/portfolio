@@ -7,24 +7,36 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
 export const UP = new THREE.Vector3(0, 1, 0);
 
-/** Matte standard material with sane defaults for a lit diorama. */
+// The look: a vector illustration. Every surface is a flat fill in one of three tones, picked by which way
+// it faces (top, left, right), with no gloss, no reflections, no micro-texture. Three.js's toon shading
+// does exactly that when the gradient map has three texels: each light's contribution is stepped to one
+// of the three values below, so a box reads as three flat faces and a sphere as three flat bands.
+const TONES = [0.45, 0.72, 1.0];
+let _gradient = null;
+function gradientMap() {
+  if (_gradient) return _gradient;
+  const data = new Uint8Array(TONES.map((t) => Math.round(t * 255)));
+  const t = new THREE.DataTexture(data, TONES.length, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.colorSpace = THREE.NoColorSpace;
+  t.needsUpdate = true;
+  return (_gradient = t);
+}
+
+/**
+ * Flat-shaded material. The options are the old lit-diorama ones so the room's builders need not change:
+ * roughness, metalness, env, bump and clearcoat are accepted and ignored (a vector fill has none of them).
+ */
 export function mat(color, o = {}) {
-  const M = o.physical ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial;
-  const m = new M({
+  const m = new THREE.MeshToonMaterial({
     color,
-    roughness: o.roughness ?? 0.88,
-    metalness: o.metalness ?? 0,
+    gradientMap: gradientMap(),
     map: o.map ?? null,
-    bumpMap: o.bumpMap ?? null,
-    bumpScale: o.bumpScale ?? 1,
-    roughnessMap: o.roughnessMap ?? null,
     alphaMap: o.alphaMap ?? null,
     side: o.side ?? THREE.FrontSide,
     transparent: !!o.transparent,
     opacity: o.opacity ?? 1,
-    envMapIntensity: o.env ?? 0.35,
   });
-  if (o.physical) { m.clearcoat = o.clearcoat ?? 0; m.clearcoatRoughness = o.clearcoatRoughness ?? 0.3; }
   if (o.emissive) {
     m.emissive = new THREE.Color(o.emissive);
     m.emissiveIntensity = o.emissiveIntensity ?? 1;
@@ -256,14 +268,11 @@ export function canvasTex(w, h, draw, o = {}) {
 }
 
 let _radial = null;
+/** The halo texture: one flat disc, not a gradient, so a lit lamp reads as drawn light. */
 function radialTex() {
   return _radial ??= canvasTex(256, 256, (ctx, w, h) => {
-    const gr = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
-    gr.addColorStop(0, 'rgba(255,255,255,1)');
-    gr.addColorStop(0.3, 'rgba(255,255,255,.55)');
-    gr.addColorStop(0.65, 'rgba(255,255,255,.14)');
-    gr.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = gr; ctx.fillRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.arc(w / 2, h / 2, w * .5, 0, Math.PI * 2); ctx.fill();
   });
 }
 
@@ -300,14 +309,21 @@ export function applyTheme(t) {
 const col = (c) => new THREE.Color(c);
 
 /**
- * A real point light in physical units (candela, inverse-square falloff). Every light in the room is
- * switched off by day (the sun does the lighting) and comes on at night at `night` candela. `distance` is
- * a soft cutoff so a small source does not shade the far side of the room.
+ * Night light strength. The builders give every lamp its real output in candela, as they did for the
+ * photographic render; the flat render has no tone mapping, so the same figures are scaled down here to
+ * sit in range. One knob for the whole room.
+ */
+export const LIGHT = 0.3;
+
+/**
+ * A point light with inverse-square falloff. Every light in the room is switched off by day (the sun does
+ * the lighting) and comes on at night at `night` candela (scaled by LIGHT). `distance` is a soft cutoff so
+ * a small source does not shade the far side of the room.
  */
 export function point(g, x, y, z, color, night, distance = 0) {
   const l = new THREE.PointLight(color, 0, distance, 2);
   l.position.set(x, y, z);
-  themed(l, 'intensity', 0, night);
+  themed(l, 'intensity', 0, night * LIGHT);
   g.add(l);
   return l;
 }
@@ -330,16 +346,15 @@ let _soft = null;
 function softRectTex() {
   return _soft ??= canvasTex(256, 256, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    ctx.shadowColor = 'rgba(0,0,0,1)'; ctx.shadowBlur = 48;
     ctx.fillStyle = 'rgba(0,0,0,1)';
-    ctx.beginPath(); ctx.roundRect(56, 56, w - 112, h - 112, 28); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(40, 40, w - 80, h - 80, 36); ctx.fill();
   });
 }
 
-/** Contact shadow on the floor under a piece of furniture: the darkening where a thing meets the ground. */
+/** Contact shadow on the floor under a piece of furniture: one flat, hard-edged darker shape, the vector way. */
 export function contact(g, x0, x1, z0, z1, opacity = 0.32, y = 0.025) {
-  const m = new THREE.MeshBasicMaterial({ map: softRectTex(), color: '#3A3028', transparent: true, opacity, depthWrite: false, toneMapped: false });
-  const pad = Math.min(x1 - x0, z1 - z0) * 0.35;
+  const m = new THREE.MeshBasicMaterial({ map: softRectTex(), color: '#3A3028', transparent: true, opacity: opacity * 0.55, depthWrite: false, toneMapped: false });
+  const pad = Math.min(x1 - x0, z1 - z0) * 0.3;
   return plane(g, '+y', y, x0 - pad, x1 + pad, z0 - pad, z1 + pad, m, { renderOrder: 1 });
 }
 
