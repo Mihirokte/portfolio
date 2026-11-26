@@ -2,7 +2,7 @@
 // beyond the site's own pixel faces (which are already loaded by the page).
 import { canvasTex } from './helpers.js';
 
-const PX = "'Pixel Operator', monospace";
+const PX = "Inter, system-ui, sans-serif";
 
 function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -36,27 +36,28 @@ export function weave() {
 }
 
 // ------------------------------------------------------------------- screens ----
-/** The MacBook's screen from across the room: the projects window on a dot-grid desktop (what it boots into up close). */
+/** The MacBook's screen from across the room: the projects window on a warm desktop (what it boots into up close). */
 export function macScreen() {
   return canvasTex(512, 320, (ctx, w, h) => {
-    ctx.fillStyle = '#ECE6DA'; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(42,42,48,.18)';
-    for (let y = 22; y < h; y += 8) for (let x = 0; x < w; x += 8) ctx.fillRect(x, y, 1, 1);
-    ctx.fillStyle = '#F8F4EC'; ctx.fillRect(0, 0, w, 14);
-    ctx.fillStyle = '#2A2A30'; ctx.fillRect(0, 14, w, 1);
-    const x0 = 20, y0 = 28, ww = w - 40, hh = h - 46;
-    ctx.fillStyle = '#F8F4EC'; ctx.fillRect(x0, y0, ww, hh);
-    ctx.strokeStyle = '#2A2A30'; ctx.lineWidth = 2; ctx.strokeRect(x0 + 1, y0 + 1, ww - 2, hh - 2);
-    ctx.fillStyle = '#2A2A30'; ctx.fillRect(x0, y0 + 22, ww, 2); ctx.fillRect(x0 + 14, y0 + 9, 60, 5);
-    const cw = (ww - 14 * 4) / 3, ch = (hh - 24 - 14 * 3) / 2;
+    const g = ctx.createRadialGradient(w * .2, 0, 0, w * .2, 0, w * 1.1);
+    g.addColorStop(0, '#F3EEE6'); g.addColorStop(.55, '#E4DDD1'); g.addColorStop(1, '#D6CEC1');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(0, 0, w, 12);
+    const x0 = 22, y0 = 26, ww = w - 44, hh = h - 46;
+    ctx.fillStyle = 'rgba(40,30,20,.16)'; rr(ctx, x0, y0 + 6, ww, hh, 10); ctx.fill();
+    ctx.fillStyle = '#FFFFFF'; rr(ctx, x0, y0, ww, hh, 10); ctx.fill();
+    ctx.fillStyle = '#FAF9F7'; ctx.fillRect(x0 + 6, y0, ww - 12, 22);
+    ctx.fillStyle = 'rgba(29,29,33,.09)'; ctx.fillRect(x0, y0 + 22, ww, 1);
+    ['#FF5F57', '#FEBC2E', '#28C840'].forEach((c, k) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x0 + 14 + k * 11, y0 + 11, 3.5, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = '#1D1D21'; ctx.fillRect(x0 + 52, y0 + 9, 44, 5);
+    const cw = (ww - 12 * 4) / 3, ch = (hh - 23 - 12 * 3) / 2;
     for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
       if (r === 1 && c === 2) continue;
-      const cx = x0 + 14 + c * (cw + 14), cy = y0 + 24 + 14 + r * (ch + 14);
-      ctx.fillStyle = '#FBF8F2'; ctx.fillRect(cx, cy, cw, ch);
-      ctx.strokeStyle = '#2A2A30'; ctx.strokeRect(cx + 1, cy + 1, cw - 2, ch - 2);
-      ctx.fillStyle = '#63636A'; ctx.fillRect(cx + 10, cy + 12, 26, 4);
-      ctx.fillStyle = '#2A2A30'; ctx.fillRect(cx + 10, cy + 24, cw * .55, 6);
-      ctx.fillStyle = '#9A968E'; ctx.fillRect(cx + 10, cy + 38, cw * .7, 4);
+      const cx = x0 + 12 + c * (cw + 12), cy = y0 + 23 + 12 + r * (ch + 12);
+      ctx.fillStyle = '#F6F4F0'; rr(ctx, cx, cy, cw, ch, 8); ctx.fill();
+      ctx.fillStyle = '#9A968E'; ctx.fillRect(cx + 10, cy + 10, 24, 4);
+      ctx.fillStyle = '#1D1D21'; ctx.fillRect(cx + 10, cy + ch - 30, cw * .55, 6);
+      ctx.fillStyle = '#A09C95'; ctx.fillRect(cx + 10, cy + ch - 18, cw * .7, 4);
     }
   });
 }
@@ -130,13 +131,14 @@ export function devScreen() {
 /** His phone, face up: the chat it opens to (what it boots into up close). */
 export function phoneScreen() {
   return canvasTex(128, 272, (ctx, w, h) => {
-    ctx.fillStyle = '#19191F'; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#ECE7DC'; ctx.fillRect(8, 8, 18, 4);
-    ctx.fillStyle = 'rgba(236,231,220,.14)'; ctx.fillRect(0, 40, w, 1);
-    ctx.fillStyle = '#ECE7DC'; ctx.fillRect(8, 22, 46, 5);
-    for (const [y, bw] of [[56, 70], [82, 92]]) { ctx.strokeStyle = '#ECE7DC'; ctx.lineWidth = 2; ctx.fillStyle = '#121216'; ctx.fillRect(8, y, bw, 18); ctx.strokeRect(9, y + 1, bw - 2, 16); ctx.fillStyle = '#9A968E'; ctx.fillRect(14, y + 7, bw - 22, 3); }
-    ctx.fillStyle = 'rgba(236,231,220,.14)'; ctx.fillRect(0, h - 64, w, 1);
-    for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) { ctx.strokeStyle = '#ECE7DC'; ctx.strokeRect(9 + c * 56, h - 54 + r * 24, 52, 18); }
+    ctx.fillStyle = '#0E0E11'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#EDEAE4'; ctx.fillRect(10, 8, 16, 4);
+    ctx.fillStyle = '#2C2C33'; ctx.beginPath(); ctx.arc(18, 28, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#EDEAE4'; ctx.fillRect(30, 24, 36, 4);
+    ctx.fillStyle = 'rgba(237,234,228,.08)'; ctx.fillRect(0, 42, w, 1);
+    for (const [y, bw] of [[52, 58], [74, 88]]) { ctx.fillStyle = '#26262D'; rr(ctx, 8, y, bw, 18, 8); ctx.fill(); }
+    ctx.fillStyle = 'rgba(237,234,228,.08)'; ctx.fillRect(0, h - 62, w, 1);
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) { ctx.fillStyle = 'rgba(237,234,228,.1)'; rr(ctx, 8 + c * 58, h - 54 + r * 24, 54, 19, 6); ctx.fill(); }
   });
 }
 
@@ -323,7 +325,7 @@ export function journal() {
     ctx.fillStyle = '#B98B6E'; ctx.fillRect(58, 62, 130, 150);
     ctx.fillStyle = '#7A5A48'; ctx.fillRect(98, 92, 50, 56); ctx.fillRect(84, 150, 78, 62);
     ctx.fillStyle = 'rgba(236,226,196,.85)'; ctx.fillRect(98, 42, 52, 20);
-    ctx.font = "bold 30px 'Pixelta', serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('about', 222, 92);
+    ctx.font = "600 30px Inter, sans-serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('About', 222, 92);
     const rnd = seeded(77);
     const write = (x0, x1, y0, y1) => {
       ctx.fillStyle = '#4A4A58';
@@ -331,7 +333,7 @@ export function journal() {
     };
     write(222, w / 2 - 40, 122, 240);
     write(48, w / 2 - 40, 278, h - 40);
-    ctx.font = "bold 30px 'Pixelta', serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('accolades', w / 2 + 40, 92);
+    ctx.font = "600 30px Inter, sans-serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('Accolades', w / 2 + 40, 92);
     write(w / 2 + 40, w - 48, 122, h - 40);
   });
 }

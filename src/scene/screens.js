@@ -75,13 +75,13 @@ export function initScreens({ go, theme, clock }) {
 
   // ------------------------------------------------------------------ macbook ----
   const mac = scr('projects');
-  const grid = mac.querySelector('.grid'), backBtn = mac.querySelector('.back'), title = mac.querySelector('.win-title'), count = mac.querySelector('.win-count');
+  const grid = mac.querySelector('.grid'), backBtn = mac.querySelector('.win-back'), title = mac.querySelector('.win-title'), count = mac.querySelector('.win-count');
   function openProject(i) {
     grid.hidden = i !== null;
     backBtn.hidden = i === null;
     count.hidden = i !== null;
     for (const d of mac.querySelectorAll('.detail')) d.hidden = +d.dataset.p !== i;
-    title.textContent = i === null ? 'projects' : mac.querySelector(`.detail[data-p="${i}"] h2`).textContent;
+    title.textContent = i === null ? 'Projects' : mac.querySelector(`.detail[data-p="${i}"] h2`).textContent;
     mac.querySelector('.win-body').scrollTop = 0;
     (i === null ? grid.querySelector('.card') : backBtn).focus({ preventScroll: true });
   }
@@ -159,11 +159,12 @@ export function initScreens({ go, theme, clock }) {
   const thread = phone.querySelector('#thread'), state = phone.querySelector('#chat-state'), replies = phone.querySelector('#replies');
   const bubble = (who, node) => { const li = el('li', `msg ${who}`); li.append(node); thread.append(li); thread.scrollTop = thread.scrollHeight; return li; };
   async function say(text, { link = null } = {}) {
-    state.textContent = 'typing';
-    const dots = bubble('them typing', el('span', 'dots', '...'));
+    state.textContent = 'Typing…';
+    const dots = bubble('them typing', el('span', 'dots'));
+    dots.firstChild.append(el('i'), el('i'), el('i'));
     await wait(520 + Math.min(900, text.length * 14));
     dots.remove();
-    state.textContent = 'online';
+    state.textContent = 'Online';
     if (link) { const a = el('a', 'link', text); a.href = link; if (!link.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; } bubble('them', a); }
     else bubble('them', document.createTextNode(text));
   }
@@ -172,7 +173,7 @@ export function initScreens({ go, theme, clock }) {
     if (chatting) return;
     chatting = true;
     b.setAttribute('aria-pressed', 'true');
-    bubble('me', document.createTextNode(b.dataset.r));
+    bubble('me', document.createTextNode(b.textContent));
     await wait(200);
     await say(b.dataset.text, { link: b.dataset.href });
     chatting = false;
@@ -193,7 +194,7 @@ export function initScreens({ go, theme, clock }) {
       input.focus({ preventScroll: true });
       if (first) { line('last login: today, on the monitor in my room', 'dim'); await type('skills'); line('type help, or pick a command below.', 'dim'); }
     } else if (section === 'contact') {
-      if (first) { chatting = true; await say("hey, i'm mihir."); await say('quickest way to reach me is email. pick one and i will send it over.'); chatting = false; }
+      if (first) { chatting = true; await say("Hey, I'm Mihir."); await say("Quickest way to reach me is email. Pick one and I'll send it over."); chatting = false; }
       replies.querySelector('button')?.focus({ preventScroll: true });
     } else if (section === 'work') {
       editor.querySelector('.file[aria-current]')?.focus({ preventScroll: true });

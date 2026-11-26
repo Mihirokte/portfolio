@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>mihir okte</title>
+<title>Mihir Okte</title>
 <meta name="description" content="Mihir Okte, software engineer at Amazon, Bengaluru. My room in 3D: every section lives on something in it. Follow a pointer.">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#121216" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
-<link rel="preload" as="image" href="/img/wind.png">
+<meta name="theme-color" content="#111114" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F1EC" media="(prefers-color-scheme: light)">
+<link rel="preload" as="font" type="font/woff2" href="/fonts/InterVariable.woff2" crossorigin>
 <script>
 // the theme before first paint: night unless the visitor chose day (or ?theme=day for screenshots)
 (function () {
@@ -17,16 +17,16 @@
   document.documentElement.dataset.theme = (q || s) === 'day' ? 'day' : 'night';
 })();
 </script>
-  <script type="module" crossorigin src="/assets/index-bYe0JEN8.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BJlYCAuC.css">
+  <script type="module" crossorigin src="/assets/index-Bzz73yW8.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Y7PMWHb4.css">
 </head>
 <body>
 
-<!-- loader: a gust of wind until the room has drawn its first frame (a sprite strip stepped by the
-     compositor, so it keeps moving even while the main thread is building the room) -->
+<!-- loader: until the room has drawn its first frame -->
 <div class="loader" id="loader" role="status" aria-live="polite">
-  <div class="wind" aria-hidden="true"><i></i></div>
-  <p class="caps">setting up the room</p>
+  <p class="loader-name">Mihir Okte</p>
+  <div class="loader-bar" aria-hidden="true"><i></i></div>
+  <p class="sm">Setting up the room</p>
 </div>
 
 <main class="stage" id="stage">
@@ -37,12 +37,15 @@
   <h1 class="sr-only">Mihir Okte, software engineer at Amazon, Bengaluru. This is my room; every section lives on something in it.</h1>
 
   <!-- corners -->
-  <a class="chrome mark" href="#" id="mark">mihir okte</a>
+  <a class="chrome mark" href="#" id="mark">Mihir Okte</a>
 
   <div class="chrome topright">
-    <button class="theme caps" id="theme" type="button" aria-label="switch to day"><span>night</span></button>
-    <p class="clock caps" id="clock" aria-label="local time in bengaluru"><i class="blink" aria-hidden="true"></i><span>bengaluru</span><time id="clock-time" data-clock>--:--</time></p>
+    <button class="theme" id="theme" type="button" aria-label="switch to day"><span>Night</span></button>
+    <p class="clock" id="clock" aria-label="local time in Bengaluru"><span>Bengaluru</span><time id="clock-time" data-clock>--:--</time></p>
   </div>
+
+  <!-- the way out of a visit: always in view while you are at a surface -->
+  <button class="back" id="back" type="button">Back to room<kbd>Esc</kbd></button>
 
 <!-- ===================== the screens: every section is a working interface on a real surface in the room.
      Opening one flies the camera until that surface fills the view at 1:1, and the interface boots on it. ===================== -->
@@ -54,7 +57,7 @@
     <div class="pages">
       <div class="page" data-page="0">
         <figure class="taped"><img src="/img/mihir.jpg" width="480" height="600" alt="Mihir Okte, at a restaurant table, smiling at the camera" loading="lazy"></figure>
-        <h2>about</h2>
+        <h2>About</h2>
         <p>I'm Mihir Okte, a software engineer at Amazon in Bengaluru. I work on the systems that take and refund orders for Amazon's Global Stores.</p>
       </div>
       <div class="page" data-page="1">
@@ -62,47 +65,47 @@
         <p>Outside work I play football most weeks, usually in midfield, and FIFA on the PS5 when I can't get to a pitch. I cook on weeknights, slow dishes, with spice.</p>
       </div>
       <div class="page" data-page="2">
-        <h2>accolades</h2>
+        <h2>Accolades</h2>
         <ul class="rows">
           <li>KVPY 2018, All India Rank 233. A national science scholarship exam run by the Department of Science and Technology.</li>
           <li>NTSE 2017 scholar. A top-1000 rank in the national talent search, out of more than a million candidates.</li>
         </ul>
       </div>
       <div class="page" data-page="3">
-        <h2>elsewhere in the room</h2>
+        <h2>Elsewhere in the room</h2>
         <ul class="go">
-          <li><button type="button" data-go="work">work</button><span class="caps">the laptop on the riser</span></li>
-          <li><button type="button" data-go="projects">projects</button><span class="caps">the macbook beside this journal</span></li>
-          <li><button type="button" data-go="skills">skills</button><span class="caps">the terminal on the monitor</span></li>
-          <li><button type="button" data-go="contact">say hi</button><span class="caps">my phone, on the bed</span></li>
+          <li><button type="button" data-go="work">Work</button><span class="sm">The laptop on the riser</span></li>
+          <li><button type="button" data-go="projects">Projects</button><span class="sm">The MacBook beside this journal</span></li>
+          <li><button type="button" data-go="skills">Skills</button><span class="sm">The terminal on the monitor</span></li>
+          <li><button type="button" data-go="contact">Say hi</button><span class="sm">My phone, on the bed</span></li>
         </ul>
       </div>
     </div>
     <footer class="turns">
-      <button type="button" class="caps" data-turn="-1">previous page</button>
-      <span class="caps folio" aria-live="polite">1 / 2</span>
-      <button type="button" class="caps" data-turn="1">next page</button>
+      <button type="button" class="sm" data-turn="-1">Previous page</button>
+      <span class="sm folio" aria-live="polite">1 / 2</span>
+      <button type="button" class="sm" data-turn="1">Next page</button>
     </footer>
   </section>
 
   <!-- the work laptop on the riser: an editor -->
   <section class="scr scr-editor" data-screen="work" aria-label="work, in an editor on my work laptop" tabindex="-1">
-    <div class="boot" aria-hidden="true"><span class="caps">opening experience</span><i></i></div>
-    <header class="bar"><span class="caps">experience</span><span class="caps">work laptop</span></header>
+    <div class="boot" aria-hidden="true"><span class="sm">Opening experience</span><i></i></div>
+    <header class="bar"><span class="sm">Experience</span><span class="sm">Work laptop</span></header>
     <div class="ed">
       <nav class="tree" aria-label="files">
-        <p class="caps">files</p>
+        <p class="sm">Files</p>
         <button type="button" class="file" data-f="0" aria-current="true">amazon.md</button>
         <button type="button" class="file" data-f="1">yoptima.md</button>
         <button type="button" class="file" data-f="2">e-ring.md</button>
         <button type="button" class="file" data-f="3">early-startups.md</button>
       </nav>
       <div class="pane">
-        <div class="tab caps" id="ed-tab">amazon.md</div>
+        <div class="tab" id="ed-tab">amazon.md</div>
         <div class="docs">
           <article class="doc on" data-f="0">
             <h3>Amazon</h3>
-            <p class="meta caps">aug 2024 — now · software engineer, global stores</p>
+            <p class="meta">aug 2024 — now · software engineer, global stores</p>
             <ul>
               <li>Moved 19 ordering and refund services onto new infrastructure with no downtime, leading a team of 8 through the ten-month migration.</li>
               <li>Connected legacy service logs to diagnosis agents, which cut the time to assess a risky change by 97%.</li>
@@ -112,7 +115,7 @@
           </article>
           <article class="doc" data-f="1">
             <h3>YOptima</h3>
-            <p class="meta caps">jul 2023 — aug 2024 · founding engineer, ceo office</p>
+            <p class="meta">jul 2023 — aug 2024 · founding engineer, ceo office</p>
             <ul>
               <li>Built nYO, a self-serve platform for YouTube and DV360 ad campaigns. Client onboarding went from days to minutes.</li>
               <li>Rebuilt overspend alerting on real-time signals: alerts in 10 minutes instead of 2 hours.</li>
@@ -121,55 +124,55 @@
           </article>
           <article class="doc" data-f="2">
             <h3>E-Ring</h3>
-            <p class="meta caps">jun — jul 2022 · software engineer intern (ppo)</p>
+            <p class="meta">jun — jul 2022 · software engineer intern (ppo)</p>
             <ul><li>Restructured the database behind a US property-tax appraisal system. Queries got 30% faster.</li></ul>
           </article>
           <article class="doc" data-f="3">
             <h3>Early startups</h3>
-            <p class="meta caps">2020 — 2023 · materate · pricing · storyprocess</p>
+            <p class="meta">2020 — 2023 · materate · pricing · storyprocess</p>
             <ul><li>Built Materate's first dashboards and web app, and a tool for StoryProcess that turned a spoken pitch into a short animation.</li></ul>
           </article>
         </div>
-        <footer class="status caps"><span id="ed-status">amazon.md</span><span>4 files · up and down to switch</span></footer>
+        <footer class="status"><span id="ed-status">amazon.md</span><span>4 files · arrow keys to switch</span></footer>
       </div>
     </div>
   </section>
 
   <!-- the macbook on the wall desk: projects -->
   <section class="scr scr-mac" data-screen="projects" aria-label="projects, on my macbook" tabindex="-1">
-    <div class="boot" aria-hidden="true"><span class="mac-mark">mihir</span></div>
-    <header class="bar"><span class="caps">mihir's macbook</span><span class="caps" data-clock>--:--</span></header>
+    <div class="boot" aria-hidden="true"><span class="mac-mark">Mihir</span></div>
+    <header class="bar"><span class="sm">Mihir's MacBook</span><span class="sm" data-clock>--:--</span></header>
     <div class="desk">
       <div class="win">
-        <header class="win-head"><button type="button" class="caps back" hidden>all projects</button><span class="caps win-title">projects</span><span class="caps win-count">5 projects</span></header>
+        <header class="win-head"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><button type="button" class="sm win-back" hidden>All projects</button><span class="win-title">Projects</span><span class="sm win-count">5 projects</span></header>
         <div class="win-body">
           <div class="grid">
-            <button type="button" class="card" data-p="0"><span class="caps">2026</span><strong>Talk Mode</strong><span class="line">An Alexa skill for talking to an AI model.</span></button>
-            <button type="button" class="card" data-p="1"><span class="caps">2026 — now</span><strong>Prep</strong><span class="line">A Mac app for interview prep, offline.</span></button>
-            <button type="button" class="card" data-p="2"><span class="caps">2025 — now</span><strong>Helio</strong><span class="line">A personal assistant inside Telegram.</span></button>
-            <button type="button" class="card" data-p="3"><span class="caps">b.tech thesis</span><strong>Rubik's cube solver</strong><span class="line">Any scramble, solved in under two seconds.</span></button>
-            <button type="button" class="card" data-p="4"><span class="caps">storyprocess</span><strong>Speech-to-animation</strong><span class="line">Speak a pitch, get an animated video.</span></button>
+            <button type="button" class="card" data-p="0"><span class="sm">2026</span><strong>Talk Mode</strong><span class="line">An Alexa skill for talking to an AI model.</span></button>
+            <button type="button" class="card" data-p="1"><span class="sm">2026 — now</span><strong>Prep</strong><span class="line">A Mac app for interview prep, offline.</span></button>
+            <button type="button" class="card" data-p="2"><span class="sm">2025 — now</span><strong>Helio</strong><span class="line">A personal assistant inside Telegram.</span></button>
+            <button type="button" class="card" data-p="3"><span class="sm">b.tech thesis</span><strong>Rubik's cube solver</strong><span class="line">Any scramble, solved in under two seconds.</span></button>
+            <button type="button" class="card" data-p="4"><span class="sm">storyprocess</span><strong>Speech-to-animation</strong><span class="line">Speak a pitch, get an animated video.</span></button>
           </div>
           <article class="detail" data-p="0" hidden>
-            <p class="caps">2026</p><h2>Talk Mode</h2>
+            <p class="sm">2026</p><h2>Talk Mode</h2>
             <p>An Alexa skill that lets me talk to an AI model through the Echo in my room. I say "Alexa, start talk mode", then ask anything in my own words and keep asking follow-ups until I say stop. It can look things up on the web and add to my task list, and an average question costs less than a tenth of a cent.</p>
-            <a class="btn caps" href="https://github.com/Mihirokte/talk-mode" target="_blank" rel="noopener">github.com/Mihirokte/talk-mode</a>
+            <a class="btn" href="https://github.com/Mihirokte/talk-mode" target="_blank" rel="noopener">github.com/Mihirokte/talk-mode</a>
           </article>
           <article class="detail" data-p="1" hidden>
-            <p class="caps">2026 — now</p><h2>Prep</h2>
+            <p class="sm">2026 — now</p><h2>Prep</h2>
             <p>A Mac app I use to study for interviews. It has courses, drills and coding problems, and it checks my answers on the laptop itself, with no account and no internet needed.</p>
-            <a class="btn caps" href="https://github.com/Mihirokte/prep" target="_blank" rel="noopener">github.com/Mihirokte/prep</a>
+            <a class="btn" href="https://github.com/Mihirokte/prep" target="_blank" rel="noopener">github.com/Mihirokte/prep</a>
           </article>
           <article class="detail" data-p="2" hidden>
-            <p class="caps">2025 — now</p><h2>Helio</h2>
+            <p class="sm">2025 — now</p><h2>Helio</h2>
             <p>A personal assistant that lives inside Telegram. It runs on a server, so it keeps working when my phone has no signal. I use it every day.</p>
           </article>
           <article class="detail" data-p="3" hidden>
-            <p class="caps">b.tech thesis</p><h2>The cube solver</h2>
+            <p class="sm">b.tech thesis</p><h2>Rubik's cube solver</h2>
             <p>Treats the cube as a maths object, turns each move into a step on a map, and searches for the shortest route to solved. Any scramble in under two seconds. The cube itself is on the shelf across the room.</p>
           </article>
           <article class="detail" data-p="4" hidden>
-            <p class="caps">storyprocess</p><h2>Speech-to-animation</h2>
+            <p class="sm">storyprocess</p><h2>Speech-to-animation</h2>
             <p>Speak a pitch into a microphone and get a short animated video back. Built so a small team could make many pitches quickly.</p>
           </article>
         </div>
@@ -179,33 +182,33 @@
 
   <!-- the monitor: a terminal -->
   <section class="scr scr-term" data-screen="skills" aria-label="skills, in a terminal on my monitor" tabindex="-1">
-    <header class="bar"><span class="caps">mihir@room — zsh</span><span class="caps">monitor</span></header>
+    <header class="bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="sm">mihir@room — zsh</span><span class="sm">Monitor</span></header>
     <div class="term" id="term">
       <div class="term-out" id="term-out" aria-live="polite"></div>
       <label class="term-in"><span class="ps">mihir@room ~ %</span><input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="type a command"></label>
     </div>
     <footer class="chips" aria-label="try a command">
-      <button type="button" class="caps" data-cmd="skills">skills</button>
-      <button type="button" class="caps" data-cmd="whoami">whoami</button>
-      <button type="button" class="caps" data-cmd="ls">ls</button>
-      <button type="button" class="caps" data-cmd="open work">open work</button>
-      <button type="button" class="caps" data-cmd="open projects">open projects</button>
-      <button type="button" class="caps" data-cmd="help">help</button>
-      <button type="button" class="caps" data-cmd="exit">exit</button>
+      <button type="button" class="sm" data-cmd="skills">skills</button>
+      <button type="button" class="sm" data-cmd="whoami">whoami</button>
+      <button type="button" class="sm" data-cmd="ls">ls</button>
+      <button type="button" class="sm" data-cmd="open work">open work</button>
+      <button type="button" class="sm" data-cmd="open projects">open projects</button>
+      <button type="button" class="sm" data-cmd="help">help</button>
+      <button type="button" class="sm" data-cmd="exit">exit</button>
     </footer>
   </section>
 
   <!-- his phone, on the bed: a chat -->
   <section class="scr scr-phone" data-screen="contact" aria-label="say hi, on my phone" tabindex="-1">
-    <div class="boot" aria-hidden="true"><span class="caps" data-clock>--:--</span></div>
-    <header class="status caps"><span data-clock>--:--</span><span>bengaluru</span></header>
-    <header class="chat-head"><strong>mihir okte</strong><span class="caps" id="chat-state">online</span></header>
+    <div class="boot" aria-hidden="true"><span class="sm" data-clock>--:--</span></div>
+    <header class="status"><span data-clock>--:--</span><span>Bengaluru</span></header>
+    <header class="chat-head"><span class="avatar" aria-hidden="true">MO</span><span class="who"><strong>Mihir Okte</strong><span class="sm" id="chat-state">Online</span></span></header>
     <ol class="thread" id="thread" aria-live="polite"></ol>
     <div class="replies" id="replies">
-      <button type="button" class="caps" data-r="email" data-href="mailto:mihirokte77@gmail.com" data-text="mihirokte77@gmail.com">email</button>
-      <button type="button" class="caps" data-r="linkedin" data-href="https://linkedin.com/in/mihirokte" data-text="linkedin.com/in/mihirokte">linkedin</button>
-      <button type="button" class="caps" data-r="github" data-href="https://github.com/Mihirokte" data-text="github.com/Mihirokte">github</button>
-      <button type="button" class="caps" data-r="resume" data-href="https://resume.mihirokte.info" data-text="resume.mihirokte.info">resume</button>
+      <button type="button" class="sm" data-r="email" data-href="mailto:mihirokte77@gmail.com" data-text="mihirokte77@gmail.com">Email</button>
+      <button type="button" class="sm" data-r="linkedin" data-href="https://linkedin.com/in/mihirokte" data-text="linkedin.com/in/mihirokte">LinkedIn</button>
+      <button type="button" class="sm" data-r="github" data-href="https://github.com/Mihirokte" data-text="github.com/Mihirokte">GitHub</button>
+      <button type="button" class="sm" data-r="resume" data-href="https://resume.mihirokte.info" data-text="resume.mihirokte.info">Résumé</button>
     </div>
   </section>
 
@@ -215,12 +218,11 @@
 
 <!-- while visiting a surface: back to the room, or straight to another one -->
 <nav class="nav" id="nav" aria-label="sections">
-  <button type="button" class="caps" data-to="room">room</button>
-  <button type="button" class="caps" data-to="about">about</button>
-  <button type="button" class="caps" data-to="work">work</button>
-  <button type="button" class="caps" data-to="projects">projects</button>
-  <button type="button" class="caps" data-to="skills">skills</button>
-  <button type="button" class="caps" data-to="contact">contact</button>
+  <button type="button" data-to="about">About</button>
+  <button type="button" data-to="work">Work</button>
+  <button type="button" data-to="projects">Projects</button>
+  <button type="button" data-to="skills">Skills</button>
+  <button type="button" data-to="contact">Contact</button>
 </nav>
 
 </body>

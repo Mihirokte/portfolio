@@ -44,9 +44,9 @@ const pinsEl = $('pins');
 const loader = $('loader');
 const nav = $('nav');
 
-// the canvas textures set type in the site's pixel faces: have them before the room is drawn
+// the canvas textures set type in the site's face: have it before the room is drawn
 await Promise.race([
-  Promise.all(["16px 'Pixel Operator'", "bold 16px 'Pixel Operator'", '12px Determination', '24px Pixelta'].map((f) => document.fonts.load(f))),
+  Promise.all(['400 16px Inter', '600 16px Inter'].map((f) => document.fonts.load(f))),
   new Promise((r) => setTimeout(r, 1500)),
 ]);
 
@@ -63,7 +63,7 @@ let theme = night;
 function setTheme(n, persist = true) {
   night = n;
   document.documentElement.dataset.theme = n ? 'night' : 'day';
-  themeBtn.querySelector('span').textContent = n ? 'night' : 'day';
+  themeBtn.querySelector('span').textContent = n ? 'Night' : 'Day';
   themeBtn.setAttribute('aria-label', n ? 'switch to day' : 'switch to night');
   if (persist) try { localStorage.setItem('theme', n ? 'night' : 'day'); } catch { /* private mode: the choice just does not stick */ }
 }
@@ -175,7 +175,7 @@ const pinEls = (GL ? PINS : []).map((pin) => {
   const b = document.createElement('button');
   b.className = 'pin'; b.type = 'button';
   b.dataset.section = pin.section; b.dataset.side = pin.side;
-  b.innerHTML = `<i></i><span class="caps">${pin.section}</span>`;
+  b.innerHTML = `<i></i><span>${pin.section[0].toUpperCase() + pin.section.slice(1)}</span>`;
   b.setAttribute('aria-label', `go to ${pin.section}`);
   b.addEventListener('click', (e) => { e.stopPropagation(); visit(pin.section); });
   pinsEl.appendChild(b);
@@ -440,6 +440,7 @@ function dismissLoader() {
 }
 
 $('mark').addEventListener('click', (e) => { e.preventDefault(); leave(); });
+$('back').addEventListener('click', (e) => { e.stopPropagation(); leave(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape') leave(); }, true);
 addEventListener('resize', measure);
 stage.addEventListener('pointermove', (e) => {
@@ -452,7 +453,7 @@ stage.addEventListener('pointermove', (e) => {
 stage.addEventListener('pointerleave', () => { pointerIn = false; lean.gx = lean.gy = 0; if (hover) { hover = null; stage.classList.remove('pointing'); forceRender = true; } });
 // a click on the room: on a surface at home, go to it; anywhere off the screen during a visit, come back out
 stage.addEventListener('click', (e) => {
-  if (e.target.closest('.chrome, .pin, .scr, .nav')) return;
+  if (e.target.closest('.chrome, .pin, .scr, .nav, .back')) return;
   if (at) { if (landed) leave(); return; }
   const h = pick();
   if (h) visit(h);

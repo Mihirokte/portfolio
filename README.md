@@ -16,7 +16,7 @@ flies back out. Night by default, day on the switch.
   geometry, the palette, the surfaces the screens live on), `screens.js` (what each screen does),
   `textures.js` (canvas-drawn screens and prints, as seen from across the room), `helpers.js` (primitives,
   the flat toon material, theme registry)
-- `public/fonts`, `public/img` — pixel fonts (Pixelta, Pixel Operator, Determination), the photo
+- `public/fonts`, `public/img` — Inter (variable, OFL), the photo
 
 Commands: `npm run dev`, `npm run build` (to `docs/`), `npm run lint`.
 
