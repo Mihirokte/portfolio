@@ -3,7 +3,7 @@
 Personal site at https://mihirokte.info (GitHub Pages serves the committed `docs/` folder on `main`;
 https://mihirokte.github.io/portfolio/ redirects there).
 
-The room: a three.js cutaway of my room, drawn flat as an isometric vector illustration. Every section
+The room: a three.js cutaway of my room, drawn flat as an isometric vector illustration, set in a block of rooms drawn as edges only: mine is the one cell cut open. Every section
 lives on a real surface in it: about in the open journal on the desk, work in an editor on the work laptop,
 projects on the MacBook, skills in a terminal on the monitor, contact in a chat on the phone. Opening a
 pointer (or clicking the surface itself) flies the camera across the room until that surface faces you and

@@ -92,7 +92,6 @@ html { scrollbar-width: none; }
 html, body { height: 100%; overflow: hidden; }
 .stage {
   position: fixed; inset: 0; overflow: hidden; background-color: var(--paper);
-  background-image: var(--grid);
   transition: background-color .45s ease;
 }
 .stage.pointing { cursor: pointer; }
@@ -417,7 +416,7 @@ html[data-theme="night"] .scr-journal { --s-bg: #F1EBDF; }
 
 /* no WebGL: the screens are the page, one after another */
 html:has(body.nogl), body.nogl { overflow: auto; height: auto; }
-.nogl .stage { position: static; overflow: visible; padding: 96px 16px 32px; }
+.nogl .stage { position: static; overflow: visible; padding: 96px 16px 32px; background-image: var(--grid); }
 .nogl #view, .nogl .pins, .nogl .nav, .nogl .back { display: none; }
 .nogl .screens { position: static; display: grid; gap: 32px; justify-items: center; pointer-events: auto; }
 .nogl .scr { position: relative; visibility: visible; opacity: 1; width: min(1040px, 100%); height: 640px; border-radius: 14px; box-shadow: var(--lift); }
