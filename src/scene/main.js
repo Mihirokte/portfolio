@@ -140,27 +140,29 @@ const { pieces, figure } = GL ? await buildRoom(scene) : { pieces: {}, figure: n
 // invisibly, marking its outline on screen, and the block is drawn only outside that mark. Inside the
 // room (on a visit) the mark covers the whole window.
 const CELL = { x: -2, y: -ROOM.SLAB, z: -2, w: ROOM.L + 2, h: ROOM.H + ROOM.SLAB };
-const BLOCK = { back: 6, down: 6, gap: 0.9, depth: 0.7 };
+const BLOCK = { back: 6, down: 6, gap: 0.9, depth: 1.15 };
 const blockScene = new THREE.Scene();
 const block = (() => {
   const { x: X0, y: Y0, z: Z0, w: P, h: Q } = CELL;
   const X1 = X0 + P, Y1 = Y0 + Q, Z1 = Z0 + P;                         // my cell's outer corner: 44, 32, 44
-  const XL = X0 - BLOCK.back * P, ZL = Z0 - BLOCK.back * P, YB = Y0 - BLOCK.down * Q;
+  const G = BLOCK.gap, PG = P + G, QG = Q + G;                         // every room, mine too, sits on one grid: room, gap, room
+  const XL = X0 - BLOCK.back * PG, ZL = Z0 - BLOCK.back * PG, YB = Y0 - BLOCK.down * QG;
   const stencil = { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp };
   const paint = Object.assign(mat(WALL), stencil);
   const g = new THREE.Group();
-  // Each room of the block is its own box, set in from its cell by half the gap on every side (by the
-  // whole gap beside my room, whose walls run to the cell's edge), so a groove runs between every two
-  // rooms. Only the rooms on the outside of the block can be seen, and of each only the three faces that
-  // turn toward the camera: the ones on the outside of the block take the wall paint; the ones that face
-  // into a groove (onto the next room) take the shadow tone, so every groove reads as a dark reveal.
-  const G = BLOCK.gap, outer = [], inner = [];
+  // Each room of the block is its own box the size of my room's cell, laid out on the same grid as mine
+  // with the same gap between every two rooms, so the block's outer faces are flush with my room's and
+  // every gap, beside my room or between two others, is the same width. Only the rooms on the outside of
+  // the block can be seen, and of each only the three faces that turn toward the camera: those on the
+  // outside of the block take the wall paint; those that face into a gap (onto the next room, or mine)
+  // take the shadow tone, so every gap reads as a dark reveal.
+  const outer = [], inner = [];
   const quad = (list, a, b, c, d, n) => list.push([a, b, c, a, c, d, n]);
+  const boxes = [];
   for (let i = -BLOCK.back; i <= 0; i++) for (let j = -BLOCK.down; j <= 0; j++) for (let k = -BLOCK.back; k <= 0; k++) {
     if ((i === 0 && j === 0 && k === 0) || (i !== 0 && j !== 0 && k !== 0)) continue;
-    const mine = (di, dj, dk) => i + di === 0 && j + dj === 0 && k + dk === 0;    // is my room the next cell that way?
-    const hi = (n) => (n ? G : G / 2), cx = X0 + i * P, cy = Y0 + j * Q, cz = Z0 + k * P;
-    const x0 = cx + G / 2, x1 = cx + P - hi(mine(1, 0, 0)), y0 = cy + G / 2, y1 = cy + Q - hi(mine(0, 1, 0)), z0 = cz + G / 2, z1 = cz + P - hi(mine(0, 0, 1));
+    boxes.push([i, j, k, X0 + i * PG, X0 + i * PG + P, Y0 + j * QG, Y0 + j * QG + Q, Z0 + k * PG, Z0 + k * PG + P]);
+    const x0 = X0 + i * PG, x1 = x0 + P, y0 = Y0 + j * QG, y1 = y0 + Q, z0 = Z0 + k * PG, z1 = z0 + P;
     quad(i === 0 ? outer : inner, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0]);     // +x
     quad(j === 0 ? outer : inner, [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0]);     // +y
     quad(k === 0 ? outer : inner, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1]);     // +z
@@ -176,8 +178,9 @@ const block = (() => {
   const shade = Object.assign(mat('#FFFFFF'), stencil);
   themed(shade, 'color', new THREE.Color('#8E867A'), new THREE.Color('#0C0C0F'));
   g.add(faces(outer, paint), faces(inner, shade));
-  // and under the rooms, a core in the same shadow tone, so the floor of every groove is dark too
-  const inset = G / 2 + BLOCK.depth;
+  // and under the rooms, a core in the same shadow tone filling the gaps a little way below the faces, so
+  // the floor of every gap is dark too (it stops at my room's cell, which it never enters)
+  const inset = BLOCK.depth;
   for (const [a, b, c, d, e, f] of [[XL, X0, YB, Y1, ZL, Z1], [X0, X1, YB, Y1, ZL, Z0], [X0, X1, YB, Y0, Z0, Z1]]) {
     const core = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), shade);
     const bx = b - (b === X1 ? inset : 0), dy = d - (d === Y1 ? inset : 0), fz = f - (f === Z1 ? inset : 0);
@@ -202,7 +205,7 @@ const block = (() => {
   }));
   mark.position.set(X0 + P / 2, Y0 + Q / 2, Z0 + P / 2);
   mark.renderOrder = -10;
-  return { group: g, mark };
+  return { group: g, mark, boxes, mine: [X0, X1, Y0, Y1, Z0, Z1] };
 })();
 if (GL) scene.add(block.mark);
 applyTheme(theme);
@@ -564,6 +567,7 @@ if (import.meta.env.DEV) {
   window.__state = () => ({ theme, night, amb: +ambient.intensity.toFixed(4), key: +key.intensity.toFixed(4), sun: +sun.intensity.toFixed(4), lean: [lean.x, lean.y].map((v) => +v.toFixed(5)), fly: !!fly, at });
   window.__lean = (x, y) => { lean.x = lean.gx = x; lean.y = lean.gy = y; applyPose(homePose()); };
   window.__project = (x, y, z) => { _t.set(x, y, z).project(camera); return [(_t.x + 1) / 2 * W, (1 - _t.y) / 2 * H]; };
+  window.__rooms = () => ({ boxes: block.boxes, mine: block.mine, gap: BLOCK.gap });
   window.__block = (v) => { block.group.visible = v; forceRender = true; };
   /** The room cell's 8 corners in window px under the current camera. */
   window.__cellCorners = () => { const { x, y, z, w: P, h: Q } = CELL; const out = []; for (let i = 0; i < 8; i++) { _t.set(x + (i & 1 ? P : 0), y + (i & 2 ? Q : 0), z + (i & 4 ? P : 0)).project(camera); out.push([(_t.x + 1) / 2 * W, (1 - _t.y) / 2 * H]); } return out; };
