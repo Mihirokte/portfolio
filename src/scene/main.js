@@ -9,8 +9,8 @@
 // back out, or straight on to the next thing.
 // Rendering is on demand: a frame is drawn only when something moved.
 import * as THREE from 'three';
-import { buildRoom, PINS, ROOM, SCREENS } from './room.js';
-import { lerp, clamp, easeInOut, themed, applyTheme } from './helpers.js';
+import { buildRoom, PINS, ROOM, SCREENS, WALL } from './room.js';
+import { lerp, clamp, easeInOut, themed, applyTheme, mat, plane } from './helpers.js';
 import { initScreens, SECTIONS } from './screens.js';
 
 const PAPER = '#F3EEE4';
@@ -130,50 +130,69 @@ scene.add(sun, sun.target);
 // ------------------------------------------------------------------ room ----
 const { pieces, figure } = GL ? await buildRoom(scene) : { pieces: {}, figure: null };
 // ------------------------------------------------------------------ the block ----
-// My room is one cell of a much larger block of rooms: the cells all round it (beside, above, below,
-// behind and in front) are drawn as their edges only, fading out with distance, and mine is the one cut
-// open. Each cell is a room's footprint wall to wall (46 x 46) by slab to wall top (37). The lines are
-// kept off my room exactly, whatever the camera does, by a stencil: the room's cell box is drawn first,
-// invisibly, marking its outline on screen, and lines are drawn only outside that mark. Inside the room
-// (on a visit) the mark covers the whole window, so the block disappears.
+// My room is the corner room of a much larger block, the one with its two outer walls and its roof taken
+// off. The rest of the block runs back, sideways and down from it: rooms of the same size (46 x 46 by 37
+// tall, wall to wall and slab to wall top), closed, so what you see of them is the outside of the block,
+// its roof and its two faces, in the same paint as my walls with the room lines drawn on it.
+// They are drawn in a second pass with only the room's ambient and key light (the light my walls get
+// wherever the sun through the window does not reach), so their faces take exactly the tones my walls
+// take. A stencil keeps them off my room at any camera angle: the room's cell box is drawn first,
+// invisibly, marking its outline on screen, and the block is drawn only outside that mark. Inside the
+// room (on a visit) the mark covers the whole window.
 const CELL = { x: -2, y: -ROOM.SLAB, z: -2, w: ROOM.L + 2, h: ROOM.H + ROOM.SLAB };
-const BLOCK = { r: 5, up: 3, down: 3, fade: 3.8, alpha: .34 };
-const lattice = (() => {
-  const pos = [], col = [];
+const BLOCK = { back: 6, down: 6 };
+const blockScene = new THREE.Scene();
+const block = (() => {
   const { x: X0, y: Y0, z: Z0, w: P, h: Q } = CELL;
-  for (let i = -BLOCK.r; i <= BLOCK.r; i++) for (let j = -BLOCK.down; j <= BLOCK.up; j++) for (let k = -BLOCK.r; k <= BLOCK.r; k++) {
-    const x = X0 + i * P, y = Y0 + j * Q, z = Z0 + k * P;
-    const d = Math.hypot(i, j * 1.15, k);
-    const a = BLOCK.alpha * Math.pow(Math.max(0, 1 - d / BLOCK.fade), 1.4);
-    if (a < .01) continue;
-    for (const [dx, dy, dz] of [[P, 0, 0], [0, Q, 0], [0, 0, P]]) {
-      pos.push(x, y, z, x + dx, y + dy, z + dz);
-      // the far end of each edge is a step further out, so lines fade along their length too
-      const d2 = Math.hypot(i + dx / P, (j + dy / Q) * 1.15, k + dz / P);
-      const a2 = BLOCK.alpha * Math.pow(Math.max(0, 1 - d2 / BLOCK.fade), 1.4);
-      col.push(1, 1, 1, a, 1, 1, 1, Math.max(a2, a * .35));
-    }
+  const X1 = X0 + P, Y1 = Y0 + Q, Z1 = Z0 + P;                         // my cell's outer corner: 44, 32, 44
+  const XL = X0 - BLOCK.back * P, ZL = Z0 - BLOCK.back * P, YB = Y0 - BLOCK.down * Q;
+  const stencil = { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp };
+  const paint = Object.assign(mat(WALL), stencil);
+  paint.polygonOffset = true; paint.polygonOffsetFactor = 1; paint.polygonOffsetUnits = 1;
+  const g = new THREE.Group();
+  // the roof (+y) and the two faces (+x, +z), each the whole face of the block less my room's corner
+  plane(g, '+y', Y1, XL, X0, ZL, Z1, paint); plane(g, '+y', Y1, X0, X1, ZL, Z0, paint);
+  plane(g, '+x', X1, ZL, Z0, YB, Y1, paint); plane(g, '+x', X1, Z0, Z1, YB, Y0, paint);
+  plane(g, '+z', Z1, XL, X0, YB, Y1, paint); plane(g, '+z', Z1, X0, X1, YB, Y0, paint);
+  // the room lines: where one room meets the next, on the roof and on both faces
+  const pts = [], e = .02;
+  for (let i = 0; i <= BLOCK.back + 1; i++) {
+    const x = X1 - i * P, z = Z1 - i * P;
+    pts.push(x, Y1 + e, ZL, x, Y1 + e, Z1, XL, Y1 + e, z, X1, Y1 + e, z);        // roof
+    pts.push(X1 + e, YB, z, X1 + e, Y1, z, x, YB, Z1 + e, x, Y1, Z1 + e);        // the uprights on the two faces
+  }
+  for (let j = 0; j <= BLOCK.down + 1; j++) {
+    const y = Y1 - j * Q;
+    pts.push(X1 + e, y, ZL, X1 + e, y, Z1, XL, y, Z1 + e, X1, y, Z1 + e);        // the floor lines on the two faces
   }
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 4));
-  const m = new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, depthWrite: false,
-    stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp,
-  });
-  themed(m, 'color', new THREE.Color('#1D1D21'), new THREE.Color('#B4B0A8'));
-  const lines = new THREE.LineSegments(geo, m);
-  lines.renderOrder = 10; lines.frustumCulled = false;
-  // the mark: my room's cell, a hair larger, drawn into the stencil only
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const ink = new THREE.LineBasicMaterial({ transparent: true, opacity: .16, depthWrite: false, ...stencil });
+  themed(ink, 'color', new THREE.Color('#1D1D21'), new THREE.Color('#000000'));
+  themed(ink, 'opacity', .16, .55);
+  const lines = new THREE.LineSegments(geo, ink);
+  lines.renderOrder = 10;
+  g.add(lines);
+  for (const o of g.children) o.frustumCulled = false;
+  // the room's own light, and nothing else
+  const amb = new THREE.AmbientLight(ambient.color, ambient.intensity);
+  themed(amb, 'intensity', 0.95, 0.34);
+  themed(amb, 'color', new THREE.Color('#FFF6EA'), new THREE.Color('#5C6A8C'));
+  const k = new THREE.DirectionalLight(key.color, key.intensity);
+  k.position.copy(key.position); k.target.position.copy(key.target.position);
+  themed(k, 'intensity', 2.0, 0.46);
+  themed(k, 'color', new THREE.Color('#FFFFFF'), new THREE.Color('#6E7A9A'));
+  blockScene.add(g, amb, k, k.target);
+  // the mark: my room's cell, a hair larger, drawn into the stencil only (first, in the room's pass)
   const mark = new THREE.Mesh(new THREE.BoxGeometry(P + .6, Q + .6, P + .6), new THREE.MeshBasicMaterial({
     colorWrite: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
     stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp,
   }));
   mark.position.set(X0 + P / 2, Y0 + Q / 2, Z0 + P / 2);
   mark.renderOrder = -10;
-  return { lines, mark, segments: pos.length / 6 };
+  return { group: g, mark };
 })();
-if (GL) scene.add(lattice.mark, lattice.lines);
+if (GL) scene.add(block.mark);
 applyTheme(theme);
 
 // ------------------------------------------------------------------ surfaces ----
@@ -341,7 +360,6 @@ function flightPose(f, k) {
 function stepFly(now) {
   if (!fly) return false;
   const k = scrub ? (fly.k ?? 0) : Math.min(1, (now - fly.t0) / fly.ms);
-  fly.prog = k;
   applyPose(flightPose(fly, k));
   if (k >= 1) { const then = fly.then; fly = null; then?.(); }
   return true;
@@ -516,12 +534,13 @@ function frame(t) {
     applyTheme(easeInOut(theme));
     dirty = true;
   }
-  // the block of rooms fades out as the camera goes in, and back as it comes home
-  const lv = !fly ? (at ? 0 : 1) : fly.kind === 'in' ? 1 - smooth(0, .3, fly.prog ?? 0) : fly.kind === 'out' ? smooth(.55, 1, fly.prog ?? 0) : 0;
-  if (Math.abs(lattice.lines.material.opacity - lv) > 1e-3) { lattice.lines.material.opacity = lv; dirty = true; }
   if (dirty) {
     forceRender = false;
     renderer.render(scene, camera);
+    // the block, into the same depth and stencil
+    renderer.autoClear = false;
+    renderer.render(blockScene, camera);
+    renderer.autoClear = true;
     placePins();
     if (!document.body.classList.contains('ready')) { document.body.classList.add('ready'); dismissLoader(); }
     if (pendingHash) { const s = pendingHash; pendingHash = null; setTimeout(() => visit(s), still ? 0 : 350); }
@@ -530,9 +549,10 @@ function frame(t) {
 
 // test hooks for the dev server only (Vite drops this block from the build)
 if (import.meta.env.DEV) {
-  window.__state = () => ({ theme, night, amb: +ambient.intensity.toFixed(4), key: +key.intensity.toFixed(4), sun: +sun.intensity.toFixed(4), lean: [lean.x, lean.y].map((v) => +v.toFixed(5)), lat: lattice.lines.material.opacity, fly: !!fly, at });
+  window.__state = () => ({ theme, night, amb: +ambient.intensity.toFixed(4), key: +key.intensity.toFixed(4), sun: +sun.intensity.toFixed(4), lean: [lean.x, lean.y].map((v) => +v.toFixed(5)), fly: !!fly, at });
   window.__lean = (x, y) => { lean.x = lean.gx = x; lean.y = lean.gy = y; applyPose(homePose()); };
-  window.__lattice = (v) => { lattice.lines.visible = v; forceRender = true; return lattice.segments; };
+  window.__project = (x, y, z) => { _t.set(x, y, z).project(camera); return [(_t.x + 1) / 2 * W, (1 - _t.y) / 2 * H]; };
+  window.__block = (v) => { block.group.visible = v; forceRender = true; };
   /** The room cell's 8 corners in window px under the current camera. */
   window.__cellCorners = () => { const { x, y, z, w: P, h: Q } = CELL; const out = []; for (let i = 0; i < 8; i++) { _t.set(x + (i & 1 ? P : 0), y + (i & 2 ? Q : 0), z + (i & 4 ? P : 0)).project(camera); out.push([(_t.x + 1) / 2 * W, (1 - _t.y) / 2 * H]); } return out; };
   window.__cam = () => ({ pos: camera.position.toArray().map((v) => +v.toFixed(2)), aim: pose?.aim.toArray().map((v) => +v.toFixed(2)), fov: camera.fov, near: camera.near, W, H, home: homeBase && { aim: homeBase.aim.toArray().map((v) => +v.toFixed(2)), dist: +homeBase.dist.toFixed(1) } });

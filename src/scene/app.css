@@ -97,6 +97,12 @@ html, body { height: 100%; overflow: hidden; }
 .stage.pointing { cursor: pointer; }
 #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .8s ease; touch-action: pan-y; }
 .ready #view { opacity: 1; }
+/* the block runs on past the window: it fades into the paper toward the edges, so the eye stays on the room */
+.vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s ease;
+  background: radial-gradient(ellipse 78% 72% at 50% 50%, transparent 52%, color-mix(in srgb, var(--paper) 55%, transparent) 82%, var(--paper) 100%); }
+.ready .vignette { opacity: 1; }
+.visiting .vignette { opacity: 0; }
+.nogl .vignette { display: none; }
 
 /* pointers: a dot anchored to the geometry and a label beside it */
 .pins { position: absolute; left: 0; top: 0; z-index: 2; opacity: 0; transition: opacity .5s ease .2s; }

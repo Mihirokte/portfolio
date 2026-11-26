@@ -24,6 +24,18 @@ function gradientMap() {
 }
 
 /**
+ * Toon shading maps the whole -1..1 range of a light's angle onto the tones, so a lamp lights the back of
+ * anything as well as the front (the outer ends of the walls glowed with the lamp behind them). The room's
+ * lamps are point and spot lights: they light only what faces them. The key light keeps the toon ramp.
+ */
+function lampsFaceOnly(shader) {
+  const face = (call) => `${call}\n\t\tdirectLight.color *= step( 0.0, dot( geometryNormal, directLight.direction ) );`;
+  shader.fragmentShader = shader.fragmentShader.replace('#include <lights_fragment_begin>', THREE.ShaderChunk.lights_fragment_begin
+    .replace('getPointLightInfo( pointLight, geometryPosition, directLight );', face('getPointLightInfo( pointLight, geometryPosition, directLight );'))
+    .replace('getSpotLightInfo( spotLight, geometryPosition, directLight );', face('getSpotLightInfo( spotLight, geometryPosition, directLight );')));
+}
+
+/**
  * Flat-shaded material. The options are the old lit-diorama ones so the room's builders need not change:
  * roughness, metalness, env, bump and clearcoat are accepted and ignored (a vector fill has none of them).
  */
@@ -37,6 +49,7 @@ export function mat(color, o = {}) {
     transparent: !!o.transparent,
     opacity: o.opacity ?? 1,
   });
+  m.onBeforeCompile = lampsFaceOnly;
   if (o.emissive) {
     m.emissive = new THREE.Color(o.emissive);
     m.emissiveIntensity = o.emissiveIntensity ?? 1;

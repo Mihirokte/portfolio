@@ -10,6 +10,8 @@ import { UP, mat, flat, box, cyl, rodX, rodZ, sphere, limb, loft, ring, tube, pl
 import * as T from './textures.js';
 
 export const ROOM = { L: 44, H: 32, SLAB: 5, CENTRE: new THREE.Vector3(22, 10, 22) };
+// the walls' paint: the neighbouring rooms of the block are built from it too (see main.js)
+export const WALL = '#EFE7DB';
 const TILE = 6.6;                                                  // 60 cm floor tiles
 
 // The window: on the front wall (z = 44, the wall the camera looks through), in the gap between the door
@@ -53,7 +55,7 @@ let M = null;
 function materials(tex) {
   tex.weave.repeat.set(3, 2);
   return {
-    wall: mat('#EFE7DB'),
+    wall: mat(WALL),
     slab: mat('#D6CCBC'),
     slabBottom: mat('#C2B6A3'),
     base: mat('#E3DBCD'), baseLip: mat('#F2ECE0'),
