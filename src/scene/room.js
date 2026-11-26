@@ -25,13 +25,15 @@ export const PIECES = {
   bed:    { rect: [14, 44, 17, 44] },   // the bed, the mesh chair, bits on the floor
 };
 
-// pointers: section -> a point on the object that stands for it (absolute room coordinates) + the label side
+// pointers: section -> a point on the object that stands for it (absolute room coordinates), the label side,
+// the box the camera flies to when the pointer is opened (x0, x1, z0, z1, y0, y1: the object and what it sits
+// on), and the side of that box the panel opens on
 export const PINS = [
-  { section: 'projects', piece: 'battle', at: [0.9, 10.3, 7.5], side: 'left' },      // the MacBook on the wall desk: side projects
-  { section: 'work',     piece: 'battle', at: [7.75, 10.9, 1.75], side: 'top' },     // the work laptop on the riser, editor open
-  { section: 'skills',   piece: 'battle', at: [13.5, 11.8, 3.6], side: 'right' },    // the monitor: code, terminal, metrics
-  { section: 'about',    piece: 'battle', at: [15.75, 12.35, 13.0], side: 'bottom' }, // Mihir: his right shoulder
-  { section: 'contact',  piece: 'bed',    at: [18.4, 7.05, 32.6], side: 'right' },   // his phone, face up on the pillow
+  { section: 'projects', piece: 'battle', at: [0.9, 10.3, 7.5], side: 'left', frame: [0, 5.6, 4.6, 10.6, 8.2, 11.4], panel: 'right' },       // the MacBook on the wall desk: side projects
+  { section: 'work',     piece: 'battle', at: [7.75, 10.9, 1.75], side: 'top', frame: [5.4, 10.2, 0.8, 5.2, 8.4, 12.4], panel: 'right' },     // the work laptop on the riser, editor open
+  { section: 'skills',   piece: 'battle', at: [13.5, 11.8, 3.6], side: 'right', frame: [9.4, 17.8, 2.6, 7.4, 8.4, 14.2], panel: 'left' },     // the monitor: code, terminal, metrics
+  { section: 'about',    piece: 'battle', at: [15.75, 12.35, 13.0], side: 'bottom', frame: [9.6, 17.2, 9.0, 16.4, 3.5, 16.8], panel: 'right' }, // Mihir: his right shoulder
+  { section: 'contact',  piece: 'bed',    at: [18.4, 7.05, 32.6], side: 'right', frame: [15.4, 21.6, 29.4, 36.0, 5.2, 7.6], panel: 'right' },  // his phone, face up on the pillow
 ];
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -786,8 +788,6 @@ export async function buildRoom(scene) {
   bed(P.bed.inner, tex);
   meshChair(P.bed.inner);
   floorBits(P.bed.inner);
-  // each piece's bounds, before the (huge, invisible) window wall joins the door piece
-  for (const p of Object.values(pieces)) { p.g.updateMatrixWorld(true); p.box0 = new THREE.Box3().setFromObject(p.g); }
   windowWall(P.door.inner);
 
   return { pieces, figure };

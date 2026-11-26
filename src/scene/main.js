@@ -1,26 +1,26 @@
 // main.js — the room, as a vector illustration.
-// One WebGL canvas fixed behind the page. The room fills the window (the slab, the bed's front and the
-// ground shadow overflow out of the bottom). Pointers anchored to the geometry grow into in-place modals;
-// hovering near his head makes him look back. Rendering is on demand: a frame is drawn only when
-// something moved (the look-back, the day/night tween, a resize).
+// One WebGL canvas fixed behind the page. The whole room sits centred on the paper. Opening a pointer flies
+// the camera to the thing it points at (a pan and a zoom; the isometric angle never changes) and the
+// section grows out of the pointer beside it; closing flies back out. Hovering near his head makes him
+// look back. Rendering is on demand: a frame is drawn only when something moved (the look-back, the
+// day/night tween, the camera, a resize).
 import * as THREE from 'three';
 import { buildRoom, PINS, ROOM } from './room.js';
 import { lerp, clamp, easeInOut, themed, applyTheme } from './helpers.js';
 
 const SECTIONS = ['about', 'work', 'projects', 'skills', 'contact'];
 const PAPER = '#F3EEE4';
-const FRAME = 16 / 9;                                 // the room is composed inside a 16:9 frame
 // True isometric: the camera looks down the diagonal of the room (45 degrees round) at the angle that
 // makes the three axes foreshorten equally (35.264 degrees up), with no perspective at all.
 const AZ = THREE.MathUtils.degToRad(45), EL = Math.atan(1 / Math.SQRT2);
 const CAM_D = 400;                                    // the camera's distance from its aim: anything, in orthographic
-// The window shows the room itself: the two wall ends span the width, the wall tops sit just under the top
-// edge, and whatever is below (the bed's front, the slab, the ground shadow) overflows out of the bottom.
-// Walls are 2 units thick, so the outer wall faces are at -2.
-const ROOM_FRAME = [[-2, 0, 44], [-2, 32, 44], [44, 0, -2], [44, 32, -2], [-2, 32, -2], [0, 32, 0], [44, 0, 44], [0, 0, 0]].map((v) => new THREE.Vector3(...v));
-const SIDE_MARGIN = 0.012;                            // fraction of the width kept clear at each side
-const TOP_MARGIN = 0.04;                              // fraction of the height kept above the wall tops
-const MAX_OVERFLOW = 1.42;                            // the room may be this many viewport heights tall before we stop zooming in
+const AIM0 = new THREE.Vector3(22, 12, 22);           // the picture plane passes through the middle of the room
+// Where things sit in the window, as fractions of its width and height (x0, x1, y0, y1 from the top left).
+// HOME: the whole room, centred, with a margin. FOCUS: the object a pointer opened, in the half of the
+// window away from its panel. Phones: the room in the upper part, the panel is a bottom sheet.
+const HOME = [0.05, 0.95, 0.09, 0.93], HOME_COMPACT = [0.04, 0.96, 0.08, 0.62];
+const FOCUS_L = [0.08, 0.46, 0.12, 0.88], FOCUS_R = [0.54, 0.92, 0.12, 0.88], FOCUS_COMPACT = [0.1, 0.9, 0.1, 0.46];
+const FLY = 0.8;                                      // seconds, there and back
 const PIN_EDGE = 150;                                 // a label this close to a side edge flips to the other side
 const LOOK_RADIUS = 0.09;                             // fraction of the height: the pointer this close to his head makes him look back
 const LOOK_YAW = -2.0, LOOK_TWIST = -0.42;            // head yaw and torso twist (radians) when he looks back over his right shoulder
@@ -40,7 +40,6 @@ const loader = $('loader');
 const root = $('modal-root');
 const modal = $('modal');
 const mTitle = $('modal-title');
-const mIco = $('modal-ico');
 const mScroll = $('modal-scroll');
 const sections = [...modal.querySelectorAll('section')];
 
@@ -132,14 +131,14 @@ const pinEls = (GL ? PINS : []).map((pin) => {
   b.dataset.section = pin.section; b.dataset.side = pin.side;
   b.innerHTML = `<i></i><span class="caps">${pin.section}</span>`;
   b.setAttribute('aria-label', `open ${pin.section}`);
-  b.addEventListener('click', (e) => { e.stopPropagation(); open === pin.section ? hide() : show(pin.section, b); });
+  b.addEventListener('click', (e) => { e.stopPropagation(); if (open === pin.section) hide(); else show(pin.section, b); });
   pinsEl.appendChild(b);
   return { el: b, pin, local: new THREE.Vector3(...pin.at), piece: pieces[pin.piece] };
 });
 // phones: the pointers keep their dots but lose their labels (they collide at that size), so a plain text row
 // of the sections sits along the bottom edge instead; hidden on desktop, where the pointers are the navigation
 const mnav = document.createElement('nav'); mnav.className = 'mnav'; mnav.setAttribute('aria-label', 'sections');
-for (const s of SECTIONS) { const b = document.createElement('button'); b.type = 'button'; b.className = 'caps'; b.textContent = s; b.addEventListener('click', () => open === s ? hide() : show(s, b)); mnav.appendChild(b); }
+for (const s of SECTIONS) { const b = document.createElement('button'); b.type = 'button'; b.className = 'caps'; b.textContent = s; b.addEventListener('click', () => { if (open === s) hide(); else show(s, b); }); mnav.appendChild(b); }
 document.body.appendChild(mnav);
 
 // ------------------------------------------------------------------ state ----
@@ -149,6 +148,9 @@ let pointerIn = false, forceRender = true;
 let look = 0, lookGoal = 0, closeTimer = 0, swapTimer = 0;
 const px = new THREE.Vector2();
 const _t = new THREE.Vector3(), _right = new THREE.Vector3(), _up = new THREE.Vector3();
+// the camera's view: the picture-plane point it is centred on (cx, cy along _right and _up) and the half
+// width of the picture in world units. `view` is what is drawn, `fly` the tween in progress, if any.
+let view = { cx: 0, cy: 0, hw: 40 }, fly = null, home = null;
 
 // theme: 0 = day, 1 = night. Night is the default; the choice is kept in localStorage (the inline script in
 // the head applies it before first paint) and the scene tweens between the two readings in the loop.
@@ -167,61 +169,78 @@ setTheme(night, false);
 themeBtn.addEventListener('click', () => setTheme(night ? 0 : 1));
 applyTheme(theme);
 
-function aimCamera(aim) {
+// the picture plane's axes never change (the camera only pans and zooms), so they are fixed once
+camera.position.copy(AIM0).addScaledVector(dirCam, CAM_D);
+camera.lookAt(AIM0);
+camera.updateMatrixWorld();
+_right.setFromMatrixColumn(camera.matrixWorld, 0);
+_up.setFromMatrixColumn(camera.matrixWorld, 1);
+
+/** Sets the camera to a view. */
+function applyView(v) {
+  view = v;
+  const aim = AIM0.clone().addScaledVector(_right, v.cx - AIM0.dot(_right)).addScaledVector(_up, v.cy - AIM0.dot(_up));
   camera.position.copy(aim).addScaledVector(dirCam, CAM_D);
   camera.lookAt(aim);
   camera.updateMatrixWorld();
+  const hh = v.hw * H / W;
+  camera.left = -v.hw; camera.right = v.hw; camera.top = hh; camera.bottom = -hh;
+  camera.updateProjectionMatrix();
+  forceRender = true;
 }
 
-/** The extents of `points` in the camera's own frame (world units across and up the picture plane). */
+/** The extents of `points` on the picture plane (world units along _right and _up). */
 function extents(points) {
   let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-  for (const p of points) { _t.copy(p).applyMatrix4(camera.matrixWorldInverse); x0 = Math.min(x0, _t.x); x1 = Math.max(x1, _t.x); y0 = Math.min(y0, _t.y); y1 = Math.max(y1, _t.y); }
+  for (const p of points) { const x = p.dot(_right), y = p.dot(_up); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
   return { x0, x1, y0, y1 };
 }
 
-/** Points the camera so that camera-space (cx, cy) sits at the centre of a view `hw` world units wide. */
-function frameView(aim0, cx, cy, hw) {
-  _right.setFromMatrixColumn(camera.matrixWorld, 0);
-  _up.setFromMatrixColumn(camera.matrixWorld, 1);
-  const aim = aim0.clone().addScaledVector(_right, cx).addScaledVector(_up, cy);
-  const hh = hw * H / W;
-  camera.left = -hw; camera.right = hw; camera.top = hh; camera.bottom = -hh;
-  camera.updateProjectionMatrix();
-  aimCamera(aim);
-}
-
-/** CONTAIN: `points` fill `margin` of a frame (default 16:9) centred in the viewport. Orthographic, so one pass is exact. */
-function fit(points, margin, frame = FRAME) {
-  const aim = new THREE.Vector3(22, 12, 22);
-  aimCamera(aim);
+/** The view that puts `points` inside the window rectangle `[fx0, fx1, fy0, fy1]` (fractions), centred in it. Orthographic, so it is exact. */
+function fitView(points, [fx0, fx1, fy0, fy1]) {
   const { x0, x1, y0, y1 } = extents(points);
-  const fw = Math.min(W, H * frame), fh = fw / frame;             // the artwork's frame, in CSS px
-  const hw = Math.max(((x1 - x0) / 2) / (margin * fw / W), ((y1 - y0) / 2) / (margin * fh / H) * (W / H));
-  frameView(aim, (x0 + x1) / 2, (y0 + y1) / 2, hw);
-}
-
-/**
- * COVER: the room fills the window. The wall ends span the width, the wall tops sit under the top edge, and
- * the room may run up to MAX_OVERFLOW viewport heights tall before the zoom stops (ultra-wide windows).
- */
-function fitRoom() {
-  const aim = new THREE.Vector3(22, 12, 22);
-  aimCamera(aim);
-  const { x0, x1, y0, y1 } = extents(ROOM_FRAME);
-  const hw = Math.max(((x1 - x0) / 2) / (1 - 2 * SIDE_MARGIN), ((y1 - y0) / 2) / MAX_OVERFLOW * (W / H));
+  const fw = fx1 - fx0, fh = fy1 - fy0;
+  const hw = Math.max((x1 - x0) / (2 * fw), (y1 - y0) / (2 * fh) * (W / H));
   const hh = hw * H / W;
-  frameView(aim, (x0 + x1) / 2, y1 - hh * (1 - 2 * TOP_MARGIN), hw);
+  return { cx: (x0 + x1) / 2 - ((fx0 + fx1) / 2 - 0.5) * 2 * hw, cy: (y0 + y1) / 2 + ((fy0 + fy1) / 2 - 0.5) * 2 * hh, hw };
 }
 
-/** The eight corners of every piece's bounds: what the contain fit frames. */
-function corners() {
-  const pts = [];
-  for (const p of pieceList) {
-    const b = p.box0;
-    for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z));
+const box8 = (b) => Array.from({ length: 8 }, (_, i) => new THREE.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z));
+// What the home view frames: the drawn outline of the room, not the bounds of its meshes (those include
+// things hidden behind the walls, like the door leaf swung into the corridor, and would pull it off
+// centre). The tops of the two walls, the bottom of the slab, and the hard shadow under it.
+const S = ROOM.SLAB, SH = 2.6;
+const OUTLINE = [[-2, ROOM.H, -2], [-2, ROOM.H, ROOM.L], [ROOM.L, ROOM.H, -2], [-2, -S, ROOM.L], [ROOM.L, -S, -2], [ROOM.L, -S, ROOM.L],
+  [-2 + SH, -S - .6, ROOM.L + SH], [ROOM.L + SH, -S - .6, -2 + SH], [ROOM.L + SH, -S - .6, ROOM.L + SH]].map((v) => new THREE.Vector3(...v));
+/** The eight corners of a pointer's frame box, in world space. */
+function frameCorners(pin) {
+  const [x0, x1, z0, z1, y0, y1] = pin.frame;
+  return box8(new THREE.Box3(new THREE.Vector3(x0, y0, z0), new THREE.Vector3(x1, y1, z1)));
+}
+/** Where a pointer's frame box lands in the window (CSS px) under the current view. */
+function frameRect(pin) {
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const p of frameCorners(pin)) {
+    _t.copy(p).project(camera);
+    const x = (_t.x + 1) / 2 * W, y = (1 - _t.y) / 2 * H;
+    x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
   }
-  return pts;
+  return { x0, x1, y0, y1 };
+}
+const homeView = () => fitView(OUTLINE, compact ? HOME_COMPACT : HOME);
+const focusView = (pin) => fitView(frameCorners(pin), compact ? FOCUS_COMPACT : pin.panel === 'right' ? FOCUS_L : FOCUS_R);
+
+/** Flies the camera from the current view to `to` over FLY seconds (at once if motion is reduced), then calls `then`. */
+function flyTo(to, then = null) {
+  if (reduced || still) { applyView(to); fly = null; then?.(); return; }
+  fly = { from: { ...view }, to, t0: performance.now(), then };
+}
+function stepFly(now) {
+  if (!fly) return;
+  const k = Math.min(1, (now - fly.t0) / (FLY * 1000)), e = easeInOut(k);
+  const { from, to } = fly;
+  applyView({ cx: lerp(from.cx, to.cx, e), cy: lerp(from.cy, to.cy, e), hw: Math.exp(lerp(Math.log(from.hw), Math.log(to.hw), e)) });
+  if (k >= 1) { const then = fly.then; fly = null; then && queueMicrotask(then); }
 }
 
 function measure() {
@@ -232,10 +251,13 @@ function measure() {
   const rect = stage.getBoundingClientRect();
   H = Math.round(rect.height) || H;
   renderer.setSize(W, H, false);
-  camera.clearViewOffset();
-  // phones: the whole room contained in the upper part of the screen; desktop: the room fills the window
-  if (compact) fit(corners(), 0.94, W / (H * 0.62)); else fitRoom();
-  forceRender = true;
+  document.body.style.setProperty('--mnav-h', `${compact ? mnav.offsetHeight : 0}px`);   // the phone sheet sits above the nav
+  home = homeView();
+  // a resize keeps whatever is in view (the room, or the object a pointer opened) framed the same way
+  const pin = open && PINS.find((p) => p.section === open);
+  const target = pin ? focusView(pin) : home;
+  if (fly) fly = { ...fly, from: { ...view }, to: target, t0: performance.now() }; else applyView(target);
+  if (pin && root.classList.contains('open')) placeModal(pin);
 }
 
 function placePins() {
@@ -273,68 +295,92 @@ function poseLook(e) {
 }
 
 // ------------------------------------------------------------------ modal ----
-// The modal grows out of the pointer that opened it: its transform origin is the pointer's dot, so the
-// pointer visibly becomes the box. Closing shrinks it back into the same point.
-function anchorOf(el) {
-  const r = (el.querySelector('i') || el).getBoundingClientRect();
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+// Opening a pointer is a visit: the other pointers step away, the camera flies to the object (pan and
+// zoom, same isometric angle), and when it lands the section grows out of the pointer's dot into a note
+// pinned beside the object, on the side the object leaves free. Closing shrinks the note back into the
+// dot and the camera flies out to the whole room. Opening another section from the phone nav flies
+// straight from one object to the next.
+const pinOf = (section) => PINS.find((p) => p.section === section);
+const elOf = (section) => pinEls.find((p) => p.pin.section === section)?.el || null;
+
+/** The pointer's dot in window px under the current view. */
+function dotOf(pin) {
+  const pe = pinEls.find((p) => p.pin === pin);
+  pe.piece.inner.localToWorld(_t.copy(pe.local)).project(camera);
+  return { x: (_t.x + 1) / 2 * W, y: (1 - _t.y) / 2 * H };
 }
 
-function show(section, from) {
-  if (!SECTIONS.includes(section) || open === section) return;
-  if (open) {                                          // swap: shrink into the old origin, then grow from the new one
-    hide();
-    clearTimeout(swapTimer);
-    swapTimer = setTimeout(() => show(section, from), still ? 0 : 320);
-    return;
-  }
-  open = section;
-  origin = from || pinEls.find((p) => p.pin.section === section)?.el || null;
-  const sec = sections.find((s) => s.dataset.panel === section);
-  sections.forEach((s) => s.classList.toggle('on', s === sec));
-  mTitle.textContent = sec.dataset.title;
-  mIco.style.setProperty('--i', sec.dataset.ico);
-  mScroll.scrollTop = 0;
+/** Puts the note beside the object in view and sets its growth origin to the pointer's dot. */
+function placeModal(pin) {
+  const a = dotOf(pin);
+  if (!compact) {
+    const r = frameRect(pin), mw = modal.offsetWidth, mh = modal.offsetHeight, m = 24, gap = 40;
+    const left = pin.panel === 'right' ? r.x1 + gap : r.x0 - gap - mw;
+    modal.style.left = `${Math.round(clamp(left, m, Math.max(m, W - mw - m)))}px`;
+    modal.style.top = `${Math.round(clamp((r.y0 + r.y1) / 2 - mh / 2, m, Math.max(m, H - mh - m)))}px`;
+  } else { modal.style.left = modal.style.top = ''; }
+  modal.style.transformOrigin = `${(a.x - modal.offsetLeft).toFixed(1)}px ${(a.y - modal.offsetTop).toFixed(1)}px`;
+}
 
+/** Grows the note for the open section (the camera has landed). */
+function reveal() {
+  const pin = pinOf(open);
+  if (!pin) return;
   clearTimeout(closeTimer);
   root.hidden = false;
   root.classList.remove('closing');
   modal.style.transition = 'none';                     // jump to the start state, no slide from the previous spot
-  const a = origin ? anchorOf(origin) : { x: W / 2, y: H / 2 };
-  if (!compact) {
-    // beside the pointer, not over it: the thing it points at (and he, looking back) stays in view
-    const mw = modal.offsetWidth, mh = modal.offsetHeight, m = 20, gap = 56;
-    const left = a.x + gap + mw <= W - m ? a.x + gap : a.x - gap - mw >= m ? a.x - gap - mw : a.x - mw / 2;
-    modal.style.left = `${Math.round(clamp(left, m, Math.max(m, W - mw - m)))}px`;
-    modal.style.top = `${Math.round(clamp(a.y - mh / 2, m, Math.max(m, H - mh - m)))}px`;
-  } else { modal.style.left = modal.style.top = ''; }
-  modal.style.transformOrigin = `${(a.x - modal.offsetLeft).toFixed(1)}px ${(a.y - modal.offsetTop).toFixed(1)}px`;
+  placeModal(pin);
   void modal.offsetWidth;                              // flush the start state before the transition is re-armed
   modal.style.transition = '';
   requestAnimationFrame(() => root.classList.add('open'));
+  modal.focus({ preventScroll: true });
+}
 
-  if (origin?.classList.contains('pin')) origin.classList.add('into');
+/** Shrinks the note back into its dot. */
+function conceal() {
+  root.classList.remove('open');
+  root.classList.add('closing');
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => { root.hidden = true; root.classList.remove('closing'); }, still ? 0 : 340);
+}
+
+function show(section, from) {
+  if (!SECTIONS.includes(section) || open === section) return;
+  const pin = pinOf(section);
+  if (!pin) return;
+  const was = open;
+  if (was) { conceal(); elOf(was)?.classList.remove('into'); }
+  open = section;
+  origin = from || elOf(section);
+  const sec = sections.find((x) => x.dataset.panel === section);
+  sections.forEach((x) => x.classList.toggle('on', x === sec));
+  mTitle.textContent = sec.dataset.title;
+  mScroll.scrollTop = 0;
+  elOf(section)?.classList.add('into');
   pinEls.forEach(({ el }) => el.toggleAttribute('aria-current', el.dataset.section === section));
   mnav.querySelectorAll('button').forEach((b) => b.toggleAttribute('aria-current', b.textContent === section));
   document.body.classList.add('modal-open');
   history.replaceState(null, '', '#' + section);
-  modal.focus({ preventScroll: true });
+  // let a closing note finish shrinking before the camera moves on
+  clearTimeout(swapTimer);
+  swapTimer = setTimeout(() => flyTo(focusView(pin), () => { if (open === section) reveal(); }), was && !still ? 260 : 0);
 }
 
 function hide() {
   if (!open) return;
+  const was = open;
   open = null;
-  root.classList.remove('open');
-  root.classList.add('closing');
-  clearTimeout(closeTimer);
-  closeTimer = setTimeout(() => { root.hidden = true; root.classList.remove('closing'); }, still ? 0 : 380);
+  clearTimeout(swapTimer);
+  conceal();
   const from = origin;
   origin = null;
-  from?.classList.remove('into');
+  elOf(was)?.classList.remove('into');
   pinEls.forEach(({ el }) => el.removeAttribute('aria-current'));
   mnav.querySelectorAll('button').forEach((b) => b.removeAttribute('aria-current'));
   document.body.classList.remove('modal-open');
   history.replaceState(null, '', location.pathname + location.search);
+  setTimeout(() => flyTo(home), still ? 0 : 180);
   from?.focus?.({ preventScroll: true });
 }
 
@@ -365,6 +411,8 @@ stage.addEventListener('pointermove', (e) => {
   pointerIn = true;
 });
 stage.addEventListener('pointerleave', () => { pointerIn = false; });
+// a click anywhere on the room (not on the chrome or a pointer) ends a visit and flies back out
+stage.addEventListener('click', (e) => { if (open && !e.target.closest('.chrome, .pin')) hide(); });
 
 // ------------------------------------------------------------------ loop ----
 let last = performance.now();
@@ -372,6 +420,7 @@ function frame(t) {
   if (!GL) return;
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
+  stepFly(t);
   let dirty = forceRender;
   // the look back: a slow ease out and back (about 0.7 s), never a snap
   aimLook();
