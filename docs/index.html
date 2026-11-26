@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>mihir okte</title>
-<meta name="description" content="Mihir Okte — software engineer at Amazon, Bengaluru. My room, in 3D: follow a pointer.">
+<meta name="description" content="Mihir Okte, software engineer at Amazon, Bengaluru. My room in 3D: every section lives on something in it. Follow a pointer.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#121216" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
@@ -17,8 +17,8 @@
   document.documentElement.dataset.theme = (q || s) === 'day' ? 'day' : 'night';
 })();
 </script>
-  <script type="module" crossorigin src="/assets/index-DlO9D7xM.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-lN2MbBM7.css">
+  <script type="module" crossorigin src="/assets/index-BrJe3LjY.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CXCXi7dJ.css">
 </head>
 <body>
 
@@ -34,122 +34,194 @@
 
   <div class="pins" id="pins"></div>
 
-  <div class="centre" aria-hidden="true">
-    <h1>mihir okte</h1>
-    <p class="caps">software engineer · amazon · bengaluru</p>
-    <p class="lede">This is my room. Everything I do happens somewhere in it. Follow a pointer.</p>
-  </div>
+  <h1 class="sr-only">Mihir Okte, software engineer at Amazon, Bengaluru. This is my room; every section lives on something in it.</h1>
 
   <!-- corners -->
   <a class="chrome mark" href="#" id="mark">mihir okte</a>
 
   <div class="chrome topright">
-    <button class="theme caps" id="theme" type="button" aria-label="switch to day"><i class="glyph" aria-hidden="true"></i><span>night</span></button>
-    <p class="clock caps" id="clock" aria-label="local time in bengaluru"><i class="blink" aria-hidden="true"></i><span>bengaluru</span><time id="clock-time">--:--</time></p>
+    <button class="theme caps" id="theme" type="button" aria-label="switch to day"><span>night</span></button>
+    <p class="clock caps" id="clock" aria-label="local time in bengaluru"><i class="blink" aria-hidden="true"></i><span>bengaluru</span><time id="clock-time" data-clock>--:--</time></p>
   </div>
-</main>
 
-<!-- ===================== modal: the camera flies to the object, then this grows out of its pointer ===================== -->
-<div class="modal-root" id="modal-root" hidden>
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
-    <div class="modal-box">
-      <header class="modal-head">
-        <h2 id="modal-title">about</h2>
-        <button class="x" type="button" data-close aria-label="close"><kbd class="caps">esc</kbd></button>
-      </header>
-      <div class="modal-scroll" id="modal-scroll">
+<!-- ===================== the screens: every section is a working interface on a real surface in the room.
+     Opening one flies the camera until that surface fills the view at 1:1, and the interface boots on it. ===================== -->
+<div class="screens" id="screens">
 
-        <section data-panel="about" data-title="about">
-          <figure class="photo"><img src="/img/mihir.jpg" width="480" height="600" alt="Mihir Okte, at a restaurant table, smiling at the camera" loading="lazy"></figure>
-          <p>I'm Mihir Okte, a software engineer at Amazon in Bengaluru. I work on the systems that take and refund orders for Amazon's Global Stores.</p>
-          <p>I studied Mathematics and Computing at IIT Delhi, class of 2023. My final-year project was a Rubik's cube solver; the cube is still on the shelf behind me.</p>
-          <p>Outside work I play football most weeks, usually in midfield, and FIFA on the PS5 when I can't get to a pitch. I cook on weeknights, slow dishes, with spice.</p>
-          <h3>accolades</h3>
-          <ul class="rows">
-            <li>KVPY 2018, All India Rank 233. A national science scholarship exam run by the Department of Science and Technology.</li>
-            <li>NTSE 2017 scholar. A top-1000 rank in the national talent search, out of more than a million candidates.</li>
-          </ul>
-        </section>
+  <!-- the open journal on the wall desk -->
+  <section class="scr scr-journal" data-screen="about" aria-label="about me, in my journal" tabindex="-1">
+    <div class="boot" aria-hidden="true"></div>
+    <div class="pages">
+      <div class="page" data-page="0">
+        <figure class="taped"><img src="/img/mihir.jpg" width="480" height="600" alt="Mihir Okte, at a restaurant table, smiling at the camera" loading="lazy"></figure>
+        <h2>about</h2>
+        <p>I'm Mihir Okte, a software engineer at Amazon in Bengaluru. I work on the systems that take and refund orders for Amazon's Global Stores.</p>
+      </div>
+      <div class="page" data-page="1">
+        <p>I studied Mathematics and Computing at IIT Delhi, class of 2023. My final-year project was a Rubik's cube solver; the cube is still on the shelf behind me.</p>
+        <p>Outside work I play football most weeks, usually in midfield, and FIFA on the PS5 when I can't get to a pitch. I cook on weeknights, slow dishes, with spice.</p>
+      </div>
+      <div class="page" data-page="2">
+        <h2>accolades</h2>
+        <ul class="rows">
+          <li>KVPY 2018, All India Rank 233. A national science scholarship exam run by the Department of Science and Technology.</li>
+          <li>NTSE 2017 scholar. A top-1000 rank in the national talent search, out of more than a million candidates.</li>
+        </ul>
+      </div>
+      <div class="page" data-page="3">
+        <h2>elsewhere in the room</h2>
+        <ul class="go">
+          <li><button type="button" data-go="work">work</button><span class="caps">the laptop on the riser</span></li>
+          <li><button type="button" data-go="projects">projects</button><span class="caps">the macbook beside this journal</span></li>
+          <li><button type="button" data-go="skills">skills</button><span class="caps">the terminal on the monitor</span></li>
+          <li><button type="button" data-go="contact">say hi</button><span class="caps">my phone, on the bed</span></li>
+        </ul>
+      </div>
+    </div>
+    <footer class="turns">
+      <button type="button" class="caps" data-turn="-1">previous page</button>
+      <span class="caps folio" aria-live="polite">1 / 2</span>
+      <button type="button" class="caps" data-turn="1">next page</button>
+    </footer>
+  </section>
 
-        <section data-panel="work" data-title="work">
-          <article class="job">
-            <header><h3>Amazon</h3><span class="caps">aug 2024 — now</span></header>
-            <p class="role">Software Engineer, Global Stores</p>
-            <ul class="rows">
+  <!-- the work laptop on the riser: an editor -->
+  <section class="scr scr-editor" data-screen="work" aria-label="work, in an editor on my work laptop" tabindex="-1">
+    <div class="boot" aria-hidden="true"><span class="caps">opening experience</span><i></i></div>
+    <header class="bar"><span class="caps">experience</span><span class="caps">work laptop</span></header>
+    <div class="ed">
+      <nav class="tree" aria-label="files">
+        <p class="caps">files</p>
+        <button type="button" class="file" data-f="0" aria-current="true">amazon.md</button>
+        <button type="button" class="file" data-f="1">yoptima.md</button>
+        <button type="button" class="file" data-f="2">e-ring.md</button>
+        <button type="button" class="file" data-f="3">early-startups.md</button>
+      </nav>
+      <div class="pane">
+        <div class="tab caps" id="ed-tab">amazon.md</div>
+        <div class="docs">
+          <article class="doc on" data-f="0">
+            <h3>Amazon</h3>
+            <p class="meta caps">aug 2024 — now · software engineer, global stores</p>
+            <ul>
               <li>Moved 19 ordering and refund services onto new infrastructure with no downtime, leading a team of 8 through the ten-month migration.</li>
               <li>Connected legacy service logs to diagnosis agents, which cut the time to assess a risky change by 97%.</li>
               <li>Ran my org's first release where an AI agent did the engineering end to end, on the system that updates customer orders.</li>
               <li>Owned the health of three ordering services and handled 200+ production incidents along the way.</li>
             </ul>
           </article>
-          <article class="job">
-            <header><h3>YOptima</h3><span class="caps">jul 2023 — aug 2024</span></header>
-            <p class="role">Founding Engineer, CEO Office</p>
-            <ul class="rows">
+          <article class="doc" data-f="1">
+            <h3>YOptima</h3>
+            <p class="meta caps">jul 2023 — aug 2024 · founding engineer, ceo office</p>
+            <ul>
               <li>Built nYO, a self-serve platform for YouTube and DV360 ad campaigns. Client onboarding went from days to minutes.</li>
               <li>Rebuilt overspend alerting on real-time signals: alerts in 10 minutes instead of 2 hours.</li>
               <li>Fine-tuned Llama-2 on channel metadata to match ads to inventory. Live placement variance dropped 40%.</li>
             </ul>
           </article>
-          <article class="job">
-            <header><h3>E-Ring</h3><span class="caps">jun — jul 2022</span></header>
-            <p class="role">Software Engineer Intern (PPO)</p>
-            <ul class="rows"><li>Restructured the database behind a US property-tax appraisal system. Queries got 30% faster.</li></ul>
+          <article class="doc" data-f="2">
+            <h3>E-Ring</h3>
+            <p class="meta caps">jun — jul 2022 · software engineer intern (ppo)</p>
+            <ul><li>Restructured the database behind a US property-tax appraisal system. Queries got 30% faster.</li></ul>
           </article>
-          <article class="job">
-            <header><h3>Early startups</h3><span class="caps">2020 — 2023</span></header>
-            <p class="role">Materate · Pricing · StoryProcess</p>
-            <ul class="rows"><li>Built Materate's first dashboards and web app, and a tool for StoryProcess that turned a spoken pitch into a short animation.</li></ul>
+          <article class="doc" data-f="3">
+            <h3>Early startups</h3>
+            <p class="meta caps">2020 — 2023 · materate · pricing · storyprocess</p>
+            <ul><li>Built Materate's first dashboards and web app, and a tool for StoryProcess that turned a spoken pitch into a short animation.</li></ul>
           </article>
-        </section>
-
-        <section data-panel="projects" data-title="projects">
-          <article class="job">
-            <header><h3>Talk Mode</h3><span class="caps">2026</span></header>
-            <p>An Alexa skill that lets me talk to an AI model through the Echo in my room. I say "Alexa, start talk mode", then ask anything in my own words and keep asking follow-ups until I say stop. It can look things up on the web and add to my task list, and an average question costs less than a tenth of a cent.</p>
-            <a class="link" href="https://github.com/Mihirokte/talk-mode">github.com/Mihirokte/talk-mode</a>
-          </article>
-          <article class="job">
-            <header><h3>Prep</h3><span class="caps">2026 — now</span></header>
-            <p>A Mac app I use to study for interviews. It has courses, drills and coding problems, and it checks my answers on the laptop itself, with no account and no internet needed.</p>
-            <a class="link" href="https://github.com/Mihirokte/prep">github.com/Mihirokte/prep<span class="px-arrow" aria-hidden="true"></span></a>
-          </article>
-          <article class="job">
-            <header><h3>Helio</h3><span class="caps">2025 — now</span></header>
-            <p>A personal assistant that lives inside Telegram. It runs on a server, so it keeps working when my phone has no signal. I use it every day.</p>
-          </article>
-          <article class="job">
-            <header><h3>Rubik's cube solver</h3><span class="caps">b.tech thesis</span></header>
-            <p>Treats the cube as a maths object, turns each move into a step on a map, and searches for the shortest route to solved. Any scramble in under two seconds.</p>
-          </article>
-          <article class="job">
-            <header><h3>Speech-to-animation</h3><span class="caps">storyprocess</span></header>
-            <p>Speak a pitch into a microphone and get a short animated video back. Built so a small team could make many pitches quickly.</p>
-          </article>
-        </section>
-
-        <section data-panel="skills" data-title="skills">
-          <dl class="groups">
-            <dt class="caps">languages</dt><dd>Python · TypeScript · JavaScript · SQL · C/C++ · Java</dd>
-            <dt class="caps">frameworks</dt><dd>React · Next.js · Node.js · Flask · FastAPI · REST APIs</dd>
-            <dt class="caps">cloud</dt><dd>AWS · GCP · Docker · CI/CD · GitHub Actions</dd>
-            <dt class="caps">ai &amp; agents</dt><dd>LangChain · LangGraph · MCP · Context engineering · Fine-tuning · Claude Code · Cursor · Kiro</dd>
-          </dl>
-        </section>
-
-        <section data-panel="contact" data-title="say hi.">
-          <dl class="groups">
-            <dt class="caps">email</dt><dd><a class="link" href="mailto:mihirokte77@gmail.com">mihirokte77@gmail.com</a></dd>
-            <dt class="caps">linkedin</dt><dd><a class="link" href="https://linkedin.com/in/mihirokte">linkedin.com/in/mihirokte</a></dd>
-            <dt class="caps">github</dt><dd><a class="link" href="https://github.com/Mihirokte">github.com/Mihirokte</a></dd>
-            <dt class="caps">resume</dt><dd><a class="link" href="https://resume.mihirokte.info">resume.mihirokte.info<span class="px-arrow" aria-hidden="true"></span></a></dd>
-          </dl>
-        </section>
-
+        </div>
+        <footer class="status caps"><span id="ed-status">amazon.md</span><span>4 files · up and down to switch</span></footer>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- the macbook on the wall desk: projects -->
+  <section class="scr scr-mac" data-screen="projects" aria-label="projects, on my macbook" tabindex="-1">
+    <div class="boot" aria-hidden="true"><span class="mac-mark">mihir</span></div>
+    <header class="bar"><span class="caps">mihir's macbook</span><span class="caps" data-clock>--:--</span></header>
+    <div class="desk">
+      <div class="win">
+        <header class="win-head"><button type="button" class="caps back" hidden>all projects</button><span class="caps win-title">projects</span><span class="caps win-count">5 projects</span></header>
+        <div class="win-body">
+          <div class="grid">
+            <button type="button" class="card" data-p="0"><span class="caps">2026</span><strong>Talk Mode</strong><span class="line">An Alexa skill for talking to an AI model.</span></button>
+            <button type="button" class="card" data-p="1"><span class="caps">2026 — now</span><strong>Prep</strong><span class="line">A Mac app for interview prep, offline.</span></button>
+            <button type="button" class="card" data-p="2"><span class="caps">2025 — now</span><strong>Helio</strong><span class="line">A personal assistant inside Telegram.</span></button>
+            <button type="button" class="card" data-p="3"><span class="caps">b.tech thesis</span><strong>Rubik's cube solver</strong><span class="line">Any scramble, solved in under two seconds.</span></button>
+            <button type="button" class="card" data-p="4"><span class="caps">storyprocess</span><strong>Speech-to-animation</strong><span class="line">Speak a pitch, get an animated video.</span></button>
+          </div>
+          <article class="detail" data-p="0" hidden>
+            <p class="caps">2026</p><h2>Talk Mode</h2>
+            <p>An Alexa skill that lets me talk to an AI model through the Echo in my room. I say "Alexa, start talk mode", then ask anything in my own words and keep asking follow-ups until I say stop. It can look things up on the web and add to my task list, and an average question costs less than a tenth of a cent.</p>
+            <a class="btn caps" href="https://github.com/Mihirokte/talk-mode" target="_blank" rel="noopener">github.com/Mihirokte/talk-mode</a>
+          </article>
+          <article class="detail" data-p="1" hidden>
+            <p class="caps">2026 — now</p><h2>Prep</h2>
+            <p>A Mac app I use to study for interviews. It has courses, drills and coding problems, and it checks my answers on the laptop itself, with no account and no internet needed.</p>
+            <a class="btn caps" href="https://github.com/Mihirokte/prep" target="_blank" rel="noopener">github.com/Mihirokte/prep</a>
+          </article>
+          <article class="detail" data-p="2" hidden>
+            <p class="caps">2025 — now</p><h2>Helio</h2>
+            <p>A personal assistant that lives inside Telegram. It runs on a server, so it keeps working when my phone has no signal. I use it every day.</p>
+          </article>
+          <article class="detail" data-p="3" hidden>
+            <p class="caps">b.tech thesis</p><h2>The cube solver</h2>
+            <p>Treats the cube as a maths object, turns each move into a step on a map, and searches for the shortest route to solved. Any scramble in under two seconds. The cube itself is on the shelf across the room.</p>
+          </article>
+          <article class="detail" data-p="4" hidden>
+            <p class="caps">storyprocess</p><h2>Speech-to-animation</h2>
+            <p>Speak a pitch into a microphone and get a short animated video back. Built so a small team could make many pitches quickly.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the monitor: a terminal -->
+  <section class="scr scr-term" data-screen="skills" aria-label="skills, in a terminal on my monitor" tabindex="-1">
+    <header class="bar"><span class="caps">mihir@room — zsh</span><span class="caps">monitor</span></header>
+    <div class="term" id="term">
+      <div class="term-out" id="term-out" aria-live="polite"></div>
+      <label class="term-in"><span class="ps">mihir@room ~ %</span><input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="type a command"></label>
+    </div>
+    <footer class="chips" aria-label="try a command">
+      <button type="button" class="caps" data-cmd="skills">skills</button>
+      <button type="button" class="caps" data-cmd="whoami">whoami</button>
+      <button type="button" class="caps" data-cmd="ls">ls</button>
+      <button type="button" class="caps" data-cmd="open work">open work</button>
+      <button type="button" class="caps" data-cmd="open projects">open projects</button>
+      <button type="button" class="caps" data-cmd="help">help</button>
+      <button type="button" class="caps" data-cmd="exit">exit</button>
+    </footer>
+  </section>
+
+  <!-- his phone, on the bed: a chat -->
+  <section class="scr scr-phone" data-screen="contact" aria-label="say hi, on my phone" tabindex="-1">
+    <div class="boot" aria-hidden="true"><span class="caps" data-clock>--:--</span></div>
+    <header class="status caps"><span data-clock>--:--</span><span>bengaluru</span></header>
+    <header class="chat-head"><strong>mihir okte</strong><span class="caps" id="chat-state">online</span></header>
+    <ol class="thread" id="thread" aria-live="polite"></ol>
+    <div class="replies" id="replies">
+      <button type="button" class="caps" data-r="email" data-href="mailto:mihirokte77@gmail.com" data-text="mihirokte77@gmail.com">email</button>
+      <button type="button" class="caps" data-r="linkedin" data-href="https://linkedin.com/in/mihirokte" data-text="linkedin.com/in/mihirokte">linkedin</button>
+      <button type="button" class="caps" data-r="github" data-href="https://github.com/Mihirokte" data-text="github.com/Mihirokte">github</button>
+      <button type="button" class="caps" data-r="resume" data-href="https://resume.mihirokte.info" data-text="resume.mihirokte.info">resume</button>
+    </div>
+  </section>
+
 </div>
+
+</main>
+
+<!-- while visiting a surface: back to the room, or straight to another one -->
+<nav class="nav" id="nav" aria-label="sections">
+  <button type="button" class="caps" data-to="room">room</button>
+  <button type="button" class="caps" data-to="about">about</button>
+  <button type="button" class="caps" data-to="work">work</button>
+  <button type="button" class="caps" data-to="projects">projects</button>
+  <button type="button" class="caps" data-to="skills">skills</button>
+  <button type="button" class="caps" data-to="contact">contact</button>
+</nav>
 
 </body>
 </html>

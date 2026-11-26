@@ -102,20 +102,28 @@ export function weave() {
 }
 
 // ------------------------------------------------------------------- screens ----
-/** macOS desktop wallpaper (a warm sunset over dunes) + a dock. */
+/** The MacBook's screen from across the room: the projects window on a dot-grid desktop (what it boots into up close). */
 export function macScreen() {
   return canvasTex(512, 320, (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#E8743F'); g.addColorStop(.55, '#D4486C'); g.addColorStop(1, '#F6C08A');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#B8403A';
-    ctx.beginPath(); ctx.moveTo(0, h * .72); ctx.lineTo(w * .3, h * .52); ctx.lineTo(w * .55, h * .66); ctx.lineTo(w * .8, h * .5); ctx.lineTo(w, h * .62); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
-    ctx.fillStyle = '#F2D4A0';
-    ctx.beginPath(); ctx.moveTo(0, h * .84); ctx.lineTo(w * .25, h * .7); ctx.lineTo(w * .5, h * .82); ctx.lineTo(w * .75, h * .68); ctx.lineTo(w, h * .8); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(0, 0, w, h * .07);
-    const dw = w * .55; rr(ctx, w / 2 - dw / 2, h * .86, dw, h * .11, 10); ctx.fillStyle = 'rgba(255,255,255,.42)'; ctx.fill();
-    const cols = ['#FF5F56', '#FFBD2E', '#28C840', '#007AFF', '#AF52DE', '#FF9500', '#5AC8FA', '#8E8E93'];
-    cols.forEach((c, i) => { const x = w / 2 - dw / 2 + dw * (i + .5) / cols.length, r = h * .035; rr(ctx, x - r, h * .915 - r, 2 * r, 2 * r, 4); ctx.fillStyle = c; ctx.fill(); });
+    ctx.fillStyle = '#ECE6DA'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(42,42,48,.18)';
+    for (let y = 22; y < h; y += 8) for (let x = 0; x < w; x += 8) ctx.fillRect(x, y, 1, 1);
+    ctx.fillStyle = '#F8F4EC'; ctx.fillRect(0, 0, w, 14);
+    ctx.fillStyle = '#2A2A30'; ctx.fillRect(0, 14, w, 1);
+    const x0 = 20, y0 = 28, ww = w - 40, hh = h - 46;
+    ctx.fillStyle = '#F8F4EC'; ctx.fillRect(x0, y0, ww, hh);
+    ctx.strokeStyle = '#2A2A30'; ctx.lineWidth = 2; ctx.strokeRect(x0 + 1, y0 + 1, ww - 2, hh - 2);
+    ctx.fillStyle = '#2A2A30'; ctx.fillRect(x0, y0 + 22, ww, 2); ctx.fillRect(x0 + 14, y0 + 9, 60, 5);
+    const cw = (ww - 14 * 4) / 3, ch = (hh - 24 - 14 * 3) / 2;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+      if (r === 1 && c === 2) continue;
+      const cx = x0 + 14 + c * (cw + 14), cy = y0 + 24 + 14 + r * (ch + 14);
+      ctx.fillStyle = '#FBF8F2'; ctx.fillRect(cx, cy, cw, ch);
+      ctx.strokeStyle = '#2A2A30'; ctx.strokeRect(cx + 1, cy + 1, cw - 2, ch - 2);
+      ctx.fillStyle = '#63636A'; ctx.fillRect(cx + 10, cy + 12, 26, 4);
+      ctx.fillStyle = '#2A2A30'; ctx.fillRect(cx + 10, cy + 24, cw * .55, 6);
+      ctx.fillStyle = '#9A968E'; ctx.fillRect(cx + 10, cy + 38, cw * .7, 4);
+    }
   });
 }
 
@@ -185,16 +193,16 @@ export function devScreen() {
   });
 }
 
-/** His phone, face up: a warm lock screen with the time and a couple of notifications. */
+/** His phone, face up: the chat it opens to (what it boots into up close). */
 export function phoneScreen() {
   return canvasTex(128, 272, (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#FFE3B8'); g.addColorStop(1, '#F2B46E');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#4A3222'; ctx.textAlign = 'center'; ctx.font = `bold 40px ${PX}`; ctx.fillText('17:38', w / 2, 76);
-    ctx.font = `11px ${PX}`; ctx.fillText('FRIDAY 2 OCTOBER', w / 2, 94);
-    for (let i = 0; i < 2; i++) { rr(ctx, 10, 120 + i * 52, w - 20, 42, 8); ctx.fillStyle = 'rgba(255,250,240,.75)'; ctx.fill(); ctx.fillStyle = '#4A3222'; ctx.fillRect(22, 132 + i * 52, 44, 5); ctx.fillStyle = '#9A7A5A'; ctx.fillRect(22, 144 + i * 52, 70, 4); }
-    ctx.fillStyle = '#4A3222'; ctx.fillRect(w / 2 - 20, h - 12, 40, 3);
+    ctx.fillStyle = '#19191F'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#ECE7DC'; ctx.fillRect(8, 8, 18, 4);
+    ctx.fillStyle = 'rgba(236,231,220,.14)'; ctx.fillRect(0, 40, w, 1);
+    ctx.fillStyle = '#ECE7DC'; ctx.fillRect(8, 22, 46, 5);
+    for (const [y, bw] of [[56, 70], [82, 92]]) { ctx.strokeStyle = '#ECE7DC'; ctx.lineWidth = 2; ctx.fillStyle = '#121216'; ctx.fillRect(8, y, bw, 18); ctx.strokeRect(9, y + 1, bw - 2, 16); ctx.fillStyle = '#9A968E'; ctx.fillRect(14, y + 7, bw - 22, 3); }
+    ctx.fillStyle = 'rgba(236,231,220,.14)'; ctx.fillRect(0, h - 64, w, 1);
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) { ctx.strokeStyle = '#ECE7DC'; ctx.strokeRect(9 + c * 56, h - 54 + r * 24, 52, 18); }
   });
 }
 
@@ -394,5 +402,30 @@ export function shade(dir = 'v1', alpha = 0.3) {
     g.addColorStop(0, `rgba(0,0,0,${alpha})`); g.addColorStop(.45, `rgba(0,0,0,${alpha * .3})`); g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  });
+}
+
+/** The open journal, seen from across the room: two cream pages, ruled, a taped photo and lines of writing. */
+export function journal() {
+  return canvasTex(780, 540, (ctx, w, h) => {
+    ctx.fillStyle = '#F7F1E4'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#E6DDCB'; ctx.fillRect(w / 2 - 3, 0, 6, h);                   // the crease
+    ctx.fillStyle = '#E3D9C6';
+    for (let y = 70; y < h - 30; y += 26) { ctx.fillRect(30, y, w / 2 - 60, 2); ctx.fillRect(w / 2 + 30, y, w / 2 - 60, 2); }
+    // the taped photo, top left, and the lines of writing round it
+    ctx.fillStyle = '#FBF8F1'; ctx.fillRect(48, 52, 150, 186);
+    ctx.fillStyle = '#B98B6E'; ctx.fillRect(58, 62, 130, 150);
+    ctx.fillStyle = '#7A5A48'; ctx.fillRect(98, 92, 50, 56); ctx.fillRect(84, 150, 78, 62);
+    ctx.fillStyle = 'rgba(236,226,196,.85)'; ctx.fillRect(98, 42, 52, 20);
+    ctx.font = "bold 30px 'Pixelta', serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('about', 222, 92);
+    const rnd = seeded(77);
+    const write = (x0, x1, y0, y1) => {
+      ctx.fillStyle = '#4A4A58';
+      for (let y = y0; y < y1; y += 26) { let x = x0; while (x < x1 - 30) { const len = 14 + rnd() * 46; ctx.fillRect(x, y - 9, Math.min(len, x1 - x), 4); x += len + 8; } }
+    };
+    write(222, w / 2 - 40, 122, 240);
+    write(48, w / 2 - 40, 278, h - 40);
+    ctx.font = "bold 30px 'Pixelta', serif"; ctx.fillStyle = '#2A2A30'; ctx.fillText('accolades', w / 2 + 40, 92);
+    write(w / 2 + 40, w - 48, 122, h - 40);
   });
 }

@@ -25,16 +25,24 @@ export const PIECES = {
   bed:    { rect: [14, 44, 17, 44] },   // the bed, the mesh chair, bits on the floor
 };
 
-// pointers: section -> a point on the object that stands for it (absolute room coordinates), the label side,
-// the box the camera flies to when the pointer is opened (x0, x1, z0, z1, y0, y1: the object and what it sits
-// on), and the side of that box the panel opens on
+// pointers: section -> a point on the object that stands for it (absolute room coordinates) + the label side.
+// Every section lives on a real surface in the room (see SCREENS): opening a pointer flies the camera to it.
+// `via` is where the camera passes on its way in and out (absolute room coordinates): a clear point above and
+// in front of the surface, so the flight comes in over his head and the chairs rather than through them,
+// and drops onto the surface from there. `fov` is the lens at the surface: the monitor is close in front
+// of him, so it is seen with a wider lens from nearer.
 export const PINS = [
-  { section: 'projects', piece: 'battle', at: [0.9, 10.3, 7.5], side: 'left', frame: [0, 5.6, 4.6, 10.6, 8.2, 11.4], panel: 'right' },       // the MacBook on the wall desk: side projects
-  { section: 'work',     piece: 'battle', at: [7.75, 10.9, 1.75], side: 'top', frame: [5.4, 10.2, 0.8, 5.2, 8.4, 12.4], panel: 'right' },     // the work laptop on the riser, editor open
-  { section: 'skills',   piece: 'battle', at: [13.5, 11.8, 3.6], side: 'right', frame: [9.4, 17.8, 2.6, 7.4, 8.4, 14.2], panel: 'left' },     // the monitor: code, terminal, metrics
-  { section: 'about',    piece: 'battle', at: [15.75, 12.35, 13.0], side: 'bottom', frame: [9.6, 17.2, 9.0, 16.4, 3.5, 16.8], panel: 'right' }, // Mihir: his right shoulder
-  { section: 'contact',  piece: 'bed',    at: [18.4, 7.05, 32.6], side: 'right', frame: [15.4, 21.6, 29.4, 36.0, 5.2, 7.6], panel: 'right' },  // his phone, face up on the pillow
+  { section: 'about',    piece: 'battle', at: [3.2, 8.75, 3.0], side: 'bottom', via: [8.5, 21, 9.5], fov: 36 },      // the open journal on the wall desk
+  { section: 'projects', piece: 'battle', at: [1.2, 10.3, 7.5], side: 'left', via: [11, 18.5, 11], fov: 36 },      // the MacBook on the wall desk: side projects
+  { section: 'work',     piece: 'battle', at: [7.75, 10.9, 1.75], side: 'top', via: [9, 18.5, 11], fov: 36 },      // the work laptop on the riser, editor open
+  { section: 'skills',   piece: 'battle', at: [13.5, 11.8, 3.6], side: 'right', via: [13.5, 20, 9.4], fov: 52 },   // the monitor: a terminal
+  { section: 'contact',  piece: 'bed',    at: [18.4, 7.05, 32.6], side: 'right', via: [22, 20, 37], fov: 36 },     // his phone, face up on the pillow
 ];
+
+// The surfaces the sections live on: section -> the flat mesh of the screen (or page). Each is a PlaneGeometry
+// whose local +x is the screen's right, +y its up and +z the way it faces, so its world matrix is all the
+// camera and the DOM overlay need. Filled in as the room is built.
+export const SCREENS = {};
 
 const v = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => { let s = seed * 9301 + 49297; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; };
@@ -155,14 +163,15 @@ function sWall(inner, x0, x1) {
  * An open laptop. Built in a local frame where the deck runs x = [-w/2, w/2], z = [0, d] with the hinge
  * on the z = 0 edge and the screen facing +z; `yaw` turns the whole thing (pi/2 makes it face +x).
  */
-function laptop(g, { x, y, z, yaw = 0, w, d, lid, body, screen, deck = null, tilt = 20, r = .1 }) {
+function laptop(g, { x, y, z, yaw = 0, w, d, lid, body, screen, deck = null, tilt = 20, r = .1, section = null }) {
   const grp = new THREE.Group(); grp.position.set(x, y, z); grp.rotation.y = yaw; g.add(grp);
   box(grp, -w / 2, w / 2, 0, d, 0, .22, body, { r });
   if (deck) plane(grp, '+y', .221, -w / 2 + .12, w / 2 - .12, .08, d - .08, flat('#FFFFFF', { map: deck }));
   else { plane(grp, '+y', .221, -w / 2 + .3, w / 2 - .3, .2, d * .6, flat('#1E1E22')); plane(grp, '+y', .221, -w * .22, w * .22, d * .66, d - .15, flat('#3A3A40')); }
   const h = hinge(grp, 0, .22, .06, 'x', -THREE.MathUtils.degToRad(tilt));
   box(h, -w / 2, w / 2, -.16, 0, 0, lid, body, { r });
-  plane(h, '+z', .006, -w / 2 + .14, w / 2 - .14, .14, lid - .14, flat('#FFFFFF', { map: screen }));
+  const face = plane(h, '+z', .006, -w / 2 + .14, w / 2 - .14, .14, lid - .14, flat('#FFFFFF', { map: screen }));
+  if (section) SCREENS[section] = face;
   // the screen throws a little warm light onto the deck (the main light on the desk at night)
   point(h, 0, lid * .5, .9, '#FFE2C0', 3.2, 6);
   return grp;
@@ -178,11 +187,25 @@ function wallDesk(inner, tex) {
   }
   contact(inner, 0.4, 5.4, z0, z1, .18);
   // MacBook, screen facing into the room (+x), a notebook and pen, a mug
-  laptop(inner, { x: 1.1, y: top, z: 7.5, yaw: Math.PI / 2, w: 3.45, d: 2.45, lid: 2.25, body: M.silver, screen: tex.mac, deck: tex.deck, r: .08 });
-  box(inner, 2.0, 4.6, 1.6, 4.4, top, top + .25, mat('#4C5A7A'), { r: .06 });
-  rodZ(inner, 1.9, 4.1, 3.4, top + .33, .09, M.black, { cast: false });
+  laptop(inner, { x: 1.1, y: top, z: 7.5, yaw: Math.PI / 2, w: 3.45, d: 2.45, lid: 2.25, body: M.silver, screen: tex.mac, deck: tex.deck, r: .08, section: 'projects' });
+  journal(inner, tex, top);
+  rodZ(inner, 1.3, 3.7, 4.95, top + .09, .09, M.black, { cast: false });                     // the pen, beside it
   cyl(inner, 4.3, 11.3, .48, top, top + 1.0, M.white);
   ring(inner, 4.3, top + .55, 11.95, .38, .08, M.white, { axis: 'x', seg: 20, cast: false });
+}
+
+/**
+ * The open journal on the wall desk, top of the pages toward the wall: a 35 x 24 cm spread on a navy
+ * cover, the crease down the middle. Its pages are the About section.
+ */
+function journal(inner, tex, top) {
+  const g = new THREE.Group(); g.position.set(3.2, top, 3.0); g.rotation.y = Math.PI / 2; inner.add(g);   // local +x = world -z, local -z = world -x
+  const W = 3.9, D = 2.7;
+  box(g, -W / 2 - .12, W / 2 + .12, -D / 2 - .12, D / 2 + .12, 0, .06, mat('#4C5A7A'), { r: .03 });     // the cover
+  box(g, -W / 2, -.02, -D / 2, D / 2, .06, .2, M.pillow, { r: .03, cast: false });                     // the two page blocks
+  box(g, .02, W / 2, -D / 2, D / 2, .06, .2, M.pillow, { r: .03, cast: false });
+  SCREENS.about = plane(g, '+y', .205, -W / 2, W / 2, -D / 2, D / 2, flat('#FFFFFF', { map: tex.journal }));
+  contact(inner, 1.6, 4.8, .9, 5.1, .16, top + .01);
 }
 
 function snoopyPicture(inner, tex) {
@@ -242,13 +265,13 @@ function monitorDesk(inner, tex) {
   contact(inner, x0, x1, z0, z1, .2);
   // laptop on a riser, left
   box(inner, 5.9, 9.6, 1.4, 4.6, top, top + 1.0, M.darkm, { r: .1 });
-  laptop(inner, { x: 7.75, y: top + 1.0, z: 2.0, w: 3.5, d: 2.4, lid: 2.3, body: M.darkm, screen: tex.code });
+  laptop(inner, { x: 7.75, y: top + 1.0, z: 2.0, w: 3.5, d: 2.4, lid: 2.3, body: M.darkm, screen: tex.code, section: 'work' });
   // the monitor (27", landscape, on a low stand), and the keyboard in front of it
   const mx = 13.5;
   box(inner, mx - 1.8, mx + 1.8, 3.4, 5.6, top, top + .25, M.black, { r: .1 });
   box(inner, mx - .45, mx + .45, 3.9, 4.6, top + .25, top + 2.0, M.black, { r: .06 });
   box(inner, mx - 3.65, mx + 3.65, 3.2, 3.55, top + 1.2, top + 5.45, M.black, { r: .08 });
-  plane(inner, '+z', 3.56, mx - 3.45, mx + 3.45, top + 1.4, top + 5.25, flat('#FFFFFF', { map: tex.dev }));
+  SCREENS.skills = plane(inner, '+z', 3.56, mx - 3.45, mx + 3.45, top + 1.4, top + 5.25, flat('#FFFFFF', { map: tex.dev }));
   box(inner, mx - 2.2, mx + 2.2, 2.9, 3.2, top + 2.0, top + 4.6, M.darkm, { r: .1 });            // the back housing
   point(inner, mx, top + 3.3, 5.6, '#FFDDB0', 9, 13);                                             // the monitor lights the desk and him
   keyboard(inner, 10.6, 15.5, 5.45, 7.0, top);
@@ -657,7 +680,7 @@ function bed(inner, tex) {
   // his phone, face up on the pillow by the headboard, screen lit
   const g = new THREE.Group(); g.position.set(18.4, 6.8, 32.6); g.rotation.y = -.22; inner.add(g);
   box(g, -.8, .8, -1.6, 1.6, 0, .2, M.psBlack, { r: .08 });
-  plane(g, '+y', .205, -.7, .7, -1.5, 1.5, flat('#FFFFFF', { map: tex.phone }));
+  SCREENS.contact = plane(g, '+y', .205, -.7, .7, -1.5, 1.5, flat('#FFFFFF', { map: tex.phone }));
   point(g, 0, .8, 0, '#FFD9A8', 4.0, 7);
 }
 
@@ -741,7 +764,7 @@ export async function buildRoom(scene) {
   const tex = {
     tiles: T.tiles(), weave: T.weave(), mac: T.macScreen(), deck: T.macDeck(), code: T.codeScreen(), dev: T.devScreen(), phone: T.phoneScreen(),
     snoopy: T.snoopyPrint(), neon: T.neonSign(), neonOff: T.neonSign(true), rug: T.rug(), ball: T.football(), corridor: T.corridor(),
-    photos: Array.from({ length: 12 }, (_, i) => T.photoPrint(i)),
+    photos: Array.from({ length: 12 }, (_, i) => T.photoPrint(i)), journal: T.journal(),
   };
   M = materials(tex);
   await nextFrame();
