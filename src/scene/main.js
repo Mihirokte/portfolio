@@ -10,7 +10,7 @@
 // Rendering is on demand: a frame is drawn only when something moved.
 import * as THREE from 'three';
 import { buildRoom, PINS, ROOM, SCREENS, WALL } from './room.js';
-import { lerp, clamp, easeInOut, themed, applyTheme, mat, plane } from './helpers.js';
+import { lerp, clamp, easeInOut, themed, applyTheme, mat } from './helpers.js';
 import { initScreens, SECTIONS } from './screens.js';
 
 const PAPER = '#F3EEE4';
@@ -140,7 +140,7 @@ const { pieces, figure } = GL ? await buildRoom(scene) : { pieces: {}, figure: n
 // invisibly, marking its outline on screen, and the block is drawn only outside that mark. Inside the
 // room (on a visit) the mark covers the whole window.
 const CELL = { x: -2, y: -ROOM.SLAB, z: -2, w: ROOM.L + 2, h: ROOM.H + ROOM.SLAB };
-const BLOCK = { back: 6, down: 6 };
+const BLOCK = { back: 6, down: 6, gap: 0.9, depth: 0.7 };
 const blockScene = new THREE.Scene();
 const block = (() => {
   const { x: X0, y: Y0, z: Z0, w: P, h: Q } = CELL;
@@ -148,31 +148,42 @@ const block = (() => {
   const XL = X0 - BLOCK.back * P, ZL = Z0 - BLOCK.back * P, YB = Y0 - BLOCK.down * Q;
   const stencil = { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp };
   const paint = Object.assign(mat(WALL), stencil);
-  paint.polygonOffset = true; paint.polygonOffsetFactor = 1; paint.polygonOffsetUnits = 1;
   const g = new THREE.Group();
-  // the roof (+y) and the two faces (+x, +z), each the whole face of the block less my room's corner
-  plane(g, '+y', Y1, XL, X0, ZL, Z1, paint); plane(g, '+y', Y1, X0, X1, ZL, Z0, paint);
-  plane(g, '+x', X1, ZL, Z0, YB, Y1, paint); plane(g, '+x', X1, Z0, Z1, YB, Y0, paint);
-  plane(g, '+z', Z1, XL, X0, YB, Y1, paint); plane(g, '+z', Z1, X0, X1, YB, Y0, paint);
-  // the room lines: where one room meets the next, on the roof and on both faces
-  const pts = [], e = .02;
-  for (let i = 0; i <= BLOCK.back + 1; i++) {
-    const x = X1 - i * P, z = Z1 - i * P;
-    pts.push(x, Y1 + e, ZL, x, Y1 + e, Z1, XL, Y1 + e, z, X1, Y1 + e, z);        // roof
-    pts.push(X1 + e, YB, z, X1 + e, Y1, z, x, YB, Z1 + e, x, Y1, Z1 + e);        // the uprights on the two faces
+  // Each room of the block is its own box, set in from its cell by half the gap on every side (by the
+  // whole gap beside my room, whose walls run to the cell's edge), so a groove runs between every two
+  // rooms. Only the rooms on the outside of the block can be seen, and of each only the three faces that
+  // turn toward the camera: the ones on the outside of the block take the wall paint; the ones that face
+  // into a groove (onto the next room) take the shadow tone, so every groove reads as a dark reveal.
+  const G = BLOCK.gap, outer = [], inner = [];
+  const quad = (list, a, b, c, d, n) => list.push([a, b, c, a, c, d, n]);
+  for (let i = -BLOCK.back; i <= 0; i++) for (let j = -BLOCK.down; j <= 0; j++) for (let k = -BLOCK.back; k <= 0; k++) {
+    if ((i === 0 && j === 0 && k === 0) || (i !== 0 && j !== 0 && k !== 0)) continue;
+    const mine = (di, dj, dk) => i + di === 0 && j + dj === 0 && k + dk === 0;    // is my room the next cell that way?
+    const hi = (n) => (n ? G : G / 2), cx = X0 + i * P, cy = Y0 + j * Q, cz = Z0 + k * P;
+    const x0 = cx + G / 2, x1 = cx + P - hi(mine(1, 0, 0)), y0 = cy + G / 2, y1 = cy + Q - hi(mine(0, 1, 0)), z0 = cz + G / 2, z1 = cz + P - hi(mine(0, 0, 1));
+    quad(i === 0 ? outer : inner, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0]);     // +x
+    quad(j === 0 ? outer : inner, [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0]);     // +y
+    quad(k === 0 ? outer : inner, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1]);     // +z
   }
-  for (let j = 0; j <= BLOCK.down + 1; j++) {
-    const y = Y1 - j * Q;
-    pts.push(X1 + e, y, ZL, X1 + e, y, Z1, XL, y, Z1 + e, X1, y, Z1 + e);        // the floor lines on the two faces
+  const faces = (list, material) => {
+    const pos = [], nrm = [];
+    for (const [a, b, c, a2, c2, d, n] of list) for (const v of [a, b, c, a2, c2, d]) { pos.push(...v); nrm.push(...n); }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3));
+    return new THREE.Mesh(geo, material);
+  };
+  const shade = Object.assign(mat('#FFFFFF'), stencil);
+  themed(shade, 'color', new THREE.Color('#8E867A'), new THREE.Color('#0C0C0F'));
+  g.add(faces(outer, paint), faces(inner, shade));
+  // and under the rooms, a core in the same shadow tone, so the floor of every groove is dark too
+  const inset = G / 2 + BLOCK.depth;
+  for (const [a, b, c, d, e, f] of [[XL, X0, YB, Y1, ZL, Z1], [X0, X1, YB, Y1, ZL, Z0], [X0, X1, YB, Y0, Z0, Z1]]) {
+    const core = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), shade);
+    const bx = b - (b === X1 ? inset : 0), dy = d - (d === Y1 ? inset : 0), fz = f - (f === Z1 ? inset : 0);
+    core.scale.set(bx - a, dy - c, fz - e); core.position.set((a + bx) / 2, (c + dy) / 2, (e + fz) / 2);
+    g.add(core);
   }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-  const ink = new THREE.LineBasicMaterial({ transparent: true, opacity: .16, depthWrite: false, ...stencil });
-  themed(ink, 'color', new THREE.Color('#1D1D21'), new THREE.Color('#000000'));
-  themed(ink, 'opacity', .16, .55);
-  const lines = new THREE.LineSegments(geo, ink);
-  lines.renderOrder = 10;
-  g.add(lines);
   for (const o of g.children) o.frustumCulled = false;
   // the room's own light, and nothing else
   const amb = new THREE.AmbientLight(ambient.color, ambient.intensity);
@@ -183,8 +194,9 @@ const block = (() => {
   themed(k, 'intensity', 2.0, 0.46);
   themed(k, 'color', new THREE.Color('#FFFFFF'), new THREE.Color('#6E7A9A'));
   blockScene.add(g, amb, k, k.target);
-  // the mark: my room's cell, a hair larger, drawn into the stencil only (first, in the room's pass)
-  const mark = new THREE.Mesh(new THREE.BoxGeometry(P + .6, Q + .6, P + .6), new THREE.MeshBasicMaterial({
+  // the mark: my room's cell (a hair larger: nothing of the block comes within a gap of it), drawn into the
+  // stencil only, first, in the room's pass
+  const mark = new THREE.Mesh(new THREE.BoxGeometry(P + .04, Q + .04, P + .04), new THREE.MeshBasicMaterial({
     colorWrite: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
     stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp,
   }));
