@@ -1,4 +1,4 @@
-// textures.js — every texture is drawn on a canvas at load. No image downloads, no fonts needed
+// textures.js — every texture is drawn on a canvas at load: the screens and prints as they look from across the room. No image downloads, no fonts needed
 // beyond the site's own pixel faces (which are already loaded by the page).
 import { canvasTex } from './helpers.js';
 
@@ -23,72 +23,6 @@ export function tiles() {
     ctx.fillStyle = '#CFC5B5';
     ctx.fillRect(0, 0, w, 6); ctx.fillRect(0, 0, 6, h);            // grout (top + left edge of each tile)
   }, { repeat: true, anisotropy: 16 });
-}
-
-/** Grey-scale height for the tiles: the grout sits low, the tile face is faintly uneven. */
-export function tilesBump() {
-  return canvasTex(512, 512, (ctx, w, h) => {
-    ctx.fillStyle = '#B4B4B4'; ctx.fillRect(0, 0, w, h);
-    const rnd = seeded(9);
-    for (let i = 0; i < 2500; i++) { ctx.fillStyle = rnd() < .5 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)'; ctx.fillRect(rnd() * w, rnd() * h, 3, 3); }
-    ctx.fillStyle = '#404040'; ctx.fillRect(0, 0, w, 7); ctx.fillRect(0, 0, 7, h);
-    ctx.fillStyle = '#D8D8D8'; ctx.fillRect(7, 7, w - 7, 2); ctx.fillRect(7, 7, 2, h - 7);
-  }, { repeat: true, linear: true, anisotropy: 16 });
-}
-
-/** Plaster: soft noise so the walls are not a dead flat fill. */
-export function plasterBump() {
-  return canvasTex(256, 256, (ctx, w, h) => {
-    ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, w, h);
-    const rnd = seeded(13);
-    for (let i = 0; i < 9000; i++) { const v = 110 + Math.floor(rnd() * 36); ctx.fillStyle = `rgb(${v},${v},${v})`; ctx.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 2, 1 + rnd() * 2); }
-  }, { repeat: true, linear: true });
-}
-
-/** Carbon-fibre weave for the gaming desk top. */
-export function carbon() {
-  return canvasTex(256, 256, (ctx, w, h) => {
-    ctx.fillStyle = '#1F1F23'; ctx.fillRect(0, 0, w, h);
-    const s = 16;
-    for (let y = 0; y < h; y += s) for (let x = 0; x < w; x += s) {
-      const a = ((x / s + y / s) % 2) === 0;
-      const g = a ? ctx.createLinearGradient(x, y, x + s, y) : ctx.createLinearGradient(x, y, x, y + s);
-      g.addColorStop(0, '#2C2C31'); g.addColorStop(.5, '#3A3A40'); g.addColorStop(1, '#232327');
-      ctx.fillStyle = g; ctx.fillRect(x + 1, y + 1, s - 2, s - 2);
-    }
-  }, { repeat: true, anisotropy: 16 });
-}
-
-/** Wood grain (bed frame, shelf unit). */
-export function wood(base = '#5A4238', vein = '#4A352C') {
-  return canvasTex(512, 256, (ctx, w, h) => {
-    ctx.fillStyle = base; ctx.fillRect(0, 0, w, h);
-    const rnd = seeded(31);
-    for (let i = 0; i < 70; i++) {
-      ctx.strokeStyle = vein; ctx.globalAlpha = .25 + rnd() * .4; ctx.lineWidth = .6 + rnd() * 1.6;
-      ctx.beginPath(); const y = rnd() * h; ctx.moveTo(0, y);
-      for (let x = 0; x <= w; x += 32) ctx.lineTo(x, y + Math.sin(x / 60 + i) * 3 + (rnd() - .5) * 2);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-  }, { repeat: true, anisotropy: 16 });
-}
-
-/** Quilted duvet: a diamond grid of soft bumps (height map). */
-export function quilt() {
-  return canvasTex(256, 256, (ctx, w, h) => {
-    ctx.fillStyle = '#9A9A9A'; ctx.fillRect(0, 0, w, h);
-    const s = 64;
-    for (let y = 0; y <= h; y += s) for (let x = 0; x <= w; x += s) {
-      for (const [ox, oy] of [[0, 0], [s / 2, s / 2]]) {
-        const g = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, s * .5);
-        g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(.75, 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(0,0,0,.25)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + ox, y + oy, s * .5, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 2;
-    for (let k = -h; k <= w; k += s) { ctx.beginPath(); ctx.moveTo(k, 0); ctx.lineTo(k + h, h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(k + h, 0); ctx.lineTo(k, h); ctx.stroke(); }
-  }, { repeat: true, linear: true });
 }
 
 /** Woven rattan for the basket. */
@@ -302,20 +236,6 @@ export function neonSign(off = false) {
   });
 }
 
-/** Oval doormat: grey, with a border. Transparent outside the oval. */
-export function doormat() {
-  return canvasTex(512, 320, (ctx, w, h) => {
-    ctx.clearRect(0, 0, w, h);
-    ctx.beginPath(); ctx.ellipse(w / 2, h / 2, w / 2 - 4, h / 2 - 4, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#8E8A84'; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(w / 2, h / 2, w / 2 - 28, h / 2 - 24, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#A5A19B'; ctx.fill();
-    const rnd = seeded(17);
-    ctx.fillStyle = 'rgba(0,0,0,.08)';
-    for (let i = 0; i < 1600; i++) { const x = rnd() * w, y = rnd() * h; if (((x - w / 2) / (w / 2 - 28)) ** 2 + ((y - h / 2) / (h / 2 - 24)) ** 2 < 1) ctx.fillRect(x, y, 2, 2); }
-  });
-}
-
 /** Round jute rug: concentric braided rings, a little fibre noise. Transparent outside the circle. */
 export function rug() {
   return canvasTex(512, 512, (ctx, w, h) => {
@@ -388,20 +308,6 @@ export function corridor() {
     ctx.fillStyle = '#B9A98A'; ctx.fillRect(0, h - 26, w, 6);
     ctx.fillStyle = '#D9CDB3'; ctx.fillRect(0, h - 20, w, 20);
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(w * .3, h * .1, w * .25, h * .5);   // light from a window beyond
-  });
-}
-
-/**
- * Soft darkening used where floor meets wall: black fading to clear. `dir` names the dark edge in
- * texture space: 'u0' (left), 'u1' (right), 'v0' (bottom), 'v1' (top).
- */
-export function shade(dir = 'v1', alpha = 0.3) {
-  return canvasTex(64, 64, (ctx, w, h) => {
-    const [x0, y0, x1, y1] = dir === 'u0' ? [0, 0, w, 0] : dir === 'u1' ? [w, 0, 0, 0] : dir === 'v0' ? [0, h, 0, 0] : [0, 0, 0, h];
-    const g = ctx.createLinearGradient(x0, y0, x1, y1);
-    g.addColorStop(0, `rgba(0,0,0,${alpha})`); g.addColorStop(.45, `rgba(0,0,0,${alpha * .3})`); g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
   });
 }
 
